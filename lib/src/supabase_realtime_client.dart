@@ -32,9 +32,11 @@ class SupabaseRealtimeClient {
   /// The event you want to listen to.
   SupabaseRealtimeClient on(SupabaseEventTypes event, Callback callback) {
     subscription.on(event.name(), (payload, {ref}) {
-      final enrichedPayload = SupabaseRealtimePayload();
-      enrichedPayload.parsePayload(payload);
-      callback(enrichedPayload);
+      if (payload is Map) {
+        final json = payload as Map<String, dynamic>;
+        final enrichedPayload = SupabaseRealtimePayload.fromJson(json);
+        callback(enrichedPayload);
+      }
     });
 
     return this;

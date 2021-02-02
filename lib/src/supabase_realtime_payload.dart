@@ -1,3 +1,5 @@
+import 'package:realtime_client/realtime_client.dart';
+
 class SupabaseRealtimePayload {
   String commitTimestamp;
 
@@ -20,19 +22,24 @@ class SupabaseRealtimePayload {
       this.news,
       this.olds});
 
-  void parsePayload(dynamic payload) {
-    schema = payload['schema'] as String;
-    table = payload['table'] as String;
-    commitTimestamp = payload['commit_timestamp'] as String;
-    eventType = payload['type'] as String;
+  factory SupabaseRealtimePayload.fromJson(Map<String, dynamic> json) {
+    final obj = SupabaseRealtimePayload();
+    obj.schema = json['schema'] as String;
+    obj.table = json['table'] as String;
+    obj.commitTimestamp = json['commit_timestamp'] as String;
+    obj.eventType = json['type'] as String;
 
-    // TODO: update realtime_client.transformers to handle List<Map<string, dynamic>>
-    if (payload['type'] == 'INSERT' || payload['type'] == 'UPDATE') {
-      // records['new'] = convertChangeData(payload['columns'], payload['record']);
+    if (json['type'] == 'INSERT' || json['type'] == 'UPDATE') {
+      final columns = json['columns'] as List<Map<String, String>>;
+      final records = json['record'] as Map<String, String>;
+      obj.news = convertChangeData(columns, records);
     }
 
-    if (payload.type == 'UPDATE' || payload.type == 'DELETE') {
-      // records['old'] = convertChangeData(payload.columns, payload.old_record);
+    if (json['type'] == 'UPDATE' || json['type'] == 'DELETE') {
+      final columns = json['columns'] as List<Map<String, String>>;
+      final records = json['record'] as Map<String, String>;
+      obj.olds = convertChangeData(columns, records);
     }
+    return obj;
   }
 }
