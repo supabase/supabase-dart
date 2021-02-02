@@ -1,22 +1,37 @@
-A library for Dart developers.
+# `supabase-dart`
 
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+A dart client for Supabase.
+
+[![pub package](https://img.shields.io/pub/v/supabase.svg)](https://pub.dev/packages/supabase)
+[![pub test](https://github.com/supabase/supabase-dart/workflows/Test/badge.svg)](https://github.com/supabase/supabase-dart/actions?query=workflow%3ATest)
 
 ## Usage
 
-A simple usage example:
-
 ```dart
-import 'package:supabase-dart/supabase-dart.dart';
+import 'package:supabase/supabase.dart';
 
 main() {
-  var awesome = new Awesome();
+  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  final response = await client
+      .from('countries')
+      .select()
+      .order('name', ascending: true)
+      .execute();
 }
 ```
 
-## Features and bugs
+## Contributing
 
-Please file feature requests and bugs at the [issue tracker][tracker].
+- Fork the repo on [GitHub](https://github.com/supabase/supabase-dart)
+- Clone the project to your own machine
+- Commit changes to your own branch
+- Push your work back up to your fork
+- Submit a Pull request so that we can review your changes and merge
 
-[tracker]: http://example.com/issues/replaceme
+## License
+
+This repo is liscenced under MIT.
+
+## Credits
+
+- https://github.com/supabase/supabase-js
