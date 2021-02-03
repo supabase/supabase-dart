@@ -33,7 +33,7 @@ class SupabaseClient {
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
-    final url = '$restUrl/table';
+    final url = '$restUrl/$table';
     return SupabaseQueryBuilder(
       url,
       realtime,
