@@ -1,6 +1,7 @@
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 
+import 'supabase_event_types.dart';
 import 'supabase_realtime_client.dart';
 import 'supabase_realtime_payload.dart';
 
