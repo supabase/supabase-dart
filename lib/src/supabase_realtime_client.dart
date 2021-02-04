@@ -1,19 +1,7 @@
 import 'package:realtime_client/realtime_client.dart';
 
+import 'supabase_event_types.dart';
 import 'supabase_realtime_payload.dart';
-
-enum SupabaseEventTypes { insert, update, delete, all }
-
-extension SupabaseEventTypesName on SupabaseEventTypes {
-  String name() {
-    final name = toString().split('.').last;
-    if (name == 'all') {
-      return '*';
-    } else {
-      return name.toUpperCase();
-    }
-  }
-}
 
 typedef Callback = void Function(SupabaseRealtimePayload payload);
 
