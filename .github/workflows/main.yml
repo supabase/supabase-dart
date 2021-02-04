@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test / OS ${{ matrix.os }} / Node ${{ matrix.node }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: ["12"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checks-out repo
+        uses: actions/checkout@v2
+
+      - name: Setup Dart
+        uses: cedx/setup-dart@v2
+
+      - name: Install dependencies
+        run: pub get
+
+      - name: Run tests
+        run: pub run test test

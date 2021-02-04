@@ -9,4 +9,9 @@ void main() {
   setUp(() {
     client = SupabaseClient(supabaseUrl, supabaseKey);
   });
+
+  test('postgrest builder url', () async {
+    final builder = client.from('users').select();
+    expect(builder.url.toString(), '/rest/v1/users?select=%2A');
+  });
 }
