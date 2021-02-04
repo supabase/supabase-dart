@@ -1,3 +1,8 @@
+## [0.0.1-dev.4]
+
+- fix: export SupabaseEventTypes
+- chore: include realtime supscription code in example
+
 ## [0.0.1-dev.3]
 
 - fix: SupabaseRealtimeClient client and payload parsing bug
