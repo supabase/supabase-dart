@@ -43,7 +43,7 @@ class SupabaseRealtimeClient {
   }
 
   /// Enables the subscription.
-  RealtimeSubscription subscribe({SubscribeCallback callback}) {
+  RealtimeSubscription subscribe([SubscribeCallback callback]) {
     subscription.onError((e) => callback('SUBSCRIPTION_ERROR', errorMsg: e));
     subscription.onClose(() => callback('CLOSED'));
     subscription
