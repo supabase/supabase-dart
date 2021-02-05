@@ -9,18 +9,18 @@ class SupabaseRealtimePayload {
   String table;
 
   /// The new record. Present for 'INSERT' and 'UPDATE' events
-  dynamic news;
+  dynamic newRecord;
 
   /// The previous record. Present for 'UPDATE' and 'DELETE' events
-  dynamic olds;
+  dynamic oldRecord;
 
   SupabaseRealtimePayload(
       {this.commitTimestamp,
       this.eventType,
       this.schema,
       this.table,
-      this.news,
-      this.olds});
+      this.newRecord,
+      this.oldRecord});
 
   factory SupabaseRealtimePayload.fromJson(Map<String, dynamic> json) {
     final obj = SupabaseRealtimePayload();
@@ -32,13 +32,13 @@ class SupabaseRealtimePayload {
     if (json['type'] == 'INSERT' || json['type'] == 'UPDATE') {
       final columns = obj.convertColumnList(json['columns'] as List<dynamic>);
       final records = json['record'] as Map<String, dynamic> ?? {};
-      obj.news = convertChangeData(columns, records);
+      obj.newRecord = convertChangeData(columns, records);
     }
 
     if (json['type'] == 'UPDATE' || json['type'] == 'DELETE') {
       final columns = obj.convertColumnList(json['columns'] as List<dynamic>);
       final records = json['old_record'] as Map<String, dynamic> ?? {};
-      obj.olds = convertChangeData(columns, records);
+      obj.oldRecord = convertChangeData(columns, records);
     }
     return obj;
   }
