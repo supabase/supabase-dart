@@ -1,3 +1,7 @@
+## [0.0.1-dev.5]
+
+refactor: SupabaseRealtimePayload variable names
+
 ## [0.0.1-dev.4]
 
 - fix: export SupabaseEventTypes
