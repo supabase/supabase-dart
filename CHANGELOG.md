@@ -1,6 +1,11 @@
+## [0.0.1-dev.6]
+
+- chore: update gotrue v0.0.1-dev.7
+- chore: update realtime_client v0.0.7
+
 ## [0.0.1-dev.5]
 
-refactor: SupabaseRealtimePayload variable names
+- refactor: SupabaseRealtimePayload variable names
 
 ## [0.0.1-dev.4]
 
