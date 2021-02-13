@@ -30,7 +30,7 @@ main() {
 
 ## License
 
-This repo is liscenced under MIT.
+This repo is licenced under MIT.
 
 ## Credits
 
