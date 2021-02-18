@@ -1,4 +1,8 @@
-## [0.0.1-dev.7]
+## [0.0.1-dev.8]
+
+- fix: rpc method missing param name
+
+## [0.0.1-dev.8]
 
 - chore: update postgrest ^0.0.6
 
