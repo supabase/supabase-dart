@@ -46,7 +46,7 @@ class SupabaseClient {
   /// Perform a stored procedure call.
   PostgrestBuilder rpc(String fn, Map<String, String> params) {
     final rest = _initPostgRESTClient();
-    return rest.rpc(fn, params);
+    return rest.rpc(fn, params: params);
   }
 
   /// Removes an active subscription and returns the number of open connections.
