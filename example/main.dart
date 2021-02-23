@@ -16,20 +16,20 @@ void main() async {
   }
 
   // realtime
-  final supscription1 =
+  final subscription1 =
       client.from('countries').on(SupabaseEventTypes.delete, (x) {
     print('on countries.delete: ${x.table} ${x.eventType} ${x.oldRecord}');
   }).subscribe((String event, {String errorMsg}) {
     print('event: $event error: $errorMsg');
   });
 
-  final supscription2 = client.from('todos').on(SupabaseEventTypes.insert, (x) {
+  final subscription2 = client.from('todos').on(SupabaseEventTypes.insert, (x) {
     print('on todos.insert: ${x.table} ${x.eventType} ${x.newRecord}');
   }).subscribe((String event, {String errorMsg}) {
     print('event: $event error: $errorMsg');
   });
 
   // remember to remove subscription
-  client.removeSubscription(supscription1);
-  client.removeSubscription(supscription2);
+  client.removeSubscription(subscription1);
+  client.removeSubscription(subscription2);
 }
