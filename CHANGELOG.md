@@ -1,3 +1,11 @@
+## [0.0.1-dev.9]
+
+- fix: rpc to return PostgrestTransformBuilder
+- chore: update postgrest to v0.0.7
+- chore: expose gotrue User as AuthUser
+- chore: expose 'RealtimeSubscription'
+- chore: update lib description
+
 ## [0.0.1-dev.8]
 
 - fix: rpc method missing param name
