@@ -44,7 +44,7 @@ class SupabaseClient {
   }
 
   /// Perform a stored procedure call.
-  PostgrestBuilder rpc(String fn, Map<String, String> params) {
+  PostgrestTransformBuilder rpc(String fn, {Map<String, String> params}) {
     final rest = _initPostgRESTClient();
     return rest.rpc(fn, params: params);
   }
