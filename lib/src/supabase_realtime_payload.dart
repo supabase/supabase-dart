@@ -14,36 +14,43 @@ class SupabaseRealtimePayload {
   /// The previous record. Present for 'UPDATE' and 'DELETE' events
   dynamic oldRecord;
 
-  SupabaseRealtimePayload(
-      {this.commitTimestamp,
-      this.eventType,
-      this.schema,
-      this.table,
-      this.newRecord,
-      this.oldRecord});
+  SupabaseRealtimePayload({
+    required this.commitTimestamp,
+    required this.eventType,
+    required this.schema,
+    required this.table,
+    required this.newRecord,
+    required this.oldRecord,
+  });
 
   factory SupabaseRealtimePayload.fromJson(Map<String, dynamic> json) {
-    final obj = SupabaseRealtimePayload();
-    obj.schema = json['schema'] as String;
-    obj.table = json['table'] as String;
-    obj.commitTimestamp = json['commit_timestamp'] as String;
-    obj.eventType = json['type'] as String;
-
+    final schema = json['schema'] as String;
+    final table = json['table'] as String;
+    final commitTimestamp = json['commit_timestamp'] as String;
+    final eventType = json['type'] as String;
+    Map<dynamic, dynamic>? newRecord;
     if (json['type'] == 'INSERT' || json['type'] == 'UPDATE') {
-      final columns = obj.convertColumnList(json['columns'] as List<dynamic>);
-      final records = json['record'] as Map<String, dynamic> ?? {};
-      obj.newRecord = convertChangeData(columns, records);
+      final columns = convertColumnList(json['columns'] as List<dynamic>?);
+      final records = json['record'] as Map<String, dynamic>? ?? {};
+      newRecord = convertChangeData(columns, records);
     }
-
+    Map<dynamic, dynamic>? oldRecord;
     if (json['type'] == 'UPDATE' || json['type'] == 'DELETE') {
-      final columns = obj.convertColumnList(json['columns'] as List<dynamic>);
-      final records = json['old_record'] as Map<String, dynamic> ?? {};
-      obj.oldRecord = convertChangeData(columns, records);
+      final columns = convertColumnList(json['columns'] as List<dynamic>?);
+      final records = json['old_record'] as Map<String, dynamic>? ?? {};
+      oldRecord = convertChangeData(columns, records);
     }
-    return obj;
+    return SupabaseRealtimePayload(
+      table: table,
+      schema: schema,
+      commitTimestamp: commitTimestamp,
+      eventType: eventType,
+      newRecord: newRecord,
+      oldRecord: oldRecord,
+    );
   }
 
-  List<Map<String, dynamic>> convertColumnList(List<dynamic> columns) {
+  static List<Map<String, dynamic>> convertColumnList(List<dynamic>? columns) {
     final result = <Map<String, dynamic>>[];
     if (columns != null) {
       for (final column in columns) {

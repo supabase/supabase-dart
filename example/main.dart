@@ -1,6 +1,6 @@
 import 'package:supabase/supabase.dart';
 
-void main() async {
+Future<void> main() async {
   const supabaseUrl = '';
   const supabaseKey = '';
   final client = SupabaseClient(supabaseUrl, supabaseKey);
@@ -19,13 +19,13 @@ void main() async {
   final subscription1 =
       client.from('countries').on(SupabaseEventTypes.delete, (x) {
     print('on countries.delete: ${x.table} ${x.eventType} ${x.oldRecord}');
-  }).subscribe((String event, {String errorMsg}) {
+  }).subscribe((String event, {String? errorMsg}) {
     print('event: $event error: $errorMsg');
   });
 
   final subscription2 = client.from('todos').on(SupabaseEventTypes.insert, (x) {
     print('on todos.insert: ${x.table} ${x.eventType} ${x.newRecord}');
-  }).subscribe((String event, {String errorMsg}) {
+  }).subscribe((String event, {String? errorMsg}) {
     print('event: $event error: $errorMsg');
   });
 

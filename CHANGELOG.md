@@ -1,5 +1,9 @@
 ## [0.0.1-dev.9]
 
+- chore: migrate to null-safety
+
+## [0.0.1-dev.9]
+
 - fix: rpc to return PostgrestTransformBuilder
 - chore: update postgrest to v0.0.7
 - chore: expose gotrue User as AuthUser

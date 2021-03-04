@@ -9,19 +9,16 @@ import 'supabase_query_builder.dart';
 class SupabaseClient {
   String supabaseUrl;
   String supabaseKey;
-  String schema;
-  String restUrl;
-  String realtimeUrl;
-  String authUrl;
+  String? schema;
+  late String restUrl;
+  late String realtimeUrl;
+  String? authUrl;
 
-  GoTrueClient auth;
-  RealtimeClient realtime;
+  late GoTrueClient auth;
+  late RealtimeClient realtime;
 
   SupabaseClient(this.supabaseUrl, this.supabaseKey,
-      {String schema, bool autoRefreshToken = true}) {
-    if (supabaseUrl == null) throw 'supabaseUrl is required.';
-    if (supabaseKey == null) throw 'supabaseKey is required.';
-
+      {String? schema, bool autoRefreshToken = true}) {
     restUrl = '$supabaseUrl/rest/v1';
     realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws');
     authUrl = '$supabaseUrl/auth/v1';
@@ -44,7 +41,7 @@ class SupabaseClient {
   }
 
   /// Perform a stored procedure call.
-  PostgrestTransformBuilder rpc(String fn, {Map<String, String> params}) {
+  PostgrestTransformBuilder rpc(String fn, {Map<String, String>? params}) {
     final rest = _initPostgRESTClient();
     return rest.rpc(fn, params: params);
   }
@@ -54,8 +51,8 @@ class SupabaseClient {
     final completer = Completer<int>();
 
     await _closeSubscription(subscription);
-    final openSubscriptions = getSubscriptions()?.length;
-    if (openSubscriptions == null || openSubscriptions == 0) {
+    final openSubscriptions = getSubscriptions().length;
+    if (openSubscriptions == 0) {
       realtime.disconnect();
     }
     completer.complete(openSubscriptions);
@@ -68,7 +65,7 @@ class SupabaseClient {
     return realtime.channels;
   }
 
-  GoTrueClient _initSupabaseAuthClient({bool autoRefreshToken}) {
+  GoTrueClient _initSupabaseAuthClient({bool? autoRefreshToken}) {
     return GoTrueClient(
         url: authUrl,
         headers: {

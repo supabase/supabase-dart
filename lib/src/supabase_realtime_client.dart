@@ -5,10 +5,10 @@ import 'supabase_realtime_payload.dart';
 
 typedef Callback = void Function(SupabaseRealtimePayload payload);
 
-typedef SubscribeCallback = void Function(String event, {String errorMsg});
+typedef SubscribeCallback = void Function(String event, {String? errorMsg});
 
 class SupabaseRealtimeClient {
-  RealtimeSubscription subscription;
+  late RealtimeSubscription subscription;
 
   SupabaseRealtimeClient(
       RealtimeClient socket, String schema, String tableName) {
@@ -31,15 +31,18 @@ class SupabaseRealtimeClient {
   }
 
   /// Enables the subscription.
-  RealtimeSubscription subscribe([SubscribeCallback callback]) {
-    subscription.onError((e) => callback('SUBSCRIPTION_ERROR', errorMsg: e));
-    subscription.onClose(() => callback('CLOSED'));
+  RealtimeSubscription subscribe([SubscribeCallback? callback]) {
+    subscription
+        .onError((e) => callback?.call('SUBSCRIPTION_ERROR', errorMsg: e));
+    subscription.onClose(() => callback?.call('CLOSED'));
     subscription
         .subscribe()
-        .receive('ok', (_) => callback('SUBSCRIBED'))
-        .receive('error',
-            (res) => callback('SUBSCRIPTION_ERROR', errorMsg: res.toString()))
-        .receive('timeout', (_) => callback('RETRYING_AFTER_TIMEOUT'));
+        .receive('ok', (_) => callback?.call('SUBSCRIBED'))
+        .receive(
+            'error',
+            (res) =>
+                callback?.call('SUBSCRIPTION_ERROR', errorMsg: res.toString()))
+        .receive('timeout', (_) => callback?.call('RETRYING_AFTER_TIMEOUT'));
     return subscription;
   }
 }
