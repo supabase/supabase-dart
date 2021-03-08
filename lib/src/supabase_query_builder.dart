@@ -8,8 +8,8 @@ import 'supabase_realtime_payload.dart';
 typedef Callback = void Function(SupabaseRealtimePayload payload);
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
-  late SupabaseRealtimeClient _subscription;
-  late RealtimeClient _realtime;
+  late final SupabaseRealtimeClient _subscription;
+  late final RealtimeClient _realtime;
 
   SupabaseQueryBuilder(String url, RealtimeClient realtime,
       {Map<String, String> headers = const {}, String? schema, String? table})

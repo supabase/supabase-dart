@@ -7,23 +7,22 @@ import 'package:realtime_client/realtime_client.dart';
 import 'supabase_query_builder.dart';
 
 class SupabaseClient {
-  String supabaseUrl;
-  String supabaseKey;
-  String? schema;
-  late String restUrl;
-  late String realtimeUrl;
-  String? authUrl;
+  final String supabaseUrl;
+  final String supabaseKey;
+  final String schema;
+  final String restUrl;
+  final String realtimeUrl;
+  final String authUrl;
 
-  late GoTrueClient auth;
-  late RealtimeClient realtime;
+  late final GoTrueClient auth;
+  late final RealtimeClient realtime;
 
   SupabaseClient(this.supabaseUrl, this.supabaseKey,
-      {String? schema, bool autoRefreshToken = true}) {
-    restUrl = '$supabaseUrl/rest/v1';
-    realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws');
-    authUrl = '$supabaseUrl/auth/v1';
-    schema = schema ?? 'public';
-
+      {String? schema, bool autoRefreshToken = true})
+      : restUrl = '$supabaseUrl/rest/v1',
+        realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
+        authUrl = '$supabaseUrl/auth/v1',
+        schema = schema ?? 'public' {
     auth = _initSupabaseAuthClient(autoRefreshToken: autoRefreshToken);
     realtime = _initRealtimeClient();
   }

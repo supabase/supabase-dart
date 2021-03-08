@@ -3,10 +3,10 @@ import 'package:gotrue/gotrue.dart' show User;
 class AuthUser extends User {
   AuthUser(
       {required String id,
-      Map<String, dynamic>? appMetadata,
-      Map<String, dynamic>? userMetadata,
-      String? aud,
-      String? email,
+      required Map<String, dynamic> appMetadata,
+      required Map<String, dynamic> userMetadata,
+      required String aud,
+      required String email,
       required String createdAt,
       required String confirmedAt,
       required String lastSignInAt,

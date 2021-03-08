@@ -1,18 +1,18 @@
 import 'package:realtime_client/realtime_client.dart';
 
 class SupabaseRealtimePayload {
-  String commitTimestamp;
+  final String commitTimestamp;
 
   /// 'INSERT' | 'UPDATE' | 'DELETE'
-  String eventType;
-  String schema;
-  String table;
+  final String eventType;
+  final String schema;
+  final String table;
 
   /// The new record. Present for 'INSERT' and 'UPDATE' events
-  dynamic newRecord;
+  final dynamic newRecord;
 
   /// The previous record. Present for 'UPDATE' and 'DELETE' events
-  dynamic oldRecord;
+  final dynamic oldRecord;
 
   SupabaseRealtimePayload({
     required this.commitTimestamp,

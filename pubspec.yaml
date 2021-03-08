@@ -8,7 +8,7 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  gotrue: ^0.0.1-dev.8
+  gotrue: ^0.0.1-dev.9
   postgrest: ^0.0.8
   realtime_client: ^0.0.8
 

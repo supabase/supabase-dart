@@ -8,7 +8,7 @@ typedef Callback = void Function(SupabaseRealtimePayload payload);
 typedef SubscribeCallback = void Function(String event, {String? errorMsg});
 
 class SupabaseRealtimeClient {
-  late RealtimeSubscription subscription;
+  late final RealtimeSubscription subscription;
 
   SupabaseRealtimeClient(
       RealtimeClient socket, String schema, String tableName) {
