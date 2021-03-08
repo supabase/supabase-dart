@@ -1,4 +1,4 @@
-## [0.0.1-dev.9]
+## [0.0.1-dev.10]
 
 - chore: migrate to null-safety
 
