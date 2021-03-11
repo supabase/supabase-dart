@@ -8,8 +8,8 @@ class AuthUser extends User {
       required String aud,
       required String email,
       required String createdAt,
-      required String confirmedAt,
-      required String lastSignInAt,
+      String? confirmedAt,
+      String? lastSignInAt,
       required String role,
       required String updatedAt})
       : super(
