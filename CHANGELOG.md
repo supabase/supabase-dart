@@ -1,3 +1,7 @@
+## [0.0.1-dev.10]
+
+- chore: migrate to null-safety
+
 ## [0.0.1-dev.9]
 
 - fix: rpc to return PostgrestTransformBuilder
