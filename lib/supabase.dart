@@ -4,8 +4,9 @@
 ///
 library supabase;
 
-export 'package:realtime_client/src/realtime_subscription.dart'
-    show RealtimeSubscription;
+export 'package:realtime_client/src/realtime_subscription.dart';
+export 'package:gotrue/gotrue.dart';
+export 'src/auth_session.dart';
 export 'src/auth_user.dart';
 export 'src/supabase.dart';
 export 'src/supabase_event_types.dart';
