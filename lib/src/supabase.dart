@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:gotrue/gotrue.dart';
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
+import 'package:supabase/src/supabase_storage_client.dart';
 
 import 'supabase_query_builder.dart';
 
@@ -13,6 +14,7 @@ class SupabaseClient {
   final String restUrl;
   final String realtimeUrl;
   final String authUrl;
+  final String storageUrl;
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
@@ -22,10 +24,14 @@ class SupabaseClient {
       : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
+        storageUrl = '$supabaseUrl/storage/v1',
         schema = schema ?? 'public' {
     auth = _initSupabaseAuthClient(autoRefreshToken: autoRefreshToken);
     realtime = _initRealtimeClient();
   }
+
+  /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
+  SupabaseStorageClient get storage => SupabaseStorageClient(storageUrl, _getAuthHeaders());
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
