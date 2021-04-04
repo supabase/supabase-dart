@@ -1,4 +1,5 @@
-import 'dart:html';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'fetch.dart';
 import 'types.dart';
@@ -30,11 +31,12 @@ class StorageFileApi {
   /// @param fileOptions HTTP headers. For example `cacheControl`
   Future<StorageResponse<String>> upload(String path, File file, {FileOptions? fileOptions}) async {
     try {
-      final formData = FormData();
-      formData.appendBlob('', file, file.name);
-
       final FileOptions options = fileOptions ?? defaultFileOptions;
-      formData.append('cacheControl', options.cacheControl);
+      final formData = {
+        '': file,
+        'name': file.uri, // TODO This is not the correct API
+        'cacheControl': options.cacheControl,
+      };
 
       final _path = _getFinalPath(path);
       final response = await fetch.post(
@@ -60,11 +62,12 @@ class StorageFileApi {
   /// @param fileOptions HTTP headers. For example `cacheControl`
   Future<StorageResponse<String>> update(String path, File file, {FileOptions? fileOptions}) async {
     try {
-      final formData = FormData();
-      formData.appendBlob('', file, file.name);
-
       final FileOptions options = fileOptions ?? defaultFileOptions;
-      formData.append('cacheControl', options.cacheControl);
+      final formData = {
+        '': file,
+        'name': file.uri, // TODO This is not the correct API
+        'cacheControl': options.cacheControl,
+      };
 
       final _path = _getFinalPath(path);
       final response = await fetch.put(
@@ -132,7 +135,7 @@ class StorageFileApi {
   /// Downloads a file.
   ///
   /// @param path The file path to be downloaded, including the path and file name. For example `folder/image.png`.
-  Future<StorageResponse<Blob>> download(String path) async {
+  Future<StorageResponse<Uint8List>> download(String path) async {
     try {
       final _path = _getFinalPath(path);
       final options = FetchOptions(headers: headers, noResolveJson: true);
@@ -140,7 +143,7 @@ class StorageFileApi {
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        return StorageResponse<Blob>(data: Blob([response.data])); // TODO: Probably won't work
+        return StorageResponse<Uint8List>(data: response.data as Uint8List);
       }
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));

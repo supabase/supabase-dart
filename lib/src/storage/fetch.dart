@@ -8,6 +8,9 @@ class StorageError {
   final String message;
 
   StorageError(this.message);
+
+  @override
+  String toString() => message;
 }
 
 class StorageResponse<T> {
@@ -87,6 +90,7 @@ class Fetch {
       final client = http.Client();
       final bodyStr = json.encode(body ?? {});
       final headers = options?.headers ?? {};
+      headers['Content-Type'] = 'application/json';
       final http.Response response = await client.post(Uri.parse(url), headers: headers, body: bodyStr);
       if (isSuccessStatusCode(response.statusCode)) {
         if (options?.noResolveJson == true) {
@@ -108,6 +112,7 @@ class Fetch {
       final client = http.Client();
       final bodyStr = json.encode(body ?? {});
       final headers = options?.headers ?? {};
+      headers['Content-Type'] = 'application/json';
       final http.Response response = await client.put(Uri.parse(url), headers: headers, body: bodyStr);
       if (isSuccessStatusCode(response.statusCode)) {
         if (options?.noResolveJson == true) {
@@ -129,6 +134,7 @@ class Fetch {
       final client = http.Client();
       final bodyStr = json.encode(body ?? {});
       final headers = options?.headers ?? {};
+      headers['Content-Type'] = 'application/json';
       final http.Response response = await client.delete(Uri.parse(url), headers: headers, body: bodyStr);
       if (isSuccessStatusCode(response.statusCode)) {
         if (options?.noResolveJson == true) {

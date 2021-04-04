@@ -15,7 +15,7 @@ class StorageBucketApi {
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        final buckets = List<Bucket>.from((response as List).map((value) => Bucket.fromJson(value)));
+        final buckets = List<Bucket>.from((response.data as List).map((value) => Bucket.fromJson(value)));
         return StorageResponse<List<Bucket>>(data: buckets);
       }
     } catch (e) {
@@ -46,7 +46,11 @@ class StorageBucketApi {
   Future<StorageResponse<Bucket>> createBucket(String id) async {
     try {
       final FetchOptions options = FetchOptions(headers: headers);
-      final response = await fetch.post('$url/bucket', {'id': id, 'name': id}, options: options);
+      final response = await fetch.post(
+        '$url/bucket',
+        {'id': id, 'name': id},
+        options: options,
+      );
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
