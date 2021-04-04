@@ -1,3 +1,24 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+final fetch = Fetch();
+
+class StorageError {
+  final String message;
+
+  StorageError(this.message);
+}
+
+class StorageResponse<T> {
+  final StorageError? error;
+  final T? data;
+
+  bool get hasError => error != null;
+
+  StorageResponse({this.data, this.error});
+}
+
 class FetchOptions {
   FetchOptions({this.headers, this.noResolveJson});
 
@@ -5,59 +26,122 @@ class FetchOptions {
   final bool? noResolveJson;
 }
 
-// TODO: Handle error like js: err.msg || err.message || err.error_description || err.error || err.toString();
-String _getErrorMessage(dynamic error) => error.toString();
+class Fetch {
+  Map<String, dynamic> _getRequestParams(String method, {FetchOptions? options, dynamic body}) {
+    final Map<String, dynamic> params = {'method': method, 'headers': options?.headers ?? {}};
 
-// TODO: This does not work
-void handleError(dynamic error, Function reject) {
-  if (error! is Map) {
-    reject(error);
-  } else {
-    reject({
-      'message': _getErrorMessage(error),
-      'status': error?.status ?? 500,
-    });
-  }
-}
+    if (method == 'GET') {
+      return params;
+    }
 
-Map<String, dynamic> _getRequestParams(String method, {FetchOptions? options, dynamic body}) {
-  final Map<String, dynamic> params = {'method': method, 'headers': options?.headers ?? {}};
+    params['headers'] = {'Content-Type': 'application/json', ...options?.headers ?? {}};
+    params['body'] = body.toString();
 
-  if (method == 'GET') {
     return params;
   }
 
-  params['headers'] = {'Content-Type': 'application/json', ...options?.headers ?? {}};
-  params['body'] = body.toString();
+  bool isSuccessStatusCode(int code) {
+    return code >= 200 && code <= 299;
+  }
 
-  return params;
-}
+  StorageError handleError(dynamic error) {
+    if (error is http.Response) {
+      try {
+        final parsedJson = json.decode(error.body) as Map<String, dynamic>;
+        final message = parsedJson['msg'] ??
+            parsedJson['message'] ??
+            parsedJson['error_description'] ??
+            parsedJson['error'] ??
+            json.encode(parsedJson);
+        return StorageError(message as String);
+      } on FormatException catch (_) {
+        return StorageError(error.body);
+      }
+    } else {
+      return StorageError(error.toString());
+    }
+  }
 
-Future<dynamic> _handleRequest(String method, String url, FetchOptions? options, {dynamic body}) {
-  throw UnimplementedError();
-  // TODO: Perform request
-  //  return fetch(url, _getRequestParams(method, options, body))
-  //       .then((result) => {
-  //         if (!result.ok) throw result
-  //         if (options?.noResolveJson) return resolve(result)
-  //         return result.json()
-  //       })
-  //       .then((data) => resolve(data))
-  //       .catch((error) => handleError(error, reject));
-}
+  Future<StorageResponse> get(String url, {FetchOptions? options}) async {
+    try {
+      final client = http.Client();
+      final headers = options?.headers ?? {};
+      final http.Response response = await client.get(Uri.parse(url), headers: headers);
+      if (isSuccessStatusCode(response.statusCode)) {
+        if (options?.noResolveJson == true) {
+          return StorageResponse(data: response.body);
+        } else {
+          final jsonBody = json.decode(response.body);
+          return StorageResponse(data: jsonBody);
+        }
+      } else {
+        throw response;
+      }
+    } catch (e) {
+      return StorageResponse(error: handleError(e));
+    }
+  }
 
-Future<dynamic> callGet(String url, FetchOptions? options) {
-  return _handleRequest('GET', url, options);
-}
+  Future<StorageResponse> post(String url, dynamic body, {FetchOptions? options}) async {
+    try {
+      final client = http.Client();
+      final bodyStr = json.encode(body ?? {});
+      final headers = options?.headers ?? {};
+      final http.Response response = await client.post(Uri.parse(url), headers: headers, body: bodyStr);
+      if (isSuccessStatusCode(response.statusCode)) {
+        if (options?.noResolveJson == true) {
+          return StorageResponse(data: response.body);
+        } else {
+          final jsonBody = json.decode(response.body);
+          return StorageResponse(data: jsonBody);
+        }
+      } else {
+        throw response;
+      }
+    } catch (e) {
+      return StorageResponse(error: handleError(e));
+    }
+  }
 
-Future<dynamic> callPost(String url, dynamic body, FetchOptions? options) {
-  return _handleRequest('POST', url, options, body: body);
-}
+  Future<StorageResponse> put(String url, dynamic body, {FetchOptions? options}) async {
+    try {
+      final client = http.Client();
+      final bodyStr = json.encode(body ?? {});
+      final headers = options?.headers ?? {};
+      final http.Response response = await client.put(Uri.parse(url), headers: headers, body: bodyStr);
+      if (isSuccessStatusCode(response.statusCode)) {
+        if (options?.noResolveJson == true) {
+          return StorageResponse(data: response.body);
+        } else {
+          final jsonBody = json.decode(response.body);
+          return StorageResponse(data: jsonBody);
+        }
+      } else {
+        throw response;
+      }
+    } catch (e) {
+      return StorageResponse(error: handleError(e));
+    }
+  }
 
-Future<dynamic> callPut(String url, dynamic body, FetchOptions? options) {
-  return _handleRequest('PUT', url, options, body: body);
-}
-
-Future<dynamic> callRemove(String url, dynamic body, FetchOptions? options) {
-  return _handleRequest('DELETE', url, options, body: body);
+  Future<StorageResponse> delete(String url, dynamic body, {FetchOptions? options}) async {
+    try {
+      final client = http.Client();
+      final bodyStr = json.encode(body ?? {});
+      final headers = options?.headers ?? {};
+      final http.Response response = await client.delete(Uri.parse(url), headers: headers, body: bodyStr);
+      if (isSuccessStatusCode(response.statusCode)) {
+        if (options?.noResolveJson == true) {
+          return StorageResponse(data: response.body);
+        } else {
+          final jsonBody = json.decode(response.body);
+          return StorageResponse(data: jsonBody);
+        }
+      } else {
+        throw response;
+      }
+    } catch (e) {
+      return StorageResponse(error: handleError(e));
+    }
+  }
 }

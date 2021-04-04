@@ -35,6 +35,17 @@ class FileObject {
     required this.buckets,
   });
 
+  FileObject.fromJson(dynamic json)
+      : name = json[''] as String,
+        bucketId = json[''] as String,
+        owner = json[''] as String,
+        id = json[''] as String,
+        updatedAt = json[''] as String,
+        createdAt = json[''] as String,
+        lastAccessedAt = json[''] as String,
+        metadata = Metadata.fromJson(json['metadata']),
+        buckets = Bucket.fromJson(json);
+
   final String name;
   final String bucketId;
   final String owner;
@@ -46,13 +57,6 @@ class FileObject {
   final Bucket buckets;
 }
 
-class SortBy {
-  const SortBy({this.column, this.order});
-
-  final String? column;
-  final String? order;
-}
-
 class FileOptions {
   const FileOptions({required this.cacheControl});
 
@@ -62,19 +66,28 @@ class FileOptions {
 class SearchOptions {
   const SearchOptions({this.limit, this.offset, this.sortBy});
 
-  /** The number of files you want to be returned. */
+  /// The number of files you want to be returned. */
   final int? limit;
 
-  /** The starting position. */
+  /// The starting position. */
   final int? offset;
 
-  /** The column to sort by. Can be any column inside a FileObject. */
+  /// The column to sort by. Can be any column inside a FileObject. */
   final SortBy? sortBy;
+}
+
+class SortBy {
+  const SortBy({this.column, this.order});
+
+  final String? column;
+  final String? order;
 }
 
 // TODO: need to check for metadata props. The api swagger doesnt have.
 class Metadata {
   const Metadata({required this.name});
+
+  Metadata.fromJson(dynamic json) : name = json['name'] as String;
 
   final String name;
 }
