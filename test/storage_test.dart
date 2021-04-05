@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:supabase/src/storage/types.dart';
 import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
@@ -30,7 +33,7 @@ void main() {
   test('should list buckets', () async {
     final response = await client.storage.listBuckets();
     expect(response.error, isNull);
-    expect(response.data, []);
+    expect(response.data, isA<List<Bucket>>());
   });
 
   test('should create bucket', () async {
@@ -59,5 +62,55 @@ void main() {
     final response = await client.storage.deleteBucket('test_bucket');
     expect(response.error, isNull);
     expect(response.data, 'Deleted');
+  });
+
+  test('should upload file', () async {
+    final file = File('a.txt');
+    file.writeAsStringSync('File content');
+    final response = await client.storage.from('public').upload('a.txt', file);
+    expect(response.error, isNull);
+    expect(response.data, isA<String>());
+    expect(response.data?.endsWith('/a.txt'), isTrue);
+  });
+
+  test('should update file', () async {
+    final file = File('a.txt');
+    file.writeAsStringSync('Updated content');
+    final response = await client.storage.from('public').update('a.txt', file);
+    expect(response.error, isNull);
+    expect(response.data, isA<String>());
+    expect(response.data?.endsWith('/a.txt'), isTrue);
+  });
+
+  test('should move file', () async {
+    final response = await client.storage.from('public').move('a.txt', 'b.txt');
+    expect(response.error, isNull);
+    expect(response.data, 'Move');
+  });
+
+  test('should createSignedUrl file', () async {
+    final response = await client.storage.from('public').createSignedUrl('b.txt', 60);
+    expect(response.error, isNull);
+    expect(response.data, isA<String>());
+  });
+
+  test('should list files', () async {
+    final response = await client.storage.from('public').list();
+    expect(response.error, isNull);
+    expect(response.data, isA<List<FileObject>>());
+  });
+
+  test('should download file', () async {
+    final response = await client.storage.from('public').download('b.txt');
+    expect(response.error, isNull);
+    expect(response.data, isA<Uint8List>());
+    expect(String.fromCharCodes(response.data!), 'Updated content');
+  });
+
+  test('should remove file', () async {
+    final response = await client.storage.from('public').remove(['b.txt']);
+    expect(response.error, isNull);
+    expect(response.data, isA<List>());
+    expect(response.data?.length, 1);
   });
 }

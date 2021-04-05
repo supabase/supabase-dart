@@ -36,25 +36,25 @@ class FileObject {
   });
 
   FileObject.fromJson(dynamic json)
-      : name = json[''] as String,
-        bucketId = json[''] as String,
-        owner = json[''] as String,
-        id = json[''] as String,
-        updatedAt = json[''] as String,
-        createdAt = json[''] as String,
-        lastAccessedAt = json[''] as String,
-        metadata = Metadata.fromJson(json['metadata']),
-        buckets = Bucket.fromJson(json);
+      : id = json['id'] as String?,
+        name = json['name'] as String,
+        bucketId = json['bucket_id'] as String?,
+        owner = json['owner'] as String?,
+        updatedAt = json['updated_at'] as String?,
+        createdAt = json['created_at'] as String?,
+        lastAccessedAt = json['last_accessed_at'] as String?,
+        metadata = json['metadata'] != null ? Metadata.fromJson(json['metadata']) : null,
+        buckets = json['buckets'] != null ? Bucket.fromJson(json['buckets']) : null;
 
   final String name;
-  final String bucketId;
-  final String owner;
-  final String id;
-  final String updatedAt;
-  final String createdAt;
-  final String lastAccessedAt;
-  final Metadata metadata;
-  final Bucket buckets;
+  final String? bucketId;
+  final String? owner;
+  final String? id;
+  final String? updatedAt;
+  final String? createdAt;
+  final String? lastAccessedAt;
+  final Metadata? metadata;
+  final Bucket? buckets;
 }
 
 class FileOptions {
@@ -87,7 +87,7 @@ class SortBy {
 class Metadata {
   const Metadata({required this.name});
 
-  Metadata.fromJson(dynamic json) : name = json['name'] as String;
+  Metadata.fromJson(dynamic json) : name = json['name'] as String?;
 
-  final String name;
+  final String? name;
 }

@@ -31,24 +31,18 @@ class StorageFileApi {
   /// @param fileOptions HTTP headers. For example `cacheControl`
   Future<StorageResponse<String>> upload(String path, File file, {FileOptions? fileOptions}) async {
     try {
-      final FileOptions options = fileOptions ?? defaultFileOptions;
-      final formData = {
-        '': file,
-        'name': file.uri, // TODO This is not the correct API
-        'cacheControl': options.cacheControl,
-      };
-
       final _path = _getFinalPath(path);
-      final response = await fetch.post(
+      final response = await fetch.postFile(
         '$url/object/$_path',
-        formData,
+        file,
+        fileOptions ?? defaultFileOptions,
         options: FetchOptions(headers: headers),
       );
 
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        return StorageResponse<String>(data: response.data.toString()); // TODO Correct format ?
+        return StorageResponse<String>(data: (response.data as Map)['Key'] as String);
       }
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));
@@ -62,24 +56,18 @@ class StorageFileApi {
   /// @param fileOptions HTTP headers. For example `cacheControl`
   Future<StorageResponse<String>> update(String path, File file, {FileOptions? fileOptions}) async {
     try {
-      final FileOptions options = fileOptions ?? defaultFileOptions;
-      final formData = {
-        '': file,
-        'name': file.uri, // TODO This is not the correct API
-        'cacheControl': options.cacheControl,
-      };
-
       final _path = _getFinalPath(path);
-      final response = await fetch.put(
+      final response = await fetch.putFile(
         '$url/object/$_path',
-        formData,
+        file,
+        fileOptions ?? defaultFileOptions,
         options: FetchOptions(headers: headers),
       );
 
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        return StorageResponse<String>(data: response.data.toString()); // TODO Correct format ?
+        return StorageResponse<String>(data: response.data['Key'] as String);
       }
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));
@@ -96,7 +84,7 @@ class StorageFileApi {
       final response = await fetch.post(
         '$url/object/move',
         {
-          'bucketId': bucketId,
+          'bucketName': bucketId, // TODO use bucketName or bucketId ?
           'sourceKey': fromPath,
           'destinationKey': toPath,
         },
@@ -105,7 +93,7 @@ class StorageFileApi {
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        return StorageResponse<String>(data: response.data.toString()); // TODO Correct format ?
+        return StorageResponse<String>(data: response.data['message'] as String);
       }
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));
@@ -120,7 +108,11 @@ class StorageFileApi {
     try {
       final _path = _getFinalPath(path);
       final options = FetchOptions(headers: headers);
-      final response = await fetch.post('$url}/object/sign/$_path', {expiresIn}, options: options);
+      final response = await fetch.post(
+        '$url/object/sign/$_path',
+        {'expiresIn': expiresIn},
+        options: options,
+      );
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
@@ -171,16 +163,16 @@ class StorageFileApi {
   /// Lists all the files within a bucket.
   /// @param path The folder path.
   /// @param options Search options, including `limit`, `offset`, and `sortBy`.
-  Future<StorageResponse<List<FileObject>>> list(
-    String? path,
-    SearchOptions? searchOptions,
-  ) async {
+  Future<StorageResponse<List<FileObject>>> list({String? path, SearchOptions? searchOptions}) async {
     try {
       final Map<String, dynamic> body = {
         'prefix': path ?? '',
         'limit': searchOptions?.limit ?? defaultSearchOptions.limit,
         'offset': searchOptions?.offset ?? defaultSearchOptions.offset,
-        'sort_by': searchOptions?.sortBy ?? defaultSearchOptions.sortBy,
+        'sort_by': {
+          'column': searchOptions?.sortBy?.column ?? defaultSearchOptions.sortBy!.column,
+          'order': searchOptions?.sortBy?.order ?? defaultSearchOptions.sortBy!.order,
+        },
       };
       final options = FetchOptions(headers: headers);
       final response = await fetch.post('$url/object/list/$bucketId', body, options: options);
