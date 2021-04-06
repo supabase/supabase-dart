@@ -5,13 +5,22 @@ import 'package:supabase/src/storage/types.dart';
 import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
 
-import 'test_env.dart';
+// Note: Theses tests require a working Supabase project with Storage Policies configured as follows:
+// DELETE, SELECT, UPDATE & INSERT policies are set to `true` for both Objects & Buckets
+
+final String supabaseUrl = Platform.environment['SUPABASE_TEST_URL'] ?? '';
+final String supabaseKey = Platform.environment['SUPABASE_TEST_KEY'] ?? '';
 
 void main() {
   late SupabaseClient client;
 
   setUp(() {
     client = SupabaseClient(supabaseUrl, supabaseKey);
+  });
+
+  tearDown(() {
+    final file = File('a.txt');
+    if (file.existsSync()) file.deleteSync();
   });
 
   test('env variables are set', () {

@@ -24,6 +24,10 @@ class StorageFileApi {
   final Map<String, String> headers;
   final String? bucketId;
 
+  String _getFinalPath(String path) {
+    return '$bucketId/$path';
+  }
+
   /// Uploads a file to an existing bucket.
   ///
   /// @param path The relative file path including the bucket ID. Should be of the format `bucket/folder/subfolder/filename.png`. The bucket must already exist before attempting to upload.
@@ -185,9 +189,5 @@ class StorageFileApi {
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));
     }
-  }
-
-  String _getFinalPath(String path) {
-    return '$bucketId/$path';
   }
 }
