@@ -1,3 +1,7 @@
+## [0.0.1-dev.11]
+
+- fix: aligned exports with supabase-js
+
 ## [0.0.1-dev.10]
 
 - chore: migrate to null-safety
