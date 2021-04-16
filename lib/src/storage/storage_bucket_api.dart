@@ -15,7 +15,8 @@ class StorageBucketApi {
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        final buckets = List<Bucket>.from((response.data as List).map((value) => Bucket.fromJson(value)));
+        final buckets = List<Bucket>.from(
+            (response.data as List).map((value) => Bucket.fromJson(value)));
         return StorageResponse<List<Bucket>>(data: buckets);
       }
     } catch (e) {
@@ -67,11 +68,13 @@ class StorageBucketApi {
   Future<StorageResponse<String>> emptyBucket(String id) async {
     try {
       final FetchOptions options = FetchOptions(headers: headers);
-      final response = await fetch.post('$url/bucket/$id/empty', {}, options: options);
+      final response =
+          await fetch.post('$url/bucket/$id/empty', {}, options: options);
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        return StorageResponse<String>(data: response.data['message'] as String);
+        return StorageResponse<String>(
+            data: response.data['message'] as String);
       }
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));
@@ -85,11 +88,13 @@ class StorageBucketApi {
   Future<StorageResponse<String>> deleteBucket(String id) async {
     try {
       final FetchOptions options = FetchOptions(headers: headers);
-      final response = await fetch.delete('$url/bucket/$id', {}, options: options);
+      final response =
+          await fetch.delete('$url/bucket/$id', {}, options: options);
       if (response.hasError) {
         return StorageResponse(error: response.error);
       } else {
-        return StorageResponse<String>(data: response.data['message'] as String);
+        return StorageResponse<String>(
+            data: response.data['message'] as String);
       }
     } catch (e) {
       return StorageResponse(error: StorageError(e.toString()));

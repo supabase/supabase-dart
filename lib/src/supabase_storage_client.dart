@@ -2,7 +2,8 @@ import 'package:supabase/src/storage/storage_bucket_api.dart';
 import 'package:supabase/src/storage/storage_file_api.dart';
 
 class SupabaseStorageClient extends StorageBucketApi {
-  SupabaseStorageClient(String url, Map<String, String> headers) : super(url, headers);
+  SupabaseStorageClient(String url, Map<String, String> headers)
+      : super(url, headers);
 
   /// Perform file operation in a bucket.
   ///

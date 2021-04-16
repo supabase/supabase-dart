@@ -31,7 +31,8 @@ class SupabaseClient {
   }
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
-  SupabaseStorageClient get storage => SupabaseStorageClient(storageUrl, _getAuthHeaders());
+  SupabaseStorageClient get storage =>
+      SupabaseStorageClient(storageUrl, _getAuthHeaders());
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {

@@ -43,8 +43,11 @@ class FileObject {
         updatedAt = json['updated_at'] as String?,
         createdAt = json['created_at'] as String?,
         lastAccessedAt = json['last_accessed_at'] as String?,
-        metadata = json['metadata'] != null ? Metadata.fromJson(json['metadata']) : null,
-        buckets = json['buckets'] != null ? Bucket.fromJson(json['buckets']) : null;
+        metadata = json['metadata'] != null
+            ? Metadata.fromJson(json['metadata'])
+            : null,
+        buckets =
+            json['buckets'] != null ? Bucket.fromJson(json['buckets']) : null;
 
   final String name;
   final String? bucketId;

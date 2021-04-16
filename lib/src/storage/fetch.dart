@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart' show MediaType;
+import 'package:mime/mime.dart';
 import 'package:supabase/src/storage/types.dart';
 
 Fetch fetch = Fetch();
@@ -42,6 +44,15 @@ class FetchOptions {
 class Fetch {
   bool _isSuccessStatusCode(int code) {
     return code >= 200 && code <= 299;
+  }
+
+  MediaType? _parseMediaType(String path) {
+    try {
+      final mime = lookupMimeType(path);
+      return MediaType.parse(mime ?? '');
+    } catch (error) {
+      return null;
+    }
   }
 
   StorageError _handleError(dynamic error) {
@@ -103,7 +114,12 @@ class Fetch {
       if (method != 'GET') {
         headers['Content-Type'] = 'application/json';
       }
-      final multipartFile = http.MultipartFile.fromBytes('', file.readAsBytesSync(), filename: file.path);
+      final multipartFile = http.MultipartFile.fromBytes(
+        '',
+        file.readAsBytesSync(),
+        filename: file.path,
+        contentType: _parseMediaType(file.path),
+      );
       final request = http.MultipartRequest(method, Uri.parse(url))
         ..headers.addAll(headers)
         ..files.add(multipartFile)
@@ -131,23 +147,30 @@ class Fetch {
     return _handleRequest('GET', url, {}, options);
   }
 
-  Future<StorageResponse> post(String url, dynamic body, {FetchOptions? options}) async {
+  Future<StorageResponse> post(String url, dynamic body,
+      {FetchOptions? options}) async {
     return _handleRequest('POST', url, body, options);
   }
 
-  Future<StorageResponse> put(String url, dynamic body, {FetchOptions? options}) async {
+  Future<StorageResponse> put(String url, dynamic body,
+      {FetchOptions? options}) async {
     return _handleRequest('PUT', url, body, options);
   }
 
-  Future<StorageResponse> delete(String url, dynamic body, {FetchOptions? options}) async {
+  Future<StorageResponse> delete(String url, dynamic body,
+      {FetchOptions? options}) async {
     return _handleRequest('DELETE', url, body, options);
   }
 
-  Future<StorageResponse> postFile(String url, File file, FileOptions fileOptions, {FetchOptions? options}) async {
+  Future<StorageResponse> postFile(
+      String url, File file, FileOptions fileOptions,
+      {FetchOptions? options}) async {
     return _handleMultipartRequest('POST', url, file, fileOptions, options);
   }
 
-  Future<StorageResponse> putFile(String url, File file, FileOptions fileOptions, {FetchOptions? options}) async {
+  Future<StorageResponse> putFile(
+      String url, File file, FileOptions fileOptions,
+      {FetchOptions? options}) async {
     return _handleMultipartRequest('PUT', url, file, fileOptions, options);
   }
 }
