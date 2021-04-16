@@ -88,7 +88,7 @@ class StorageFileApi {
       final response = await fetch.post(
         '$url/object/move',
         {
-          'bucketName': bucketId, // TODO use bucketName or bucketId ?
+          'bucketName': bucketId,
           'sourceKey': fromPath,
           'destinationKey': toPath,
         },

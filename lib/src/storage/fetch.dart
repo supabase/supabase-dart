@@ -95,7 +95,7 @@ class Fetch {
     String method,
     String url,
     File file,
-    FileOptions fileOptions, // TODO: Use fileOptions in request
+    FileOptions fileOptions,
     FetchOptions? options,
   ) async {
     try {
@@ -103,11 +103,11 @@ class Fetch {
       if (method != 'GET') {
         headers['Content-Type'] = 'application/json';
       }
-      // TODO: Set content type in `multipartFile`
       final multipartFile = http.MultipartFile.fromBytes('', file.readAsBytesSync(), filename: file.path);
       final request = http.MultipartRequest(method, Uri.parse(url))
         ..headers.addAll(headers)
-        ..files.add(multipartFile);
+        ..files.add(multipartFile)
+        ..fields['cacheControl'] = fileOptions.cacheControl;
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
