@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:supabase/src/storage/types.dart';
 
-final fetch = Fetch();
+Fetch fetch = Fetch();
 
 class StorageError {
   final String message;
