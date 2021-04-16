@@ -7,6 +7,7 @@ library supabase;
 export 'package:realtime_client/src/realtime_subscription.dart'
     show RealtimeSubscription;
 export 'src/auth_user.dart';
+export 'src/storage/types.dart' show FileOptions, SearchOptions, SortBy;
 export 'src/supabase.dart';
 export 'src/supabase_event_types.dart';
 export 'src/supabase_storage_client.dart';
