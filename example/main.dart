@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase/supabase.dart';
 
 Future<void> main() async {
@@ -32,4 +34,33 @@ Future<void> main() async {
   // remember to remove subscription
   client.removeSubscription(subscription1);
   client.removeSubscription(subscription2);
+
+  // Upload file to bucket "public"
+  final file = File('example.txt');
+  file.writeAsStringSync('File content');
+  final storageResponse =
+      await client.storage.from('public').upload('example.txt', file);
+  print('upload response : ${storageResponse.data}');
+
+  // Get download url
+  final urlResponse =
+      await client.storage.from('public').createSignedUrl('example.txt', 60);
+  print('download url : ${urlResponse.data}');
+
+  // Download text file
+  final fileResponse =
+      await client.storage.from('public').download('example.txt');
+  if (fileResponse.hasError) {
+    print('Error while downloading file : ${fileResponse.error}');
+  } else {
+    print('downloaded file : ${String.fromCharCodes(fileResponse.data!)}');
+  }
+
+  // Delete file
+  final deleteResponse =
+      await client.storage.from('public').remove(['example.txt']);
+  print('deleted file id : ${deleteResponse.data?.first.id}');
+
+  // Local file cleanup
+  if (file.existsSync()) file.deleteSync();
 }
