@@ -1,3 +1,9 @@
+## [0.0.1-dev.12]
+
+- feat: implement Storage API
+- chore: update postgrest to v0.1.0
+- chore: update gotrue to ^0.0.1-dev.10
+
 ## [0.0.1-dev.11]
 
 - fix: aligned exports with supabase-js
