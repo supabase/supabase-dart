@@ -9,6 +9,8 @@ environment:
 
 dependencies:
   gotrue: ^0.0.1-dev.10
+  http: ^0.13.0
+  http_parser: ^4.0.0
   mime: ^1.0.0
   postgrest: ^0.1.0
   realtime_client: ^0.0.8
