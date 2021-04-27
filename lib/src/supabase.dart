@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:gotrue/gotrue.dart';
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
-import 'package:supabase/src/supabase_storage_client.dart';
+import 'package:storage_client/storage_client.dart';
 
 import 'supabase_query_builder.dart';
 

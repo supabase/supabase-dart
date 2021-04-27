@@ -14,6 +14,7 @@ dependencies:
   mime: ^1.0.0
   postgrest: ^0.1.0
   realtime_client: ^0.0.8
+  storage_client: ^0.0.1-dev.1
 
 dev_dependencies:
   lint: ^1.5.2

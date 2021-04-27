@@ -1,3 +1,7 @@
+## [0.0.1-dev.14]
+
+- refactor: use storage_client package v0.0.1-dev.1
+
 ## [0.0.1-dev.13]
 
 - fix: package dependencies
@@ -6,7 +10,7 @@
 
 - feat: implement Storage API
 - chore: update postgrest to v0.1.0
-- chore: update gotrue to ^0.0.1-dev.10
+- chore: update gotrue to v0.0.1-dev.10
 
 ## [0.0.1-dev.11]
 
