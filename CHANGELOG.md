@@ -1,3 +1,8 @@
+## [0.0.1-dev.15]
+
+- chore: update postgrest to v0.1.1
+- chore: update gotrue to v0.0.1-dev.11
+
 ## [0.0.1-dev.14]
 
 - refactor: use storage_client package v0.0.1-dev.1
