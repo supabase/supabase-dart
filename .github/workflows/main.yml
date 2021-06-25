@@ -26,5 +26,8 @@ jobs:
       - name: Install dependencies
         run: pub get
 
+      - name: dartfmt
+        run: dart format lib test -l 80 --set-exit-if-changed
+
       - name: Run tests
         run: pub run test test
