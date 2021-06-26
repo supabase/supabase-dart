@@ -29,5 +29,8 @@ jobs:
       - name: dartfmt
         run: dart format lib test -l 80 --set-exit-if-changed
 
+      - name: analyzer
+        run: dart analyze --fatal-warnings --fatal-infos .
+
       - name: Run tests
         run: pub run test test
