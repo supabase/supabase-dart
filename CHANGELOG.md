@@ -1,3 +1,7 @@
+## [0.0.1-dev.23]
+
+- chore: update realtime to v0.1.1
+
 ## [0.0.1-dev.22]
 
 - chore: update gotrue to v0.0.5
