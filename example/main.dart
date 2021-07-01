@@ -12,7 +12,7 @@ Future<void> main() async {
       .from('countries')
       .select()
       .order('name', ascending: true)
-      .execute();
+      .execute(count: CountOption.exact);
   if (response.error == null) {
     print('response.data: ${response.data}');
   }

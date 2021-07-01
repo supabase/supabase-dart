@@ -6,6 +6,7 @@ library supabase;
 
 export 'package:realtime_client/realtime_client.dart';
 export 'package:gotrue/gotrue.dart';
+export 'package:postgrest/postgrest.dart';
 export 'package:storage_client/storage_client.dart';
 export 'src/auth_session.dart';
 export 'src/auth_user.dart';
