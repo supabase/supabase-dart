@@ -1,3 +1,7 @@
+## [0.0.1-dev.24]
+
+- fix: export postgrest classes
+
 ## [0.0.1-dev.23]
 
 - chore: update realtime to v0.1.1
