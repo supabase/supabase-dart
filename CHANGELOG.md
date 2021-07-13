@@ -1,3 +1,8 @@
+## [0.0.1]
+
+- chore: update storage_client to v0.0.1
+- Initial Release
+
 ## [0.0.1-dev.27]
 
 - chore: update realtime to v0.1.3
