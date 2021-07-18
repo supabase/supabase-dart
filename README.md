@@ -57,6 +57,9 @@ main() {
         // Do something when there is an update
       })
       .subscribe();
+
+  // remember to remove subscription when you're done
+  client.removeSubscription(subscription);
 }
 ```
 
