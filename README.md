@@ -20,6 +20,7 @@ Supabase is an open source Firebase alternative. We are a service to:
 
 
 ### [Database](https://supabase.io/docs/guides/database)
+Powered by [postgrest-dart](https://github.com/supabase/postgrest-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
@@ -37,7 +38,28 @@ main() {
 ```
 
 
+### [Realtime](https://supabase.io/docs/guides/database#realtime)
+Powered by [realtime-dart](https://github.com/supabase/realtime-dart)
+
+```dart
+import 'package:supabase/supabase.dart';
+
+main() {
+  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  
+  // Set up a listener to listen to changes in `countries` table
+  final subscription = await client
+      .from('countries')
+      .on(SupabaseEventTypes.all, (payload) {
+        // Do something when there is an update
+      })
+      .subscribe();
+}
+```
+
+
 ### [Authentication](https://supabase.io/docs/guides/auth)
+Powered by [gotrue-dart](https://github.com/supabase/gotrue-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
@@ -54,6 +76,7 @@ main() {
 
 
 ### [Storage](https://supabase.io/docs/guides/storage)
+Powered by [storage-dart](https://github.com/supabase/storage-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
