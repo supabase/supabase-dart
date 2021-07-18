@@ -8,13 +8,38 @@ Future<void> main() async {
   final client = SupabaseClient(supabaseUrl, supabaseKey);
 
   // query data
-  final response = await client
+  final selectResponse = await client
       .from('countries')
       .select()
       .order('name', ascending: true)
       .execute(count: CountOption.exact);
-  if (response.error == null) {
-    print('response.data: ${response.data}');
+  if (selectResponse.error == null) {
+    print('response.data: ${selectResponse.data}');
+  }
+
+  // insert data
+  final insertResponse = await client.from('countries').insert([
+    {'name': 'Singapore'},
+  ]).execute();
+  if (insertResponse.error == null) {
+    print('insertResponse.data: ${insertResponse.data}');
+  }
+
+  // update data
+  final updateResponse = await client
+      .from('countries')
+      .update({'name': 'Singapore'})
+      .eq('id', 1)
+      .execute();
+  if (updateResponse.error == null) {
+    print('updateResponse.data: ${updateResponse.data}');
+  }
+
+  // delete data
+  final deleteResponse =
+      await client.from('countries').delete().eq('id', 1).execute();
+  if (deleteResponse.error == null) {
+    print('deleteResponse.data: ${deleteResponse.data}');
   }
 
   // realtime
@@ -57,9 +82,9 @@ Future<void> main() async {
   }
 
   // Delete file
-  final deleteResponse =
+  final deleteFileResponse =
       await client.storage.from('public').remove(['example.txt']);
-  print('deleted file id : ${deleteResponse.data?.first.id}');
+  print('deleted file id : ${deleteFileResponse.data?.first.id}');
 
   // Local file cleanup
   if (file.existsSync()) file.deleteSync();

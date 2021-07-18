@@ -16,11 +16,15 @@ Supabase is an open source Firebase alternative. We are a service to:
 - manage your users and their permissions
 - interact with your database using a simple UI
 
+## Docs
+
+`supabase-dart` mirrors the design of `supabase-js`, which its documentation can be found here:
+https://supabase.io/docs/reference/javascript/initializing
+
 ## Usage example
 
 
 ### [Database](https://supabase.io/docs/guides/database)
-Powered by [postgrest-dart](https://github.com/supabase/postgrest-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
@@ -39,7 +43,6 @@ main() {
 
 
 ### [Realtime](https://supabase.io/docs/guides/database#realtime)
-Powered by [realtime-dart](https://github.com/supabase/realtime-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
@@ -59,7 +62,6 @@ main() {
 
 
 ### [Authentication](https://supabase.io/docs/guides/auth)
-Powered by [gotrue-dart](https://github.com/supabase/gotrue-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
@@ -76,7 +78,6 @@ main() {
 
 
 ### [Storage](https://supabase.io/docs/guides/storage)
-Powered by [storage-dart](https://github.com/supabase/storage-dart)
 
 ```dart
 import 'package:supabase/supabase.dart';
