@@ -1,3 +1,7 @@
+## [0.0.3]
+
+- chore: update storage_client to v0.0.3
+
 ## [0.0.2]
 
 - chore: update gotrue to v0.0.7
