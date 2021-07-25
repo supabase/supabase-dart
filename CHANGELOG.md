@@ -1,3 +1,7 @@
+## [0.0.4]
+
+- chore: update realtime_client to v0.1.4
+
 ## [0.0.3]
 
 - chore: update storage_client to v0.0.3
