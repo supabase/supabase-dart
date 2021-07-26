@@ -1,14 +1,15 @@
 # `supabase-dart`
 
-A dart client for [Supabase](https://supabase.io/).
+A Dart client for [Supabase](https://supabase.io/).
 
 [![pub package](https://img.shields.io/pub/v/supabase.svg)](https://pub.dev/packages/supabase)
 [![pub test](https://github.com/supabase/supabase-dart/workflows/Test/badge.svg)](https://github.com/supabase/supabase-dart/actions?query=workflow%3ATest)
 
 ***
 
-## [What is Supabase](https://supabase.io/docs/)
-Supabase is an open source Firebase alternative. We are a service to:
+## What is Supabase
+
+[Supabase](https://supabase.io/docs/) is an open source Firebase alternative. We are a service to:
 
 - listen to database changes
 - query your tables, including filtering, pagination, and deeply nested relationships (like GraphQL)
@@ -25,8 +26,7 @@ Supabase is an open source Firebase alternative. We are a service to:
 
 ## Docs
 
-`supabase-dart` mirrors the design of `supabase-js`, which its documentation can be found here:
-https://supabase.io/docs/reference/javascript/initializing
+`supabase-dart` mirrors the design of `supabase-js`. Find the  documentation [here](https://supabase.io/docs/reference/javascript/initializing).
 
 ## Usage example
 
