@@ -1,3 +1,7 @@
+## [0.0.6]
+
+- chore: update realtime_client to v0.1.6
+
 ## [0.0.5]
 
 - chore: update realtime_client to v0.1.5
