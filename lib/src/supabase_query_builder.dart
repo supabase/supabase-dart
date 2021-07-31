@@ -46,20 +46,26 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     _realtimeSubscription = on(SupabaseEventTypes.all, (payload) {
       switch (payload.eventType) {
         case 'INSERT':
-          final newRecord = Map<String, dynamic>.from(payload.newRecord as Map);
+          final newRecord = Map<String, dynamic>.from(payload.newRecord!);
           _data.add(newRecord);
           break;
         case 'UPDATE':
-          final oldRecord = Map<String, dynamic>.from(payload.oldRecord as Map);
-          final newRecord = Map<String, dynamic>.from(payload.newRecord as Map);
           final index = _data.indexWhere((element) =>
-              const DeepCollectionEquality().equals(element, oldRecord));
-          _data[index] = newRecord;
+              _findTargetRecord(record: element, payload: payload));
+          if (index >= 0) {
+            _data[index] = payload.newRecord!;
+          } else {
+            _streamController.addError(Error());
+          }
           break;
         case 'DELETE':
-          final oldRecord = Map<String, dynamic>.from(payload.oldRecord as Map);
-          _data.removeWhere((element) =>
-              const DeepCollectionEquality().equals(element, oldRecord));
+          final index = _data.indexWhere((element) =>
+              _findTargetRecord(record: element, payload: payload));
+          if (index >= 0) {
+            _data.removeAt(index);
+          } else {
+            _streamController.addError(Error());
+          }
           break;
       }
       _streamController.sink.add(_data);
@@ -68,5 +74,27 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     final data = List<Map<String, dynamic>>.from(res.data as List);
     _data.addAll(data);
     _streamController.sink.add(_data);
+  }
+
+  bool _findTargetRecord({
+    required Map<String, dynamic> record,
+    required SupabaseRealtimePayload payload,
+  }) {
+    late final Map<String, dynamic> targetRecord;
+    if (payload.eventType == 'UPDATE') {
+      targetRecord = payload.newRecord!;
+    } else if (payload.eventType == 'DELETE') {
+      targetRecord = payload.oldRecord!;
+    } else {
+      throw Error();
+    }
+
+    bool isTarget = true;
+    for (final primaryKey in payload.primaryKeys) {
+      if (record[primaryKey] != targetRecord[primaryKey]) {
+        isTarget = false;
+      }
+    }
+    return isTarget;
   }
 }
