@@ -36,7 +36,13 @@ class SupabaseClient {
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
-    final url = '$restUrl/$table';
+    late final String url;
+    if (RegExp(r'^.*:.*\=eq\..*$').hasMatch(table)) {
+      final tableName = table.split(':').first;
+      url = '$restUrl/$tableName';
+    } else {
+      url = '$restUrl/$table';
+    }
     return SupabaseQueryBuilder(
       url,
       realtime,

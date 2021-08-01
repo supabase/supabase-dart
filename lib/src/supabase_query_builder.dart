@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:collection/collection.dart';
 
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
@@ -85,8 +84,6 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
       targetRecord = payload.newRecord!;
     } else if (payload.eventType == 'DELETE') {
       targetRecord = payload.oldRecord!;
-    } else {
-      throw Error();
     }
 
     bool isTarget = true;
