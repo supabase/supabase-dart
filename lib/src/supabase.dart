@@ -37,9 +37,12 @@ class SupabaseClient {
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
     late final String url;
+    StreamFilter? streamFilter;
     if (RegExp(r'^.*:.*\=eq\..*$').hasMatch(table)) {
       final tableName = table.split(':').first;
       url = '$restUrl/$tableName';
+      final colVals = table.split(':').last.split('=eq.');
+      streamFilter = StreamFilter(column: colVals.first, value: colVals.last);
     } else {
       url = '$restUrl/$table';
     }
@@ -49,6 +52,7 @@ class SupabaseClient {
       headers: _getAuthHeaders(),
       schema: schema,
       table: table,
+      streamFilter: streamFilter,
     );
   }
 

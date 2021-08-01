@@ -9,19 +9,36 @@ import 'supabase_realtime_payload.dart';
 
 typedef Callback = void Function(SupabaseRealtimePayload payload);
 
+class StreamFilter {
+  StreamFilter({
+    required this.column,
+    required this.value,
+  });
+
+  final String column;
+  final String value;
+}
+
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   late final SupabaseRealtimeClient _subscription;
   late final RealtimeClient _realtime;
   late final StreamController<List<Map<String, dynamic>>> _streamController;
   late final List<Map<String, dynamic>> _data;
   late final RealtimeSubscription _realtimeSubscription;
+  late final StreamFilter? _streamFilter;
 
-  SupabaseQueryBuilder(String url, RealtimeClient realtime,
-      {Map<String, String> headers = const {}, String? schema, String? table})
-      : super(url, headers: headers, schema: schema) {
+  SupabaseQueryBuilder(
+    String url,
+    RealtimeClient realtime, {
+    Map<String, String> headers = const {},
+    required String? schema,
+    required String? table,
+    required StreamFilter? streamFilter,
+  }) : super(url, headers: headers, schema: schema) {
     _subscription =
         SupabaseRealtimeClient(realtime, schema ?? 'public', table ?? '*');
     _realtime = realtime;
+    _streamFilter = streamFilter;
   }
 
   /// Subscribe to realtime changes in your databse.
@@ -54,7 +71,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
           if (index >= 0) {
             _data[index] = payload.newRecord!;
           } else {
-            _streamController.addError(Error());
+            _streamController.addError('Could not find the updated record. ');
           }
           break;
         case 'DELETE':
@@ -63,13 +80,24 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
           if (index >= 0) {
             _data.removeAt(index);
           } else {
-            _streamController.addError(Error());
+            _streamController.addError('Could not find the deleted record. ');
           }
           break;
       }
       _streamController.sink.add(_data);
     }).subscribe();
-    final res = await select().execute();
+    late final PostgrestResponse res;
+    if (_streamFilter != null) {
+      res = await select()
+          .eq(_streamFilter!.column, _streamFilter!.value)
+          .execute();
+    } else {
+      res = await select().execute();
+    }
+    if (res.error != null) {
+      _streamController.sink.addError(res.error!.message);
+      return;
+    }
     final data = List<Map<String, dynamic>>.from(res.data as List);
     _data.addAll(data);
     _streamController.sink.add(_data);
