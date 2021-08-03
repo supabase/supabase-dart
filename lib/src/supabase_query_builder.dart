@@ -126,7 +126,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     _streamController.sink.add(_streamData);
   }
 
-  bool _isTargetRecord({
+  static bool _isTargetRecord({
     required Map<String, dynamic> record,
     required SupabaseRealtimePayload payload,
   }) {

@@ -10,7 +10,7 @@ environment:
 dependencies:
   gotrue: ^0.0.7
   postgrest: ^0.1.4
-  realtime_client: ^0.1.7
+  realtime_client: ^0.1.8
   storage_client: ^0.0.3
 
 dev_dependencies:
