@@ -19,8 +19,8 @@ class StreamPostgrestFilter {
   final String value;
 }
 
-class _OrderBy {
-  _OrderBy({
+class _Order {
+  _Order({
     required this.column,
     required this.ascending,
   });
@@ -50,7 +50,7 @@ class SupabaseStreamBuilder {
         _streamFilter = streamFilter;
 
   /// Which column to order by and whether it's ascending
-  _OrderBy? _orderBy;
+  _Order? _orderBy;
 
   /// Count of record to be returned
   int? _limit;
@@ -60,17 +60,17 @@ class SupabaseStreamBuilder {
   /// When `ascending` value is true, the result will be in ascending order.
   ///
   /// ```dart
-  /// supabase.from('users').stream().order('username', ascending: false)
+  /// supabase.from('users').stream().order('username', ascending: false);
   /// ```
   SupabaseStreamBuilder order(String column, {bool ascending = false}) {
-    _orderBy = _OrderBy(column: column, ascending: ascending);
+    _orderBy = _Order(column: column, ascending: ascending);
     return this;
   }
 
   /// Limits the result with the specified `count`.
   ///
   /// ```dart
-  /// supabase.from('users').stream().limit(1)
+  /// supabase.from('users').stream().limit(10);
   /// ```
   SupabaseStreamBuilder limit(int count) {
     _limit = count;
@@ -78,7 +78,6 @@ class SupabaseStreamBuilder {
   }
 
   /// Sends the request and returns a Stream.
-  /// catch any error and returns with status 500
   Stream<List<Map<String, dynamic>>> execute() {
     _streamController = StreamController.broadcast(onCancel: () {
       _supabaseRealtimeClient.unsubscribe();
@@ -102,7 +101,7 @@ class SupabaseStreamBuilder {
           if (updatedIndex >= 0) {
             _streamData[updatedIndex] = payload.newRecord!;
           } else {
-            _streamController.addError('Could not find the updated record. ');
+            _streamController.addError('Could not find the updated record.');
           }
           break;
         case 'DELETE':
@@ -111,12 +110,16 @@ class SupabaseStreamBuilder {
           if (deletedIndex >= 0) {
             _streamData.removeAt(deletedIndex);
           } else {
-            _streamController.addError('Could not find the deleted record. ');
+            _streamController.addError('Could not find the deleted record.');
           }
           break;
       }
-      // _streamData.
-      _streamController.sink.add(_streamData);
+      if (_orderBy != null) {
+        _sortData();
+      }
+      final emitData =
+          (_limit != null ? _streamData.take(_limit!) : _streamData).toList();
+      _streamController.sink.add(emitData);
     }).subscribe();
 
     PostgrestFilterBuilder query = _queryBuilder.select();
@@ -160,5 +163,21 @@ class SupabaseStreamBuilder {
       }
     }
     return isTarget;
+  }
+
+  void _sortData() {
+    final orderModifier = _orderBy!.ascending ? 1 : -1;
+    _streamData.sort((a, b) {
+      if (a[_orderBy!.column] is String && b[_orderBy!.column] is String) {
+        return orderModifier *
+            (a[_orderBy!.column] as String)
+                .compareTo(b[_orderBy!.column] as String);
+      } else if (a[_orderBy!.column] is int && b[_orderBy!.column] is int) {
+        return orderModifier *
+            (a[_orderBy!.column] as int).compareTo(b[_orderBy!.column] as int);
+      } else {
+        return 0;
+      }
+    });
   }
 }

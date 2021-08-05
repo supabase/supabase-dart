@@ -43,6 +43,28 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(jsonString)
           ..close();
+      } else if (url ==
+          '/rest/v1/todos?select=%2A&order=%22id%22.desc.nullslast') {
+        final jsonString = jsonEncode([
+          {'id': 2, 'task': 'task 2', 'status': false},
+          {'id': 1, 'task': 'task 1', 'status': true},
+        ]);
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..headers.contentType = ContentType.json
+          ..write(jsonString)
+          ..close();
+      } else if (url ==
+          '/rest/v1/todos?select=%2A&order=%22id%22.desc.nullslast&limit=2') {
+        final jsonString = jsonEncode([
+          {'id': 2, 'task': 'task 2', 'status': false},
+          {'id': 1, 'task': 'task 1', 'status': true},
+        ]);
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..headers.contentType = ContentType.json
+          ..write(jsonString)
+          ..close();
       } else if (url.contains('realtime')) {
         webSocket = await WebSocketTransformer.upgrade(request);
         if (!hasListener) {
@@ -115,7 +137,7 @@ void main() {
   });
 
   test('stream() emits data', () {
-    final stream = client.from('todos').stream();
+    final stream = client.from('todos').stream().execute();
     expect(
         stream,
         emitsInOrder([
@@ -132,7 +154,7 @@ void main() {
   });
 
   test('Can filter stream results with eq', () {
-    final stream = client.from('todos:status=eq.true').stream();
+    final stream = client.from('todos:status=eq.true').stream().execute();
     expect(
         stream,
         emitsInOrder([
@@ -142,6 +164,39 @@ void main() {
           containsAllInOrder([
             {'id': 1, 'task': 'task 1', 'status': true},
             {'id': 3, 'task': 'task 3', 'status': true},
+          ]),
+        ]));
+  });
+
+  test('stream() with order', () {
+    final stream = client.from('todos').stream().order('id').execute();
+    expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+        ]));
+  });
+
+  test('stream() with limit', () {
+    final stream = client.from('todos').stream().order('id').limit(2).execute();
+    expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false},
           ]),
         ]));
   });

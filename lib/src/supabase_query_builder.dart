@@ -44,7 +44,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// `eq`, `orderBy`, `limit` filter are available to limit the data being queried.
   ///
   /// ```dart
-  /// supabase.from('chats').eq('room_id', 123).orderBy('created_at').limit(100).stream().listen(_onChatsReceived);
+  /// supabase.from('chats:room_id=eq.123').orderBy('created_at').limit(20).stream().listen(_onChatsReceived);
   /// ```
   ///
   SupabaseStreamBuilder stream() {
