@@ -5,7 +5,7 @@ A Dart client for [Supabase](https://supabase.io/).
 [![pub package](https://img.shields.io/pub/v/supabase.svg)](https://pub.dev/packages/supabase)
 [![pub test](https://github.com/supabase/supabase-dart/workflows/Test/badge.svg)](https://github.com/supabase/supabase-dart/actions?query=workflow%3ATest)
 
-***
+---
 
 ## What is Supabase
 
@@ -26,10 +26,9 @@ A Dart client for [Supabase](https://supabase.io/).
 
 ## Docs
 
-`supabase-dart` mirrors the design of `supabase-js`. Find the  documentation [here](https://supabase.io/docs/reference/javascript/initializing).
+`supabase-dart` mirrors the design of `supabase-js`. Find the documentation [here](https://supabase.io/docs/reference/javascript/initializing).
 
 ## Usage example
-
 
 ### [Database](https://supabase.io/docs/guides/database)
 
@@ -38,7 +37,7 @@ import 'package:supabase/supabase.dart';
 
 main() {
   final client = SupabaseClient('supabaseUrl', 'supabaseKey');
-  
+
   // Select from table `countries` ordering by `name`
   final response = await client
       .from('countries')
@@ -48,7 +47,6 @@ main() {
 }
 ```
 
-
 ### [Realtime](https://supabase.io/docs/guides/database#realtime)
 
 ```dart
@@ -56,7 +54,7 @@ import 'package:supabase/supabase.dart';
 
 main() {
   final client = SupabaseClient('supabaseUrl', 'supabaseKey');
-  
+
   // Set up a listener to listen to changes in `countries` table
   final subscription = await client
       .from('countries')
@@ -70,6 +68,27 @@ main() {
 }
 ```
 
+### Realtime data as `Stream`
+
+```dart
+import 'package:supabase/supabase.dart';
+
+main() {
+  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+
+  // Set up a listener to listen to changes in `countries` table
+  final subscription = await client
+      .from('countries')
+      .stream()
+      .order('name')
+      .limit(30)
+      .execute()
+      .listen(_handleCountriesStream);
+
+  // remember to remove subscription when you're done
+  subscription.cancel();
+}
+```
 
 ### [Authentication](https://supabase.io/docs/guides/auth)
 
@@ -86,7 +105,6 @@ main() {
 }
 ```
 
-
 ### [Storage](https://supabase.io/docs/guides/storage)
 
 ```dart
@@ -94,7 +112,7 @@ import 'package:supabase/supabase.dart';
 
 main() {
   final client = SupabaseClient('supabaseUrl', 'supabaseKey');
-  
+
   // Create file `example.txt` and upload it in `public` bucket
   final file = File('example.txt');
   file.writeAsStringSync('File content');
@@ -105,21 +123,22 @@ main() {
 }
 ```
 
-
 ## Authentication
 
 Initialize a [`SupabaseClient`](https://pub.dev/documentation/supabase/latest/supabase/SupabaseClient-class.html) by passing your **Supabase URL** and **Supabase KEY**. The keys can be found in your supabase project in `/setting/API`.
+
 ```dart
 final client = SupabaseClient('supabaseUrl', 'supabaseKey');
 ```
-The `client` has a [`auth`](https://pub.dev/documentation/supabase/latest/supabase/SupabaseClient/auth.html) attribute (of type [`GoTrueClient`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient-class.html)) that you can use to authenticate your users using supabase.
 
+The `client` has a [`auth`](https://pub.dev/documentation/supabase/latest/supabase/SupabaseClient/auth.html) attribute (of type [`GoTrueClient`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient-class.html)) that you can use to authenticate your users using supabase.
 
 ### Sign up
 
 Use the [`signUp`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient/signUp.html) method, which returns a [`GotrueSessionResponse`](https://github.com/supabase/gotrue-dart/blob/7e58474b444e7d9ea303d11dd058d07f68b3d781/lib/src/gotrue_response.dart#L19).
 
-If the `error` attribute is `null`, the request was successful and the method returns `data` of type [`Session`](https://pub.dev/documentation/gotrue/latest/gotrue/Session-class.html). 
+If the `error` attribute is `null`, the request was successful and the method returns `data` of type [`Session`](https://pub.dev/documentation/gotrue/latest/gotrue/Session-class.html).
+
 ```dart
 // Sign up user with email and password
 final response = await client.auth.signUp('email', 'password');
@@ -133,10 +152,10 @@ if (response.error != null) {
 }
 ```
 
-
 ### Sign in
 
 Use the [`signIn`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient/signIn.html) method. It works similar to the `signUp` method.
+
 ```dart
 // Sign in user with email and password
 final response = await client.auth.signIn(email: 'email', password: 'password');
@@ -150,12 +169,12 @@ if (response.error != null) {
 }
 ```
 
-
 ### Sign out
 
 Use the [`signOut`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient/signOut.html) method, which returns a [`GotrueResponse`](https://github.com/supabase/gotrue-dart/blob/7e58474b444e7d9ea303d11dd058d07f68b3d781/lib/src/gotrue_response.dart#L6).
 
 Also for the sign out check that `error` is `null` to know if the request was successful.
+
 ```dart
 // Sign out user
 final response = await client.auth.signOut();
@@ -168,14 +187,11 @@ if (response.error != null) {
 }
 ```
 
-
 Check out the [**Official Documentation**](https://pub.dev/documentation/gotrue/latest/gotrue/gotrue-library.html) to learn all the other available methods.
-
 
 ## Guides
 
 - Flutter Supabase Authentication - [Blog](https://www.sandromaglione.com/2021/04/24/flutter-supabase-authentication/)
-
 
 ## Contributing
 
@@ -184,7 +200,6 @@ Check out the [**Official Documentation**](https://pub.dev/documentation/gotrue/
 - Commit changes to your own branch
 - Push your work back up to your fork
 - Submit a Pull request so that we can review your changes and merge
-
 
 ## License
 
