@@ -80,7 +80,10 @@ class SupabaseStreamBuilder {
   /// Sends the request and returns a Stream.
   Stream<List<Map<String, dynamic>>> execute() {
     _streamController = StreamController.broadcast(onCancel: () {
-      _supabaseRealtimeClient.unsubscribe();
+      if (!_streamController.hasListener) {
+        _supabaseRealtimeClient.unsubscribe();
+        _streamController.close();
+      }
     });
     _getStreamData();
     return _streamController.stream;
