@@ -1,3 +1,8 @@
+## [0.0.8]
+
+- chore: update postgrest to v0.1.5
+- chore: update storage_client to v0.0.4
+
 ## [0.0.7]
 
 - chore: update realtime_client to v0.1.7
