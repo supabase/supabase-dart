@@ -1,3 +1,8 @@
+## [0.1.0]
+
+- chore: update gotrue to v0.1.0
+- feat: add phone auth
+
 ## [0.0.8]
 
 - chore: update postgrest to v0.1.5
