@@ -1,3 +1,7 @@
+## [0.2.0]
+
+- feat: added `stream()` method to listen to realtime updates as stream
+
 ## [0.1.0]
 
 - chore: update gotrue to v0.1.0
