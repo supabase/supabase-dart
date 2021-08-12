@@ -4,6 +4,7 @@ import 'package:gotrue/gotrue.dart';
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
+import 'package:supabase/src/supabase_stream_builder.dart';
 
 import 'supabase_query_builder.dart';
 
@@ -36,13 +37,24 @@ class SupabaseClient {
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
-    final url = '$restUrl/$table';
+    late final String url;
+    StreamPostgrestFilter? streamFilter;
+    if (RegExp(r'^.*:.*\=eq\..*$').hasMatch(table)) {
+      final tableName = table.split(':').first;
+      url = '$restUrl/$tableName';
+      final colVals = table.split(':').last.split('=eq.');
+      streamFilter =
+          StreamPostgrestFilter(column: colVals.first, value: colVals.last);
+    } else {
+      url = '$restUrl/$table';
+    }
     return SupabaseQueryBuilder(
       url,
       realtime,
       headers: _getAuthHeaders(),
       schema: schema,
       table: table,
+      streamFilter: streamFilter,
     );
   }
 

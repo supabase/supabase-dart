@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:supabase/supabase.dart';
@@ -59,6 +60,20 @@ Future<void> main() async {
   // remember to remove subscription
   client.removeSubscription(subscription1);
   client.removeSubscription(subscription2);
+
+  // stream
+  final streamSubscription = client
+      .from('countries')
+      .stream()
+      .order('name')
+      .limit(10)
+      .execute()
+      .listen((snapshot) {
+    print('snapshot: $snapshot');
+  });
+
+  // remember to remove subscription
+  streamSubscription.cancel();
 
   // Upload file to bucket "public"
   final file = File('example.txt');
