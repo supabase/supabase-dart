@@ -1,3 +1,7 @@
+## [0.2.1]
+
+- chore: update realtime_client to v0.1.8
+
 ## [0.2.0]
 
 - feat: added `stream()` method to listen to realtime updates as stream
