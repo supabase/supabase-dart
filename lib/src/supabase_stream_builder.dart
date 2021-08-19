@@ -104,7 +104,7 @@ class SupabaseStreamBuilder {
           if (updatedIndex >= 0) {
             _streamData[updatedIndex] = payload.newRecord!;
           } else {
-            _streamController.addError('Could not find the updated record.');
+            _addError('Could not find the updated record.');
           }
           break;
         case 'DELETE':
@@ -113,16 +113,11 @@ class SupabaseStreamBuilder {
           if (deletedIndex >= 0) {
             _streamData.removeAt(deletedIndex);
           } else {
-            _streamController.addError('Could not find the deleted record.');
+            _addError('Could not find the deleted record.');
           }
           break;
       }
-      if (_orderBy != null) {
-        _sortData();
-      }
-      final emitData =
-          (_limit != null ? _streamData.take(_limit!) : _streamData).toList();
-      _streamController.sink.add(emitData);
+      _addStream();
     }).subscribe();
 
     PostgrestFilterBuilder query = _queryBuilder.select();
@@ -140,12 +135,13 @@ class SupabaseStreamBuilder {
 
     final res = await (transformQuery ?? query).execute();
     if (res.error != null) {
-      _streamController.sink.addError(res.error!.message);
+      _addError(res.error!.message);
+
       return;
     }
     final data = List<Map<String, dynamic>>.from(res.data as List);
     _streamData.addAll(data);
-    _streamController.sink.add(_streamData);
+    _addStream();
   }
 
   static bool _isTargetRecord({
@@ -182,5 +178,24 @@ class SupabaseStreamBuilder {
         return 0;
       }
     });
+  }
+
+  /// Will add new data to the stream if streamController is not closed
+  void _addStream() {
+    if (_orderBy != null) {
+      _sortData();
+    }
+    if (!_streamController.isClosed) {
+      final emitData =
+          (_limit != null ? _streamData.take(_limit!) : _streamData).toList();
+      _streamController.add(emitData);
+    }
+  }
+
+  /// Will add error to the stream if streamController is not closed
+  void _addError(String message) {
+    if (!_streamController.isClosed) {
+      _streamController.addError(message);
+    }
   }
 }
