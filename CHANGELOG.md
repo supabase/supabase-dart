@@ -1,3 +1,7 @@
+## [0.2.2]
+
+- fix: bug where `stream()` tries to emit data when `StreamController` is closed
+
 ## [0.2.1]
 
 - chore: update realtime_client to v0.1.8
