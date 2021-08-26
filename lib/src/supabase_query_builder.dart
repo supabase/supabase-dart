@@ -1,12 +1,9 @@
 import 'package:postgrest/postgrest.dart';
-import 'package:realtime_client/realtime_client.dart';
+import 'package:realtime_client/realtime_client.dart' hide Callback;
 import 'package:supabase/src/supabase_stream_builder.dart';
 
 import 'supabase_event_types.dart';
 import 'supabase_realtime_client.dart';
-import 'supabase_realtime_payload.dart';
-
-typedef Callback = void Function(SupabaseRealtimePayload payload);
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   late final SupabaseRealtimeClient _subscription;
