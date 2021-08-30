@@ -12,3 +12,4 @@ export 'src/auth_session.dart';
 export 'src/auth_user.dart';
 export 'src/supabase.dart';
 export 'src/supabase_event_types.dart';
+export 'src/supabase_query_builder.dart';

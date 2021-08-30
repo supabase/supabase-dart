@@ -3,8 +3,6 @@ import 'package:realtime_client/realtime_client.dart';
 import 'supabase_event_types.dart';
 import 'supabase_realtime_payload.dart';
 
-typedef Callback = void Function(SupabaseRealtimePayload payload);
-
 typedef SubscribeCallback = void Function(String event, {String? errorMsg});
 
 class SupabaseRealtimeClient {
@@ -18,7 +16,8 @@ class SupabaseRealtimeClient {
   }
 
   /// The event you want to listen to.
-  SupabaseRealtimeClient on(SupabaseEventTypes event, Callback callback) {
+  SupabaseRealtimeClient on(SupabaseEventTypes event,
+      void Function(SupabaseRealtimePayload payload) callback) {
     subscription.on(event.name(), (payload, {ref}) {
       if (payload is Map) {
         final json = payload as Map<String, dynamic>;
