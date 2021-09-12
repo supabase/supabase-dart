@@ -1,13 +1,13 @@
 import 'package:gotrue/gotrue.dart' show Session, User;
 
 class AuthSession extends Session {
-  AuthSession(
-      {required String accessToken,
-      int? expiresIn,
-      String? refreshToken,
-      String? tokenType,
-      User? user})
-      : super(
+  AuthSession({
+    required String accessToken,
+    int? expiresIn,
+    String? refreshToken,
+    String? tokenType,
+    User? user,
+  }) : super(
           accessToken: accessToken,
           expiresIn: expiresIn,
           refreshToken: refreshToken,

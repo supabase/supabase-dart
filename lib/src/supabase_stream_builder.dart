@@ -79,12 +79,14 @@ class SupabaseStreamBuilder {
 
   /// Sends the request and returns a Stream.
   Stream<List<Map<String, dynamic>>> execute() {
-    _streamController = StreamController.broadcast(onCancel: () {
-      if (!_streamController.hasListener) {
-        _supabaseRealtimeClient.unsubscribe();
-        _streamController.close();
-      }
-    });
+    _streamController = StreamController.broadcast(
+      onCancel: () {
+        if (!_streamController.hasListener) {
+          _supabaseRealtimeClient.unsubscribe();
+          _streamController.close();
+        }
+      },
+    );
     _getStreamData();
     return _streamController.stream;
   }
@@ -100,7 +102,8 @@ class SupabaseStreamBuilder {
           break;
         case 'UPDATE':
           final updatedIndex = _streamData.indexWhere(
-              (element) => _isTargetRecord(record: element, payload: payload));
+            (element) => _isTargetRecord(record: element, payload: payload),
+          );
           if (updatedIndex >= 0) {
             _streamData[updatedIndex] = payload.newRecord!;
           } else {
@@ -109,7 +112,8 @@ class SupabaseStreamBuilder {
           break;
         case 'DELETE':
           final deletedIndex = _streamData.indexWhere(
-              (element) => _isTargetRecord(record: element, payload: payload));
+            (element) => _isTargetRecord(record: element, payload: payload),
+          );
           if (deletedIndex >= 0) {
             _streamData.removeAt(deletedIndex);
           } else {
