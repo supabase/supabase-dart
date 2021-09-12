@@ -1,3 +1,11 @@
+## [0.2.6]
+
+- chore: add `X-Client-Info` header
+- chore: update gotrue to v0.1.1
+- chore: update postgrest to v0.1.7
+- chore: update realtime_client to v0.1.11
+- chore: update storage_client to v0.0.5
+
 ## [0.2.5]
 
 - chore: update realtime_client to v0.1.10
