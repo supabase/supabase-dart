@@ -20,9 +20,12 @@ class SupabaseClient {
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
 
-  SupabaseClient(this.supabaseUrl, this.supabaseKey,
-      {String? schema, bool autoRefreshToken = true})
-      : restUrl = '$supabaseUrl/rest/v1',
+  SupabaseClient(
+    this.supabaseUrl,
+    this.supabaseKey, {
+    String? schema,
+    bool autoRefreshToken = true,
+  })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
         storageUrl = '$supabaseUrl/storage/v1',
@@ -85,12 +88,13 @@ class SupabaseClient {
 
   GoTrueClient _initSupabaseAuthClient({bool? autoRefreshToken}) {
     return GoTrueClient(
-        url: authUrl,
-        headers: {
-          'Authorization': 'Bearer $supabaseKey',
-          'apikey': supabaseKey,
-        },
-        autoRefreshToken: autoRefreshToken);
+      url: authUrl,
+      headers: {
+        'Authorization': 'Bearer $supabaseKey',
+        'apikey': supabaseKey,
+      },
+      autoRefreshToken: autoRefreshToken,
+    );
   }
 
   RealtimeClient _initRealtimeClient() {
