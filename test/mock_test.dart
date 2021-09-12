@@ -120,7 +120,9 @@ void main() {
   setUp(() async {
     mockServer = await HttpServer.bind('localhost', 0);
     client = SupabaseClient(
-        'http://${mockServer.address.host}:${mockServer.port}', 'supabaseKey');
+      'http://${mockServer.address.host}:${mockServer.port}',
+      'supabaseKey',
+    );
     handleRequests(mockServer);
     hasListener = false;
     hasSentData = false;
@@ -139,65 +141,69 @@ void main() {
   test('stream() emits data', () {
     final stream = client.from('todos').stream().execute();
     expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false}
-          ]),
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 3, 'task': 'task 3', 'status': true},
-          ]),
-        ]));
+      stream,
+      emitsInOrder([
+        containsAllInOrder([
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false}
+        ]),
+        containsAllInOrder([
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false},
+          {'id': 3, 'task': 'task 3', 'status': true},
+        ]),
+      ]),
+    );
   });
 
   test('Can filter stream results with eq', () {
     final stream = client.from('todos:status=eq.true').stream().execute();
     expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 3, 'task': 'task 3', 'status': true},
-          ]),
-        ]));
+      stream,
+      emitsInOrder([
+        containsAllInOrder([
+          {'id': 1, 'task': 'task 1', 'status': true},
+        ]),
+        containsAllInOrder([
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 3, 'task': 'task 3', 'status': true},
+        ]),
+      ]),
+    );
   });
 
   test('stream() with order', () {
     final stream = client.from('todos').stream().order('id').execute();
     expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-        ]));
+      stream,
+      emitsInOrder([
+        containsAllInOrder([
+          {'id': 2, 'task': 'task 2', 'status': false},
+          {'id': 1, 'task': 'task 1', 'status': true},
+        ]),
+        containsAllInOrder([
+          {'id': 3, 'task': 'task 3', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false},
+          {'id': 1, 'task': 'task 1', 'status': true},
+        ]),
+      ]),
+    );
   });
 
   test('stream() with limit', () {
     final stream = client.from('todos').stream().order('id').limit(2).execute();
     expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-          ]),
-        ]));
+      stream,
+      emitsInOrder([
+        containsAllInOrder([
+          {'id': 2, 'task': 'task 2', 'status': false},
+          {'id': 1, 'task': 'task 1', 'status': true},
+        ]),
+        containsAllInOrder([
+          {'id': 3, 'task': 'task 3', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false},
+        ]),
+      ]),
+    );
   });
 }
