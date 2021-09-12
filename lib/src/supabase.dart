@@ -17,10 +17,10 @@ class SupabaseClient {
   final String realtimeUrl;
   final String authUrl;
   final String storageUrl;
+  final Map<String, String> _headers;
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
-  late final Map<String, String> _headers;
 
   SupabaseClient(
     this.supabaseUrl,
