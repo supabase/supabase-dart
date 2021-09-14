@@ -4,6 +4,7 @@ import 'package:gotrue/gotrue.dart';
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
+import 'package:supabase/src/constants.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 
 import 'supabase_query_builder.dart';
@@ -16,6 +17,7 @@ class SupabaseClient {
   final String realtimeUrl;
   final String authUrl;
   final String storageUrl;
+  final Map<String, String> _headers;
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
@@ -25,13 +27,18 @@ class SupabaseClient {
     this.supabaseKey, {
     String? schema,
     bool autoRefreshToken = true,
+    Map<String, String> headers = Constants.defaultHeaders,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
         storageUrl = '$supabaseUrl/storage/v1',
-        schema = schema ?? 'public' {
-    auth = _initSupabaseAuthClient(autoRefreshToken: autoRefreshToken);
-    realtime = _initRealtimeClient();
+        schema = schema ?? 'public',
+        _headers = headers {
+    auth = _initSupabaseAuthClient(
+      autoRefreshToken: autoRefreshToken,
+      headers: headers,
+    );
+    realtime = _initRealtimeClient(headers: headers);
   }
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
@@ -42,6 +49,8 @@ class SupabaseClient {
   SupabaseQueryBuilder from(String table) {
     late final String url;
     StreamPostgrestFilter? streamFilter;
+
+    /// Check whether there is realtime filter or not
     if (RegExp(r'^.*:.*\=eq\..*$').hasMatch(table)) {
       final tableName = table.split(':').first;
       url = '$restUrl/$tableName';
@@ -86,19 +95,29 @@ class SupabaseClient {
     return realtime.channels;
   }
 
-  GoTrueClient _initSupabaseAuthClient({bool? autoRefreshToken}) {
+  GoTrueClient _initSupabaseAuthClient({
+    bool? autoRefreshToken,
+    required Map<String, String> headers,
+  }) {
+    final authHeaders = {...headers};
+    authHeaders['apikey'] = supabaseKey;
+    authHeaders['Authorization'] = 'Bearer $supabaseKey';
+
     return GoTrueClient(
       url: authUrl,
-      headers: {
-        'Authorization': 'Bearer $supabaseKey',
-        'apikey': supabaseKey,
-      },
+      headers: authHeaders,
       autoRefreshToken: autoRefreshToken,
     );
   }
 
-  RealtimeClient _initRealtimeClient() {
-    return RealtimeClient(realtimeUrl, params: {'apikey': supabaseKey});
+  RealtimeClient _initRealtimeClient({
+    required Map<String, String> headers,
+  }) {
+    return RealtimeClient(
+      realtimeUrl,
+      params: {'apikey': supabaseKey},
+      headers: headers,
+    );
   }
 
   PostgrestClient _initPostgRESTClient() {
@@ -116,7 +135,7 @@ class SupabaseClient {
   }
 
   Map<String, String> _getAuthHeaders() {
-    final Map<String, String> headers = {};
+    final headers = {..._headers};
     final authBearer = auth.session()?.accessToken ?? supabaseKey;
     headers['apikey'] = supabaseKey;
     headers['Authorization'] = 'Bearer $authBearer';
