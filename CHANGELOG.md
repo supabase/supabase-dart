@@ -1,3 +1,7 @@
+## [0.2.7]
+
+- chore: update postgrest to v0.1.8
+
 ## [0.2.6]
 
 - chore: add `X-Client-Info` header
