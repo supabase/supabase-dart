@@ -1,3 +1,8 @@
+## [0.2.8]
+
+- chore: update gotrue to v0.1.2
+- chore: update storage_client to v0.0.6
+
 ## [0.2.7]
 
 - chore: update postgrest to v0.1.8
