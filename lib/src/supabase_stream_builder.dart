@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:realtime_client/realtime_client.dart';
-import 'package:supabase/src/supabase_query_builder.dart';
 import 'package:supabase/src/supabase_realtime_payload.dart';
 
 import '../supabase.dart';

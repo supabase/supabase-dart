@@ -2,6 +2,7 @@
 
 - chore: update gotrue to v0.1.2
 - chore: update storage_client to v0.0.6
+- fix: cleanup imports in `supabase_stream_builder` to remove analysis error
 
 ## [0.2.7]
 
