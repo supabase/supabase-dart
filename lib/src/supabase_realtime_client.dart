@@ -10,12 +10,18 @@ class SupabaseRealtimeClient {
 
   SupabaseRealtimeClient(
     RealtimeClient socket,
+    Map<String, String> headers,
     String schema,
     String tableName,
   ) {
+    final chanParams = <String, String>{};
     final topic =
         tableName == '*' ? 'realtime:$schema' : 'realtime:$schema:$tableName';
-    subscription = socket.channel(topic);
+    final userToken = headers['Authorization']?.split(' ')[1];
+    if (userToken != null) {
+      chanParams['user_token'] = userToken;
+    }
+    subscription = socket.channel(topic, chanParams: chanParams);
   }
 
   /// The event you want to listen to.

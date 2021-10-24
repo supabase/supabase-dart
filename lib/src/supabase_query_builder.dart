@@ -19,8 +19,12 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     required String? table,
     required StreamPostgrestFilter? streamFilter,
   }) : super(url, headers: headers, schema: schema) {
-    _subscription =
-        SupabaseRealtimeClient(realtime, schema ?? 'public', table ?? '*');
+    _subscription = SupabaseRealtimeClient(
+      realtime,
+      headers,
+      schema ?? 'public',
+      table ?? '*',
+    );
     _realtime = realtime;
     _streamFilter = streamFilter;
   }
