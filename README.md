@@ -70,7 +70,7 @@ main() {
 
 ### Realtime data as `Stream`
 
-To receive relatime updates, you have to first enable Realtime on from your Supabase console. You can read more [here](https://supabase.io/docs/guides/api#managing-realtime) on how to enable it.
+To receive realtime updates, you have to first enable Realtime on from your Supabase console. You can read more [here](https://supabase.io/docs/guides/api#managing-realtime) on how to enable it.
 
 ```dart
 import 'package:supabase/supabase.dart';
