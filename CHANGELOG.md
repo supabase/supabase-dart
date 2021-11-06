@@ -1,3 +1,8 @@
+## [0.2.9]
+
+- feat: add user_token when creating realtime channel subscription
+- fix: typo on Realtime data as Stream on readme.md
+
 ## [0.2.8]
 
 - chore: update gotrue to v0.1.2
