@@ -1,3 +1,7 @@
+## [0.2.10]
+
+- fix: type 'Null' is not a subtype of type 'List<dynamic>' in type cast
+
 ## [0.2.9]
 
 - feat: add user_token when creating realtime channel subscription
