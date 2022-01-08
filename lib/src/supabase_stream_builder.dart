@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:supabase/src/supabase_realtime_payload.dart';
-
-import '../supabase.dart';
+import 'package:supabase/supabase.dart';
 
 class StreamPostgrestFilter {
   StreamPostgrestFilter({
@@ -63,7 +62,7 @@ class SupabaseStreamBuilder {
   /// When `ascending` value is true, the result will be in ascending order.
   ///
   /// ```dart
-  /// supabase.from('users').stream('id).order('username', ascending: false);
+  /// supabase.from('users').stream('id').order('username', ascending: false);
   /// ```
   SupabaseStreamBuilder order(String column, {bool ascending = false}) {
     _orderBy = _Order(column: column, ascending: ascending);

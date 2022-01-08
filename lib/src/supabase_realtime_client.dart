@@ -1,7 +1,6 @@
 import 'package:realtime_client/realtime_client.dart';
-
-import 'supabase_event_types.dart';
-import 'supabase_realtime_payload.dart';
+import 'package:supabase/src/supabase_event_types.dart';
+import 'package:supabase/src/supabase_realtime_payload.dart';
 
 typedef SubscribeCallback = void Function(String event, {String? errorMsg});
 

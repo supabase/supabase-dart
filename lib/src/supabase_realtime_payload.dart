@@ -39,8 +39,13 @@ class SupabaseRealtimePayload {
     final commitTimestamp = json['commit_timestamp'] as String;
     final eventType = json['type'] as String;
     final primaryKeys = (json['columns'] as List)
-        .where((e) => (e['flags'] as List?)?.contains('key') == true)
-        .map((e) => e['name'] as String)
+        .where(
+          (e) =>
+              ((e as Map<String, dynamic>)['flags'] as List?)
+                  ?.contains('key') ==
+              true,
+        )
+        .map((e) => (e as Map<String, dynamic>)['name'] as String)
         .toList();
     Map<String, dynamic>? newRecord;
     if (json['type'] == 'INSERT' || json['type'] == 'UPDATE') {
