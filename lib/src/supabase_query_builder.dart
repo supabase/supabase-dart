@@ -1,10 +1,9 @@
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
+import 'package:supabase/src/supabase_event_types.dart';
+import 'package:supabase/src/supabase_realtime_client.dart';
 import 'package:supabase/src/supabase_realtime_payload.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
-
-import 'supabase_event_types.dart';
-import 'supabase_realtime_client.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   late final SupabaseRealtimeClient _subscription;
@@ -46,10 +45,10 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// supabase.from('chats').stream().execute().listen(_onChatsReceived);
   /// ```
   ///
-  /// `eq`, `orderBy`, `limit` filter are available to limit the data being queried.
+  /// `eq`, `order`, `limit` filter are available to limit the data being queried.
   ///
   /// ```dart
-  /// supabase.from('chats:room_id=eq.123').orderBy('created_at').limit(20).stream().listen(_onChatsReceived);
+  /// supabase.from('chats:room_id=eq.123').stream().order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
   ///
   SupabaseStreamBuilder stream() {
