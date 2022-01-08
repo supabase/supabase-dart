@@ -71,7 +71,7 @@ void main() {
           hasListener = true;
           webSocket!.listen((request) async {
             if (!hasSentData) {
-              final topic = jsonDecode(request as String)['topic'];
+              final topic = (jsonDecode(request as String) as Map)['topic'];
               final jsonString = jsonEncode({
                 'topic': topic,
                 'event': 'INSERT',
@@ -135,7 +135,7 @@ void main() {
 
   test('test mock server', () async {
     final res = await client.from('todos').select('task, status').execute();
-    expect(res.data.length, 2);
+    expect((res.data as List).length, 2);
   });
 
   test('stream() emits data', () {

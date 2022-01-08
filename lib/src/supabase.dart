@@ -5,9 +5,8 @@ import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
+import 'package:supabase/src/supabase_query_builder.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
-
-import 'supabase_query_builder.dart';
 
 class SupabaseClient {
   final String supabaseUrl;
