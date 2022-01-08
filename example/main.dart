@@ -64,7 +64,7 @@ Future<void> main() async {
   // stream
   final streamSubscription = client
       .from('countries')
-      .stream()
+      .stream('id')
       .order('name')
       .limit(10)
       .execute()

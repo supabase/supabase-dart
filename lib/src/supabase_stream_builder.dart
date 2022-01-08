@@ -41,11 +41,16 @@ class SupabaseStreamBuilder {
   /// `eq` filter used for both postgrest and realtime
   late final StreamPostgrestFilter? _streamFilter;
 
+  /// Used to identify which row has changed
+  final String _primaryKey;
+
   SupabaseStreamBuilder(
     SupabaseQueryBuilder queryBuilder, {
     required StreamPostgrestFilter? streamFilter,
+    required String primaryKey,
   })  : _queryBuilder = queryBuilder,
-        _streamFilter = streamFilter;
+        _streamFilter = streamFilter,
+        _primaryKey = primaryKey;
 
   /// Which column to order by and whether it's ascending
   _Order? _orderBy;
@@ -58,7 +63,7 @@ class SupabaseStreamBuilder {
   /// When `ascending` value is true, the result will be in ascending order.
   ///
   /// ```dart
-  /// supabase.from('users').stream().order('username', ascending: false);
+  /// supabase.from('users').stream('id).order('username', ascending: false);
   /// ```
   SupabaseStreamBuilder order(String column, {bool ascending = false}) {
     _orderBy = _Order(column: column, ascending: ascending);
@@ -68,7 +73,7 @@ class SupabaseStreamBuilder {
   /// Limits the result with the specified `count`.
   ///
   /// ```dart
-  /// supabase.from('users').stream().limit(10);
+  /// supabase.from('users').stream('id).limit(10);
   /// ```
   SupabaseStreamBuilder limit(int count) {
     _limit = count;
@@ -146,7 +151,7 @@ class SupabaseStreamBuilder {
     _addStream();
   }
 
-  static bool _isTargetRecord({
+  bool _isTargetRecord({
     required Map<String, dynamic> record,
     required SupabaseRealtimePayload payload,
   }) {
@@ -157,13 +162,7 @@ class SupabaseStreamBuilder {
       targetRecord = payload.oldRecord!;
     }
 
-    bool isTarget = true;
-    for (final primaryKey in payload.primaryKeys) {
-      if (record[primaryKey] != targetRecord[primaryKey]) {
-        isTarget = false;
-      }
-    }
-    return isTarget;
+    return record[_primaryKey] == targetRecord[_primaryKey];
   }
 
   void _sortData() {
