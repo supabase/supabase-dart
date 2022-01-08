@@ -64,13 +64,13 @@ Future<void> main() async {
   // stream
   final streamSubscription = client
       .from('countries')
-      .stream('id')
+      .stream(['id'])
       .order('name')
       .limit(10)
       .execute()
       .listen((snapshot) {
-    print('snapshot: $snapshot');
-  });
+        print('snapshot: $snapshot');
+      });
 
   // remember to remove subscription
   streamSubscription.cancel();

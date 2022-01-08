@@ -136,7 +136,7 @@ void main() {
   });
 
   test('stream() emits data', () {
-    final stream = client.from('todos').stream('id').execute();
+    final stream = client.from('todos').stream(['id']).execute();
     expect(
       stream,
       emitsInOrder([
@@ -154,7 +154,7 @@ void main() {
   });
 
   test('Can filter stream results with eq', () {
-    final stream = client.from('todos:status=eq.true').stream('id').execute();
+    final stream = client.from('todos:status=eq.true').stream(['id']).execute();
     expect(
       stream,
       emitsInOrder([
@@ -170,7 +170,7 @@ void main() {
   });
 
   test('stream() with order', () {
-    final stream = client.from('todos').stream('id').order('id').execute();
+    final stream = client.from('todos').stream(['id']).order('id').execute();
     expect(
       stream,
       emitsInOrder([
@@ -189,7 +189,7 @@ void main() {
 
   test('stream() with limit', () {
     final stream =
-        client.from('todos').stream('id').order('id').limit(2).execute();
+        client.from('todos').stream(['id']).order('id').limit(2).execute();
     expect(
       stream,
       emitsInOrder([

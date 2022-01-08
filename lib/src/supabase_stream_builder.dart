@@ -41,15 +41,15 @@ class SupabaseStreamBuilder {
   late final StreamPostgrestFilter? _streamFilter;
 
   /// Used to identify which row has changed
-  final String _primaryKey;
+  final List<String> _uniqueColumns;
 
   SupabaseStreamBuilder(
     SupabaseQueryBuilder queryBuilder, {
     required StreamPostgrestFilter? streamFilter,
-    required String primaryKey,
+    required List<String> uniqueColumns,
   })  : _queryBuilder = queryBuilder,
         _streamFilter = streamFilter,
-        _primaryKey = primaryKey;
+        _uniqueColumns = uniqueColumns;
 
   /// Which column to order by and whether it's ascending
   _Order? _orderBy;
@@ -72,7 +72,7 @@ class SupabaseStreamBuilder {
   /// Limits the result with the specified `count`.
   ///
   /// ```dart
-  /// supabase.from('users').stream('id).limit(10);
+  /// supabase.from('users').stream('id').limit(10);
   /// ```
   SupabaseStreamBuilder limit(int count) {
     _limit = count;
@@ -160,8 +160,8 @@ class SupabaseStreamBuilder {
     } else if (payload.eventType == 'DELETE') {
       targetRecord = payload.oldRecord!;
     }
-
-    return record[_primaryKey] == targetRecord[_primaryKey];
+    return _uniqueColumns
+        .every((column) => record[column] == targetRecord[column]);
   }
 
   void _sortData() {
