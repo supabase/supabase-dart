@@ -44,13 +44,13 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// [uniqueColumns] can be either the primary key or a combination of unique columns.
   ///
   /// ```dart
-  /// supabase.from('chats').stream('my_primary_key').execute().listen(_onChatsReceived);
+  /// supabase.from('chats').stream(['my_primary_key']).execute().listen(_onChatsReceived);
   /// ```
   ///
   /// `eq`, `order`, `limit` filter are available to limit the data being queried.
   ///
   /// ```dart
-  /// supabase.from('chats:room_id=eq.123').stream('my_primary_key').order('created_at').limit(20).execute().listen(_onChatsReceived);
+  /// supabase.from('chats:room_id=eq.123').stream(['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream(List<String> uniqueColumns) {
     return SupabaseStreamBuilder(
