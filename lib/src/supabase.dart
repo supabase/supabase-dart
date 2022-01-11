@@ -20,7 +20,7 @@ class SupabaseClient {
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
-  late String? changedAccessToken;
+  String? changedAccessToken;
 
   SupabaseClient(
     this.supabaseUrl,
