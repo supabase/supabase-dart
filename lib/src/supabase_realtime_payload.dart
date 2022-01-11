@@ -15,6 +15,9 @@ class SupabaseRealtimePayload {
   final Map<String, dynamic>? oldRecord;
 
   /// List of columns that are set as primary key
+  @Deprecated(
+    "The new RLS real-time server no longer sends the required data",
+  )
   final List<String> primaryKeys;
 
   SupabaseRealtimePayload({
@@ -24,7 +27,10 @@ class SupabaseRealtimePayload {
     required this.table,
     required this.newRecord,
     required this.oldRecord,
-    required this.primaryKeys,
+    @Deprecated(
+      "The new RLS real-time server no longer sends the required data",
+    )
+        required this.primaryKeys,
   });
 
   factory SupabaseRealtimePayload.fromJson(Map<String, dynamic> json) {
@@ -60,6 +66,7 @@ class SupabaseRealtimePayload {
       eventType: eventType,
       newRecord: newRecord,
       oldRecord: oldRecord,
+      // ignore: deprecated_member_use_from_same_package
       primaryKeys: primaryKeys,
     );
   }

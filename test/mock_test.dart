@@ -84,19 +84,16 @@ void main() {
                   'type': 'INSERT',
                   'columns': [
                     {
-                      'flags': ['key'],
                       'name': 'id',
                       'type': 'int4',
-                      'type_modifier': 4294967295
+                      'type_modifier': 4294967295,
                     },
                     {
-                      'flags': [],
                       'name': 'task',
                       'type': 'text',
                       'type_modifier': 4294967295
                     },
                     {
-                      'flags': [],
                       'name': 'status',
                       'type': 'bool',
                       'type_modifier': 4294967295
@@ -139,7 +136,7 @@ void main() {
   });
 
   test('stream() emits data', () {
-    final stream = client.from('todos').stream().execute();
+    final stream = client.from('todos').stream(['id']).execute();
     expect(
       stream,
       emitsInOrder([
@@ -157,7 +154,7 @@ void main() {
   });
 
   test('Can filter stream results with eq', () {
-    final stream = client.from('todos:status=eq.true').stream().execute();
+    final stream = client.from('todos:status=eq.true').stream(['id']).execute();
     expect(
       stream,
       emitsInOrder([
@@ -173,7 +170,7 @@ void main() {
   });
 
   test('stream() with order', () {
-    final stream = client.from('todos').stream().order('id').execute();
+    final stream = client.from('todos').stream(['id']).order('id').execute();
     expect(
       stream,
       emitsInOrder([
@@ -191,7 +188,8 @@ void main() {
   });
 
   test('stream() with limit', () {
-    final stream = client.from('todos').stream().order('id').limit(2).execute();
+    final stream =
+        client.from('todos').stream(['id']).order('id').limit(2).execute();
     expect(
       stream,
       emitsInOrder([
