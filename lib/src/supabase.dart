@@ -20,6 +20,7 @@ class SupabaseClient {
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
+  late String? changedAccessToken;
 
   SupabaseClient(
     this.supabaseUrl,
@@ -38,6 +39,8 @@ class SupabaseClient {
       headers: headers,
     );
     realtime = _initRealtimeClient(headers: headers);
+
+    _listenForAuthEvents();
   }
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
@@ -73,6 +76,13 @@ class SupabaseClient {
   PostgrestFilterBuilder rpc(String fn, {Map<String, dynamic>? params}) {
     final rest = _initPostgRESTClient();
     return rest.rpc(fn, params: params);
+  }
+
+  /// Remove all subscriptions.
+  Future removeAllSubscriptions() async {
+    final subscriptions = getSubscriptions();
+    final futures = subscriptions.map((sub) => removeSubscription(sub));
+    await Future.wait(futures);
   }
 
   /// Removes an active subscription and returns the number of open connections.
@@ -148,5 +158,23 @@ class SupabaseClient {
       completer.complete(true);
     }).receive('error', (e) => {completer.complete(false)});
     return completer.future;
+  }
+
+  void _listenForAuthEvents() {
+    auth.onAuthStateChange((event, session) {
+      _handleTokenChanged(event, session?.accessToken);
+    });
+  }
+
+  void _handleTokenChanged(AuthChangeEvent event, String? token) {
+    if (event == AuthChangeEvent.tokenRefreshed ||
+        event == AuthChangeEvent.signedIn && changedAccessToken != token) {
+      // Token has changed
+      changedAccessToken = token;
+      realtime.setAuth(token);
+    } else if (event == AuthChangeEvent.signedOut) {
+      // Token is removed
+      removeAllSubscriptions();
+    }
   }
 }
