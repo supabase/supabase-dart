@@ -1,3 +1,11 @@
+## [0.2.11]
+
+- feat: listen for auth event and handle token changed
+- chore: update gotrue to v0.1.3
+- chore: update realtime_client to v0.1.13
+- fix: use PostgrestFilterBuilder type for rpc
+- docs: correct stream method documentation
+
 ## [0.2.10]
 
 - fix: type 'Null' is not a subtype of type 'List<dynamic>' in type cast
