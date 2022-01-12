@@ -33,6 +33,7 @@ class SupabaseClient {
         authUrl = '$supabaseUrl/auth/v1',
         storageUrl = '$supabaseUrl/storage/v1',
         schema = schema ?? 'public',
+        changedAccessToken = null,
         _headers = headers {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
