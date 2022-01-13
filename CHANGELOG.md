@@ -1,3 +1,8 @@
+## [0.2.12]
+
+- fix: changedAccessToken never initialized error when changing account
+- fix: stream replaces the correct row
+
 ## [0.2.11]
 
 - feat: listen for auth event and handle token changed
