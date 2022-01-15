@@ -1,3 +1,7 @@
+## [0.2.13]
+
+- chore: update realtime_client to v0.1.14
+
 ## [0.2.12]
 
 - fix: changedAccessToken never initialized error when changing account
