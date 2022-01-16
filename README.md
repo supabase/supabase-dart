@@ -81,7 +81,7 @@ main() {
   // Set up a listener to listen to changes in `countries` table
   final subscription = await client
       .from('countries')
-      .stream()
+      .stream(['id']) // Pass list of primary key column names
       .order('name')
       .limit(30)
       .execute()
