@@ -1,3 +1,10 @@
+## [0.2.14]
+
+- chore: update gotrue_client to v0.1.5
+- chore: update postgrest to v0.1.9
+- chore: update realtime_client to v0.1.15
+- chore: update storage_client to v0.0.6+2
+
 ## [0.2.13]
 
 - chore: update realtime_client to v0.1.14
