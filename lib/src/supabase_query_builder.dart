@@ -4,6 +4,7 @@ import 'package:supabase/src/supabase_event_types.dart';
 import 'package:supabase/src/supabase_realtime_client.dart';
 import 'package:supabase/src/supabase_realtime_payload.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
+import 'package:supabase/supabase.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   late final SupabaseRealtimeClient _subscription;
