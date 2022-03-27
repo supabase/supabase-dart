@@ -1,4 +1,4 @@
-## [0.2.15]
+## [0.2.16]
 
 - chore: update gotrue_client to v0.2.0
 
