@@ -1,8 +1,8 @@
 name: supabase
 description: A dart client for Supabase. This client makes it simple for developers to build secure and scalable products.
 version: 0.3.0
-homepage: "https://supabase.io"
-repository: "https://github.com/supabase/supabase-dart"
+homepage: 'https://supabase.io'
+repository: 'https://github.com/supabase/supabase-dart'
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
