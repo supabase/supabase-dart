@@ -1,6 +1,7 @@
-## [0.2.16]
+## [0.3.0]
 
-- chore: update gotrue_client to v0.2.0
+- BREAKING: update gotrue_client to [v0.2.0](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#020)
+
 
 ## [0.2.15]
 
