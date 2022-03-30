@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:functions_client/functions_client.dart';
 import 'package:gotrue/gotrue.dart';
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
@@ -16,6 +17,7 @@ class SupabaseClient {
   final String realtimeUrl;
   final String authUrl;
   final String storageUrl;
+  final String functionsUrl;
   final Map<String, String> _headers;
 
   late final GoTrueClient auth;
@@ -32,6 +34,10 @@ class SupabaseClient {
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
         storageUrl = '$supabaseUrl/storage/v1',
+        functionsUrl = RegExp(r'(supabase\.co)|(supabase\.in)')
+                .hasMatch(supabaseUrl)
+            ? '${supabaseUrl.split('.')[0]}.functions.${supabaseUrl.split('.')[1]}.${supabaseUrl.split('.')[2]}'
+            : '$supabaseUrl/functions/v1',
         schema = schema ?? 'public',
         _headers = headers {
     auth = _initSupabaseAuthClient(
@@ -42,6 +48,12 @@ class SupabaseClient {
 
     _listenForAuthEvents();
   }
+
+  /// Supabase Functions allows you to deploy and invoke edge functions.
+  FunctionsClient get functions => FunctionsClient(
+        functionsUrl,
+        _getAuthHeaders(),
+      );
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
   SupabaseStorageClient get storage =>
