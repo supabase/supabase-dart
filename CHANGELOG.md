@@ -1,3 +1,7 @@
+## [0.3.1+1]
+
+- feat: exporting classes of functions_client
+
 ## [0.3.1]
 
 - feat: add functions support
