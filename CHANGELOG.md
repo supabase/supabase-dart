@@ -1,3 +1,12 @@
+## [0.3.2]
+
+- feat: update postgrest to [v0.1.10](https://github.com/supabase-community/postgrest-dart/blob/master/CHANGELOG.md#0110)
+- fix: update functions_client to [v0.0.1-dev.4](https://github.com/supabase-community/functions-dart/blob/main/CHANGELOG.md#001-dev4)
+
+## [0.3.1+1]
+
+- feat: exporting classes of functions_client
+
 ## [0.3.1]
 
 - feat: add functions support
