@@ -1,3 +1,7 @@
+## [0.3.4]
+
+- fix: update gotrue to [0.2.2](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#022)
+
 ## [0.3.3]
 
 - feat: update gotrue to[v0.2.1](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#021)
