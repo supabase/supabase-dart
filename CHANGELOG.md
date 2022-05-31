@@ -1,4 +1,4 @@
-## [0.3.5]
+## [0.3.4+1]
 
 - fix: export type, `SupabaseRealtimePayload`
 
