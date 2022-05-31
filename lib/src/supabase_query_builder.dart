@@ -1,5 +1,4 @@
 import 'package:supabase/src/supabase_realtime_client.dart';
-import 'package:supabase/src/supabase_realtime_payload.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 import 'package:supabase/supabase.dart';
 
