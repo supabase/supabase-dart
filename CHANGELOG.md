@@ -1,3 +1,7 @@
+## [0.3.5]
+
+- fix: export type, `SupabaseRealtimePayload`
+
 ## [0.3.4]
 
 - fix: update gotrue to [0.2.2](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#022)
