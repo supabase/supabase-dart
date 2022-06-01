@@ -155,6 +155,8 @@ void main() {
 
   test('Can filter stream results with eq', () {
     final stream = client.from('todos:status=eq.true').stream(['id']).execute();
+    print("");
+
     expect(
       stream,
       emitsInOrder([
