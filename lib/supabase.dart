@@ -15,3 +15,4 @@ export 'src/auth_user.dart';
 export 'src/supabase.dart';
 export 'src/supabase_event_types.dart';
 export 'src/supabase_query_builder.dart';
+export 'src/supabase_realtime_payload.dart';

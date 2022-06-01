@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:supabase/src/supabase_realtime_payload.dart';
 import 'package:supabase/supabase.dart';
 
 class StreamPostgrestFilter {
