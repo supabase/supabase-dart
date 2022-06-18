@@ -90,23 +90,28 @@ class SupabaseClient {
     return rest.rpc(fn, params: params);
   }
 
-  /// Remove all subscriptions.
-  Future removeAllSubscriptions() async {
-    final subscriptions = getSubscriptions();
-    final futures = subscriptions.map((sub) => removeSubscription(sub));
-    await Future.wait(futures);
+  /// Closes and removes all subscriptions and returns a list of removed
+  /// subscriptions and their errors.
+  Future<List<RealtimeSubscription>> removeAllSubscriptions() async {
+    final allSubs = [...getSubscriptions()];
+    final allSubsFutures = allSubs.map((sub) => removeSubscription(sub));
+    final allRemovedSubs = await Future.wait(allSubsFutures);
+    return allRemovedSubs.map((e) => allSubs[e]).toList();
   }
 
-  /// Removes an active subscription and returns the number of open connections.
+  /// Closes and removes a subscription and returns the number of open subscriptions.
+  /// [subscription]: subscription The subscription you want to close and remove.
   Future<int> removeSubscription(RealtimeSubscription subscription) async {
     final completer = Completer<int>();
 
     await _closeSubscription(subscription);
-    final openSubscriptions = getSubscriptions().length;
-    if (openSubscriptions == 0) {
+    final allSubs = [...getSubscriptions()];
+    final openSubsCount =
+        allSubs.where((sub) => sub.isJoined()).toList().length;
+    if (openSubsCount == 0) {
       realtime.disconnect();
     }
-    completer.complete(openSubscriptions);
+    completer.complete(openSubsCount);
 
     return completer.future;
   }
