@@ -96,7 +96,11 @@ class SupabaseClient {
     final allSubs = [...getSubscriptions()];
     final allSubsFutures = allSubs.map((sub) => removeSubscription(sub));
     final allRemovedSubs = await Future.wait(allSubsFutures);
-    return allRemovedSubs.map((e) => allSubs[e]).toList();
+    final removed = <RealtimeSubscription>[];
+    for (var i = 0; i < allRemovedSubs.length; i++) {
+      removed.add(allSubs[i]);
+    }
+    return removed;
   }
 
   /// Closes and removes a subscription and returns the number of open subscriptions.
