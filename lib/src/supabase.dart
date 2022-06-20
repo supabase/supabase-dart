@@ -6,7 +6,9 @@ import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
+import 'package:supabase/src/remove_subscription_result.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
+import 'package:supabase/src/supabase_realtime_error.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 
 class SupabaseClient {
@@ -90,25 +92,39 @@ class SupabaseClient {
     return rest.rpc(fn, params: params);
   }
 
-  /// Remove all subscriptions.
-  Future removeAllSubscriptions() async {
-    final subscriptions = getSubscriptions();
-    final futures = subscriptions.map((sub) => removeSubscription(sub));
-    await Future.wait(futures);
+  /// Closes and removes all subscriptions and returns a list of removed
+  /// subscriptions and their errors.
+  Future<List<RealtimeSubscription>> removeAllSubscriptions() async {
+    final allSubs = [...getSubscriptions()];
+    final allSubsFutures = allSubs.map((sub) => removeSubscription(sub));
+    final allRemovedSubs = await Future.wait(allSubsFutures);
+    final removed = <RealtimeSubscription>[];
+    for (var i = 0; i < allRemovedSubs.length; i++) {
+      removed.add(allSubs[i]);
+    }
+    return removed;
   }
 
-  /// Removes an active subscription and returns the number of open connections.
-  Future<int> removeSubscription(RealtimeSubscription subscription) async {
+  /// Closes and removes a subscription and returns the number of open subscriptions.
+  /// [subscription]: subscription The subscription you want to close and remove.
+  Future<RemoveSubscriptionResult> removeSubscription(
+    RealtimeSubscription subscription,
+  ) async {
     final completer = Completer<int>();
 
-    await _closeSubscription(subscription);
-    final openSubscriptions = getSubscriptions().length;
-    if (openSubscriptions == 0) {
-      realtime.disconnect();
+    final closeSubscriptionResult = await _closeSubscription(subscription);
+    final allSubs = [...getSubscriptions()];
+    final openSubsCount =
+        allSubs.where((sub) => sub.isJoined()).toList().length;
+    if (openSubsCount == 0) {
+      realtime.disconnect(reason: 'all subscriptions closed');
     }
-    completer.complete(openSubscriptions);
+    completer.complete(openSubsCount);
 
-    return completer.future;
+    return RemoveSubscriptionResult(
+      openSubscriptions: openSubsCount,
+      error: closeSubscriptionResult,
+    );
   }
 
   /// Returns an array of all your subscriptions.
@@ -149,10 +165,15 @@ class SupabaseClient {
     );
   }
 
-  Future<void> _closeSubscription(RealtimeSubscription subscription) async {
+  Future<SupabaseRealtimeError?> _closeSubscription(
+    RealtimeSubscription subscription,
+  ) async {
+    SupabaseRealtimeError? error;
     if (!subscription.isClosed()) {
-      await _closeChannel(subscription);
+      error = await _unsubscribeSubscription(subscription);
     }
+    realtime.remove(subscription);
+    return error;
   }
 
   Map<String, String> _getAuthHeaders() {
@@ -163,12 +184,30 @@ class SupabaseClient {
     return headers;
   }
 
-  Future<bool> _closeChannel(RealtimeSubscription subscription) {
-    final completer = Completer<bool>();
-    subscription.unsubscribe().receive('ok', (_) {
-      realtime.remove(subscription);
-      completer.complete(true);
-    }).receive('error', (e) => {completer.complete(false)});
+  /// Close channel [subscription] and return the result.
+  ///
+  /// in case of unsubscribe, remove the realtime connection and return null
+  /// in case of error return the error
+  Future<SupabaseRealtimeError?> _unsubscribeSubscription(
+    RealtimeSubscription subscription,
+  ) {
+    final completer = Completer<SupabaseRealtimeError?>();
+    subscription.unsubscribe().receive(
+      'ok',
+      (_) {
+        completer.complete(null);
+      },
+    ).receive(
+      'error',
+      (e) {
+        completer.completeError(SupabaseRealtimeError(e.toString()));
+      },
+    ).receive(
+      'timeout',
+      (e) {
+        completer.completeError(SupabaseRealtimeError(e.toString()));
+      },
+    );
     return completer.future;
   }
 
