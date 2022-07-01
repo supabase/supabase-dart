@@ -1,10 +1,15 @@
+## [0.3.5]
+
+- fix: update gotrue to [v0.2.2+1](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#0221)
+- feat: update postgrest to [v0.1.11](https://github.com/supabase-community/postgrest-dart/blob/master/CHANGELOG.md#0111)
+
 ## [0.3.4+1]
 
 - fix: export type, `SupabaseRealtimePayload`
 
 ## [0.3.4]
 
-- fix: update gotrue to [0.2.2](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#022)
+- fix: update gotrue to [v0.2.2](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#022)
 
 ## [0.3.3]
 
