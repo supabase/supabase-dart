@@ -72,6 +72,7 @@ void main() {
           hasListener = true;
           listener = webSocket!.listen((request) async {
             if (!hasSentData) {
+              await Future.delayed(const Duration(milliseconds: 100));
               final topic = (jsonDecode(request as String) as Map)['topic'];
               final jsonString = jsonEncode({
                 'topic': topic,
