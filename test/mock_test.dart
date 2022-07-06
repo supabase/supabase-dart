@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,6 +11,7 @@ void main() {
   WebSocket? webSocket;
   bool hasListener = false;
   bool hasSentData = false;
+  StreamSubscription<dynamic>? listener;
 
   Future<void> handleRequests(HttpServer server) async {
     await for (final HttpRequest request in server) {
@@ -43,8 +45,7 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(jsonString)
           ..close();
-      } else if (url ==
-          '/rest/v1/todos?select=%2A&order=%22id%22.desc.nullslast') {
+      } else if (url == '/rest/v1/todos?select=%2A&order=id.desc.nullslast') {
         final jsonString = jsonEncode([
           {'id': 2, 'task': 'task 2', 'status': false},
           {'id': 1, 'task': 'task 1', 'status': true},
@@ -55,7 +56,7 @@ void main() {
           ..write(jsonString)
           ..close();
       } else if (url ==
-          '/rest/v1/todos?select=%2A&order=%22id%22.desc.nullslast&limit=2') {
+          '/rest/v1/todos?select=%2A&order=id.desc.nullslast&limit=2') {
         final jsonString = jsonEncode([
           {'id': 2, 'task': 'task 2', 'status': false},
           {'id': 1, 'task': 'task 1', 'status': true},
@@ -69,7 +70,7 @@ void main() {
         webSocket = await WebSocketTransformer.upgrade(request);
         if (!hasListener) {
           hasListener = true;
-          webSocket!.listen((request) async {
+          listener = webSocket!.listen((request) async {
             if (!hasSentData) {
               final topic = (jsonDecode(request as String) as Map)['topic'];
               final jsonString = jsonEncode({
@@ -126,6 +127,7 @@ void main() {
   });
 
   tearDown(() async {
+    listener?.cancel();
     await webSocket?.close();
     await mockServer.close();
   });
