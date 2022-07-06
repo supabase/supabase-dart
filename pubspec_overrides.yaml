@@ -1,0 +1,11 @@
+dependency_overrides:
+  functions_client:
+    path: ../functions-dart
+  gotrue:
+    path: ../gotrue-dart
+  postgrest:
+    path: ../postgrest-dart
+  realtime_client:
+    path: ../realtime-dart
+  storage_client:
+    path: ../storage-dart
