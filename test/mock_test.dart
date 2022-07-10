@@ -68,46 +68,40 @@ void main() {
           ..close();
       } else if (url.contains('realtime')) {
         webSocket = await WebSocketTransformer.upgrade(request);
-        if (!hasListener) {
-          hasListener = true;
-          listener = webSocket!.listen((request) async {
-            if (!hasSentData) {
-              await Future.delayed(const Duration(milliseconds: 100));
-              final topic = (jsonDecode(request as String) as Map)['topic'];
-              final jsonString = jsonEncode({
-                'topic': topic,
-                'event': 'INSERT',
-                'ref': null,
-                'payload': {
-                  'commit_timestamp': '2021-08-01T08:00:20Z',
-                  'record': {'id': 3, 'task': 'task 3', 'status': 't'},
-                  'schema': 'public',
-                  'table': 'todos',
-                  'type': 'INSERT',
-                  'columns': [
-                    {
-                      'name': 'id',
-                      'type': 'int4',
-                      'type_modifier': 4294967295,
-                    },
-                    {
-                      'name': 'task',
-                      'type': 'text',
-                      'type_modifier': 4294967295
-                    },
-                    {
-                      'name': 'status',
-                      'type': 'bool',
-                      'type_modifier': 4294967295
-                    },
-                  ],
-                },
-              });
-              hasSentData = true;
-              webSocket!.add(jsonString);
-            }
-          });
+        if (hasListener) {
+          return;
         }
+        hasListener = true;
+        listener = webSocket!.listen((request) async {
+          if (hasSentData) {
+            return;
+          }
+          hasSentData = true;
+          await Future.delayed(const Duration(milliseconds: 10));
+          final topic = (jsonDecode(request as String) as Map)['topic'];
+          final jsonString = jsonEncode({
+            'topic': topic,
+            'event': 'INSERT',
+            'ref': null,
+            'payload': {
+              'commit_timestamp': '2021-08-01T08:00:20Z',
+              'record': {'id': 3, 'task': 'task 3', 'status': 't'},
+              'schema': 'public',
+              'table': 'todos',
+              'type': 'INSERT',
+              'columns': [
+                {
+                  'name': 'id',
+                  'type': 'int4',
+                  'type_modifier': 4294967295,
+                },
+                {'name': 'task', 'type': 'text', 'type_modifier': 4294967295},
+                {'name': 'status', 'type': 'bool', 'type_modifier': 4294967295},
+              ],
+            },
+          });
+          webSocket!.add(jsonString);
+        });
       } else {
         request.response
           ..statusCode = HttpStatus.ok
@@ -138,73 +132,90 @@ void main() {
     expect((res.data as List).length, 2);
   });
 
-  test('stream() emits data', () {
-    final stream = client.from('todos').stream(['id']).execute();
-    expect(
-      stream,
-      emitsInOrder([
-        containsAllInOrder([
-          {'id': 1, 'task': 'task 1', 'status': true},
-          {'id': 2, 'task': 'task 2', 'status': false}
+  group('stream()', () {
+    test('stream() emits data', () {
+      final stream = client.from('todos').stream(['id']).execute();
+      expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false}
+          ]),
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 3, 'task': 'task 3', 'status': true},
+          ]),
         ]),
-        containsAllInOrder([
-          {'id': 1, 'task': 'task 1', 'status': true},
-          {'id': 2, 'task': 'task 2', 'status': false},
-          {'id': 3, 'task': 'task 3', 'status': true},
+      );
+    });
+
+    test('Can filter stream results with eq', () {
+      final stream =
+          client.from('todos:status=eq.true').stream(['id']).execute();
+      expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 3, 'task': 'task 3', 'status': true},
+          ]),
         ]),
-      ]),
-    );
+      );
+    });
+
+    test('stream() with order', () {
+      final stream = client.from('todos').stream(['id']).order('id').execute();
+      expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+        ]),
+      );
+    });
+
+    test('stream() with limit', () {
+      final stream =
+          client.from('todos').stream(['id']).order('id').limit(2).execute();
+      expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false},
+          ]),
+        ]),
+      );
+    });
   });
 
-  test('Can filter stream results with eq', () {
-    final stream = client.from('todos:status=eq.true').stream(['id']).execute();
-    expect(
-      stream,
-      emitsInOrder([
-        containsAllInOrder([
-          {'id': 1, 'task': 'task 1', 'status': true},
-        ]),
-        containsAllInOrder([
-          {'id': 1, 'task': 'task 1', 'status': true},
-          {'id': 3, 'task': 'task 3', 'status': true},
-        ]),
-      ]),
-    );
-  });
+  group('realtime', () {
+    /// Constructing Supabase query within a realtime callback caused exception
+    /// https://github.com/supabase-community/supabase-flutter/issues/81
+    test('Calling Postgrest within realtime callback', () async {
+      client.from('todos').on(SupabaseEventTypes.all, (event) async {
+        await client.from('todos').select('task, status').execute();
+      }).subscribe();
 
-  test('stream() with order', () {
-    final stream = client.from('todos').stream(['id']).order('id').execute();
-    expect(
-      stream,
-      emitsInOrder([
-        containsAllInOrder([
-          {'id': 2, 'task': 'task 2', 'status': false},
-          {'id': 1, 'task': 'task 1', 'status': true},
-        ]),
-        containsAllInOrder([
-          {'id': 3, 'task': 'task 3', 'status': true},
-          {'id': 2, 'task': 'task 2', 'status': false},
-          {'id': 1, 'task': 'task 1', 'status': true},
-        ]),
-      ]),
-    );
-  });
+      await Future.delayed(const Duration(milliseconds: 700));
 
-  test('stream() with limit', () {
-    final stream =
-        client.from('todos').stream(['id']).order('id').limit(2).execute();
-    expect(
-      stream,
-      emitsInOrder([
-        containsAllInOrder([
-          {'id': 2, 'task': 'task 2', 'status': false},
-          {'id': 1, 'task': 'task 1', 'status': true},
-        ]),
-        containsAllInOrder([
-          {'id': 3, 'task': 'task 3', 'status': true},
-          {'id': 2, 'task': 'task 2', 'status': false},
-        ]),
-      ]),
-    );
+      await client.removeAllSubscriptions();
+    });
   });
 }
