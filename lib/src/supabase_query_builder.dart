@@ -4,26 +4,25 @@ import 'package:supabase/supabase.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   late final SupabaseRealtimeClient _subscription;
-  late final RealtimeClient _realtime;
-  late final StreamPostgrestFilter? _streamFilter;
+  final Map<String, String> _headers;
+  final String _schema;
+  final String _table;
+  final RealtimeClient _realtime;
+  final StreamPostgrestFilter? _streamFilter;
 
   SupabaseQueryBuilder(
     String url,
     RealtimeClient realtime, {
     Map<String, String> headers = const {},
-    required String? schema,
-    required String? table,
+    required String schema,
+    required String table,
     required StreamPostgrestFilter? streamFilter,
-  }) : super(url, headers: headers, schema: schema) {
-    _subscription = SupabaseRealtimeClient(
-      realtime,
-      headers,
-      schema ?? 'public',
-      table ?? '*',
-    );
-    _realtime = realtime;
-    _streamFilter = streamFilter;
-  }
+  })  : _headers = headers,
+        _schema = schema,
+        _table = table,
+        _realtime = realtime,
+        _streamFilter = streamFilter,
+        super(url, headers: headers, schema: schema);
 
   /// Subscribe to realtime changes in your databse.
   SupabaseRealtimeClient on(
@@ -33,6 +32,12 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     if (_realtime.isConnected() == false) {
       _realtime.connect();
     }
+    _subscription = SupabaseRealtimeClient(
+      _realtime,
+      _headers,
+      _schema,
+      _table,
+    );
     return _subscription.on(event, callback);
   }
 
