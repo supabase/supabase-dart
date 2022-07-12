@@ -1,3 +1,8 @@
+## [0.3.6]
+
+- fix: Calling postgrest endpoints within realtime callback throws exception
+- feat: update gotrue to [v0.2.3](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#023)
+
 ## [0.3.5]
 
 - fix: update gotrue to [v0.2.2+1](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#0221)
