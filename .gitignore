@@ -9,6 +9,10 @@
 # https://dart.dev/guides/libraries/private-files#pubspeclock
 pubspec.lock
 
+# Specifying what packages to use in the pubspec_overrides
+# https://github.com/dart-lang/pub/pull/3215
+pubspec_overrides.yaml
+
 # Conventional directory for build outputs
 build/
 
