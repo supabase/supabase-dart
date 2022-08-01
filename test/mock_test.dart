@@ -128,8 +128,8 @@ void main() {
   });
 
   test('test mock server', () async {
-    final res = await client.from('todos').select('task, status').execute();
-    expect((res.data as List).length, 2);
+    final data = await client.from('todos').select('task, status');
+    expect((data as List).length, 2);
   });
 
   group('stream()', () {
@@ -210,7 +210,7 @@ void main() {
     /// https://github.com/supabase-community/supabase-flutter/issues/81
     test('Calling Postgrest within realtime callback', () async {
       client.from('todos').on(SupabaseEventTypes.all, (event) async {
-        await client.from('todos').select('task, status').execute();
+        await client.from('todos').select('task, status');
       }).subscribe();
 
       await Future.delayed(const Duration(milliseconds: 700));
