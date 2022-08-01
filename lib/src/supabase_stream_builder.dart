@@ -138,14 +138,9 @@ class SupabaseStreamBuilder {
       transformQuery = (transformQuery ?? query).limit(_limit!);
     }
 
-    final res = await (transformQuery ?? query).execute();
-    if (res.error != null) {
-      _addError(res.error!.message);
-
-      return;
-    }
-    final data = List<Map<String, dynamic>>.from(res.data as List);
-    _streamData.addAll(data);
+    final data = await (transformQuery ?? query);
+    final rows = List<Map<String, dynamic>>.from(data as List);
+    _streamData.addAll(rows);
     _addStream();
   }
 

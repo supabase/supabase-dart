@@ -5,7 +5,7 @@ class AuthSession extends Session {
     required String accessToken,
     int? expiresIn,
     String? refreshToken,
-    String? tokenType,
+    required String tokenType,
     User? user,
   }) : super(
           accessToken: accessToken,
