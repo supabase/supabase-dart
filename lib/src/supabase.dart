@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:functions_client/functions_client.dart';
 import 'package:gotrue/gotrue.dart';
+import 'package:http/http.dart';
 import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
@@ -21,6 +22,7 @@ class SupabaseClient {
   final String storageUrl;
   final String functionsUrl;
   final Map<String, String> _headers;
+  final Client? _httpClient;
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
@@ -32,6 +34,7 @@ class SupabaseClient {
     String? schema,
     bool autoRefreshToken = true,
     Map<String, String> headers = Constants.defaultHeaders,
+    Client? httpClient,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
@@ -41,7 +44,8 @@ class SupabaseClient {
             ? '${supabaseUrl.split('.')[0]}.functions.${supabaseUrl.split('.')[1]}.${supabaseUrl.split('.')[2]}'
             : '$supabaseUrl/functions/v1',
         schema = schema ?? 'public',
-        _headers = headers {
+        _headers = headers,
+        _httpClient = httpClient {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
       headers: headers,
@@ -55,11 +59,15 @@ class SupabaseClient {
   FunctionsClient get functions => FunctionsClient(
         functionsUrl,
         _getAuthHeaders(),
+        httpClient: _httpClient,
       );
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
-  SupabaseStorageClient get storage =>
-      SupabaseStorageClient(storageUrl, _getAuthHeaders());
+  SupabaseStorageClient get storage => SupabaseStorageClient(
+        storageUrl,
+        _getAuthHeaders(),
+        httpClient: _httpClient,
+      );
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
@@ -83,6 +91,7 @@ class SupabaseClient {
       schema: schema,
       table: table,
       streamFilter: streamFilter,
+      httpClient: _httpClient,
     );
   }
 
@@ -144,6 +153,7 @@ class SupabaseClient {
       url: authUrl,
       headers: authHeaders,
       autoRefreshToken: autoRefreshToken,
+      httpClient: _httpClient,
     );
   }
 
@@ -162,6 +172,7 @@ class SupabaseClient {
       restUrl,
       headers: _getAuthHeaders(),
       schema: schema,
+      httpClient: _httpClient,
     );
   }
 
