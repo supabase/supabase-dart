@@ -1,3 +1,4 @@
+import 'package:http/http.dart';
 import 'package:supabase/src/supabase_realtime_client.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 import 'package:supabase/supabase.dart';
@@ -17,12 +18,18 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     required String schema,
     required String table,
     required StreamPostgrestFilter? streamFilter,
+    Client? httpClient,
   })  : _headers = headers,
         _schema = schema,
         _table = table,
         _realtime = realtime,
         _streamFilter = streamFilter,
-        super(url, headers: headers, schema: schema);
+        super(
+          url,
+          headers: headers,
+          schema: schema,
+          httpClient: httpClient,
+        );
 
   /// Subscribe to realtime changes in your databse.
   SupabaseRealtimeClient on(

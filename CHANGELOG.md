@@ -1,3 +1,7 @@
+## [1.0.0-dev.2]
+
+- feat: custom http client
+
 ## [1.0.0-dev.1]
 
 - BREAKING: update postgrest to [v1.0.0-dev.1](https://github.com/supabase-community/postgrest-dart/blob/master/CHANGELOG.md#100-dev1)
