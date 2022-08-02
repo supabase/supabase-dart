@@ -1,5 +1,9 @@
 ## [1.0.0-dev.2]
 
+- fix: export storage types
+
+## [1.0.0-dev.2]
+
 - feat: custom http client
 
 ## [1.0.0-dev.1]
