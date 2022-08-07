@@ -4,7 +4,6 @@ import 'package:supabase/supabase.dart';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/io.dart';
 
-// TODO: @zoocityboy prepare mocked version of SupabaseClient
 void main() {
   late HttpServer mockServer;
   late SupabaseClient client;

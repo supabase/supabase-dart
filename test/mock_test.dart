@@ -15,6 +15,10 @@ void main() {
 
   Future<void> handleRequests(HttpServer server) async {
     await for (final HttpRequest request in server) {
+      final headers = request.headers;
+      if (headers.value('X-Client-Info') != 'supabase-flutter/0.0.0') {
+        throw 'Proper header not set';
+      }
       final url = request.uri.toString();
       if (url == '/rest/v1/todos?select=task%2Cstatus') {
         final jsonString = jsonEncode([
@@ -115,6 +119,9 @@ void main() {
     client = SupabaseClient(
       'http://${mockServer.address.host}:${mockServer.port}',
       'supabaseKey',
+      headers: {
+        'X-Client-Info': 'supabase-flutter/0.0.0',
+      },
     );
     handleRequests(mockServer);
     hasListener = false;
@@ -130,6 +137,16 @@ void main() {
   test('test mock server', () async {
     final data = await client.from('todos').select('task, status');
     expect((data as List).length, 2);
+  });
+
+  group('Basic client test', () {
+    test('Postgrest calls the correct endpoint', () async {
+      final data = await client.from('todos').select();
+      expect(data, [
+        {'id': 1, 'task': 'task 1', 'status': true},
+        {'id': 2, 'task': 'task 2', 'status': false}
+      ]);
+    });
   });
 
   group('stream()', () {
