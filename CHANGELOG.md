@@ -2,6 +2,7 @@
 
 - fix: update storage to [v1.0.0-dev.3](https://github.com/supabase-community/storage-dart/blob/main/CHANGELOG.md#100-dev3)
 - fix: add `web_socket_channel` to dev dependencies since it is used in tests
+- fix: add basic `postgrest` test
 
 ## [1.0.0-dev.3]
 
