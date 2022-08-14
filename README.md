@@ -150,7 +150,7 @@ if (response.error != null) {
   print('Error: ${response.error?.message}');
 } else {
   // Success
-  final session = response.data;
+  final session = response.session;
 }
 ```
 
@@ -167,7 +167,7 @@ if (response.error != null) {
   print('Error: ${response.error?.message}');
 } else {
   // Success
-  final session = response.data;
+  final session = response.session;
 }
 ```
 

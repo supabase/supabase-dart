@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   functions_client: ^1.0.0-dev.1
-  gotrue: ^1.0.0-dev.2
+  gotrue: ^1.0.0-dev.3
   http: ^0.13.4
   postgrest: ^1.0.0-dev.2
   realtime_client: ^0.1.15
