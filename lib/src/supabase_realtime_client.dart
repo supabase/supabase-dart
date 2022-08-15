@@ -5,7 +5,7 @@ import 'package:supabase/src/supabase_realtime_payload.dart';
 typedef SubscribeCallback = void Function(String event, {String? errorMsg});
 
 class SupabaseRealtimeClient {
-  late final RealtimeSubscription subscription;
+  late final RealtimeChannel subscription;
 
   SupabaseRealtimeClient(
     RealtimeClient socket,
@@ -20,7 +20,7 @@ class SupabaseRealtimeClient {
     if (userToken != null) {
       chanParams['user_token'] = userToken;
     }
-    subscription = socket.channel(topic, chanParams: chanParams);
+    subscription = socket.channel(topic, chanParams);
   }
 
   /// The event you want to listen to.
@@ -28,7 +28,7 @@ class SupabaseRealtimeClient {
     SupabaseEventTypes event,
     void Function(SupabaseRealtimePayload payload) callback,
   ) {
-    subscription.on(event.name(), (payload, {ref}) {
+    subscription.on(event.name(), {}, (payload, [ref]) {
       if (payload is Map) {
         final json = payload as Map<String, dynamic>;
         final enrichedPayload = SupabaseRealtimePayload.fromJson(json);
@@ -40,7 +40,7 @@ class SupabaseRealtimeClient {
   }
 
   /// Enables the subscription.
-  RealtimeSubscription subscribe([SubscribeCallback? callback]) {
+  RealtimeChannel subscribe([SubscribeCallback? callback]) {
     subscription
         .onError((e) => callback?.call('SUBSCRIPTION_ERROR', errorMsg: e));
     subscription.onClose(() => callback?.call('CLOSED'));

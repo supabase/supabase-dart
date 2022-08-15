@@ -103,11 +103,11 @@ class SupabaseClient {
 
   /// Closes and removes all subscriptions and returns a list of removed
   /// subscriptions and their errors.
-  Future<List<RealtimeSubscription>> removeAllSubscriptions() async {
+  Future<List<RealtimeChannel>> removeAllSubscriptions() async {
     final allSubs = [...getSubscriptions()];
     final allSubsFutures = allSubs.map((sub) => removeSubscription(sub));
     final allRemovedSubs = await Future.wait(allSubsFutures);
-    final removed = <RealtimeSubscription>[];
+    final removed = <RealtimeChannel>[];
     for (var i = 0; i < allRemovedSubs.length; i++) {
       removed.add(allSubs[i]);
     }
@@ -117,14 +117,13 @@ class SupabaseClient {
   /// Closes and removes a subscription and returns the number of open subscriptions.
   /// [subscription]: subscription The subscription you want to close and remove.
   Future<RemoveSubscriptionResult> removeSubscription(
-    RealtimeSubscription subscription,
+    RealtimeChannel subscription,
   ) async {
     final completer = Completer<int>();
 
     final closeSubscriptionResult = await _closeSubscription(subscription);
     final allSubs = [...getSubscriptions()];
-    final openSubsCount =
-        allSubs.where((sub) => sub.isJoined()).toList().length;
+    final openSubsCount = allSubs.where((sub) => sub.isJoined).toList().length;
     if (openSubsCount == 0) {
       realtime.disconnect(reason: 'all subscriptions closed');
     }
@@ -137,7 +136,7 @@ class SupabaseClient {
   }
 
   /// Returns an array of all your subscriptions.
-  List<RealtimeSubscription> getSubscriptions() {
+  List<RealtimeChannel> getSubscriptions() {
     return realtime.channels;
   }
 
@@ -177,10 +176,10 @@ class SupabaseClient {
   }
 
   Future<SupabaseRealtimeError?> _closeSubscription(
-    RealtimeSubscription subscription,
+    RealtimeChannel subscription,
   ) async {
     SupabaseRealtimeError? error;
-    if (!subscription.isClosed()) {
+    if (!subscription.isClosed) {
       error = await _unsubscribeSubscription(subscription);
     }
     realtime.remove(subscription);
@@ -200,7 +199,7 @@ class SupabaseClient {
   /// in case of unsubscribe, remove the realtime connection and return null
   /// in case of error return the error
   Future<SupabaseRealtimeError?> _unsubscribeSubscription(
-    RealtimeSubscription subscription,
+    RealtimeChannel subscription,
   ) {
     final completer = Completer<SupabaseRealtimeError?>();
     subscription.unsubscribe().receive(

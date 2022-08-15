@@ -36,7 +36,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     SupabaseEventTypes event,
     void Function(SupabaseRealtimePayload payload) callback,
   ) {
-    if (_realtime.isConnected() == false) {
+    if (_realtime.isConnected == false) {
       _realtime.connect();
     }
     _subscription = SupabaseRealtimeClient(

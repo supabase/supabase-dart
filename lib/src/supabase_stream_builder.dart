@@ -34,7 +34,7 @@ class SupabaseStreamBuilder {
   late final List<Map<String, dynamic>> _streamData;
 
   /// RealtimeSubscription used in `stream()`.
-  late final RealtimeSubscription _supabaseRealtimeClient;
+  late final RealtimeChannel _supabaseRealtimeClient;
 
   /// `eq` filter used for both postgrest and realtime
   late final StreamPostgrestFilter? _streamFilter;
