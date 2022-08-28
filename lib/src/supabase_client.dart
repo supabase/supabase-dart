@@ -7,10 +7,7 @@ import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
-import 'package:supabase/src/remove_subscription_result.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
-import 'package:supabase/src/supabase_realtime_error.dart';
-import 'package:supabase/src/supabase_stream_builder.dart';
 
 class SupabaseClient {
   final String supabaseUrl;
@@ -26,6 +23,7 @@ class SupabaseClient {
 
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
+  late final PostgrestClient rest;
   String? changedAccessToken;
 
   SupabaseClient(
@@ -51,6 +49,12 @@ class SupabaseClient {
       headers: headers,
     );
     realtime = _initRealtimeClient(headers: headers);
+    rest = PostgrestClient(
+      '$supabaseUrl/rest/v1',
+      headers: headers,
+      schema: schema,
+      httpClient: _httpClient,
+    );
 
     _listenForAuthEvents();
   }
@@ -71,73 +75,42 @@ class SupabaseClient {
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
-    late final String url;
-    StreamPostgrestFilter? streamFilter;
-
-    /// Check whether there is realtime filter or not
-    if (RegExp(r'^.*:.*\=eq\..*$').hasMatch(table)) {
-      final tableName = table.split(':').first;
-      url = '$restUrl/$tableName';
-      final colVals = table.split(':').last.split('=eq.');
-      streamFilter =
-          StreamPostgrestFilter(column: colVals.first, value: colVals.last);
-    } else {
-      url = '$restUrl/$table';
-    }
+    final url = '$restUrl/$table';
     return SupabaseQueryBuilder(
       url,
       realtime,
       headers: _getAuthHeaders(),
       schema: schema,
       table: table,
-      streamFilter: streamFilter,
       httpClient: _httpClient,
     );
   }
 
   /// Perform a stored procedure call.
   PostgrestFilterBuilder rpc(String fn, {Map<String, dynamic>? params}) {
-    final rest = _initPostgRESTClient();
     return rest.rpc(fn, params: params);
   }
 
-  /// Closes and removes all subscriptions and returns a list of removed
-  /// subscriptions and their errors.
-  Future<List<RealtimeChannel>> removeAllSubscriptions() async {
-    final allSubs = [...getSubscriptions()];
-    final allSubsFutures = allSubs.map((sub) => removeSubscription(sub));
-    final allRemovedSubs = await Future.wait(allSubsFutures);
-    final removed = <RealtimeChannel>[];
-    for (var i = 0; i < allRemovedSubs.length; i++) {
-      removed.add(allSubs[i]);
-    }
-    return removed;
+  /// Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
+  RealtimeChannel channel(String name, {Map<String, dynamic>? opts}) {
+    return realtime.channel(name, opts);
   }
 
-  /// Closes and removes a subscription and returns the number of open subscriptions.
-  /// [subscription]: subscription The subscription you want to close and remove.
-  Future<RemoveSubscriptionResult> removeSubscription(
-    RealtimeChannel subscription,
-  ) async {
-    final completer = Completer<int>();
-
-    final closeSubscriptionResult = await _closeSubscription(subscription);
-    final allSubs = [...getSubscriptions()];
-    final openSubsCount = allSubs.where((sub) => sub.isJoined).toList().length;
-    if (openSubsCount == 0) {
-      realtime.disconnect(reason: 'all subscriptions closed');
-    }
-    completer.complete(openSubsCount);
-
-    return RemoveSubscriptionResult(
-      openSubscriptions: openSubsCount,
-      error: closeSubscriptionResult,
-    );
+  /// Returns all Realtime channels.
+  List<RealtimeChannel> getChannels() {
+    return realtime.getChannels();
   }
 
-  /// Returns an array of all your subscriptions.
-  List<RealtimeChannel> getSubscriptions() {
-    return realtime.channels;
+  /// Unsubscribes and removes Realtime channel from Realtime client.
+  ///
+  /// [channel] - The name of the Realtime channel.
+  Future<String> removeChannel(RealtimeChannel channel) {
+    return realtime.removeChannel(channel);
+  }
+
+  ///  Unsubscribes and removes all Realtime channels from Realtime client.
+  Future<List<String>> removeAllChannels() {
+    return realtime.removeAllChannels();
   }
 
   GoTrueClient _initSupabaseAuthClient({
@@ -166,59 +139,12 @@ class SupabaseClient {
     );
   }
 
-  PostgrestClient _initPostgRESTClient() {
-    return PostgrestClient(
-      restUrl,
-      headers: _getAuthHeaders(),
-      schema: schema,
-      httpClient: _httpClient,
-    );
-  }
-
-  Future<SupabaseRealtimeError?> _closeSubscription(
-    RealtimeChannel subscription,
-  ) async {
-    SupabaseRealtimeError? error;
-    if (!subscription.isClosed) {
-      error = await _unsubscribeSubscription(subscription);
-    }
-    realtime.remove(subscription);
-    return error;
-  }
-
   Map<String, String> _getAuthHeaders() {
     final headers = {..._headers};
     final authBearer = auth.currentSession?.accessToken ?? supabaseKey;
     headers['apikey'] = supabaseKey;
     headers['Authorization'] = 'Bearer $authBearer';
     return headers;
-  }
-
-  /// Close channel [subscription] and return the result.
-  ///
-  /// in case of unsubscribe, remove the realtime connection and return null
-  /// in case of error return the error
-  Future<SupabaseRealtimeError?> _unsubscribeSubscription(
-    RealtimeChannel subscription,
-  ) {
-    final completer = Completer<SupabaseRealtimeError?>();
-    subscription.unsubscribe().receive(
-      'ok',
-      (_) {
-        completer.complete(null);
-      },
-    ).receive(
-      'error',
-      (e) {
-        completer.completeError(SupabaseRealtimeError(e.toString()));
-      },
-    ).receive(
-      'timeout',
-      (e) {
-        completer.completeError(SupabaseRealtimeError(e.toString()));
-      },
-    );
-    return completer.future;
   }
 
   void _listenForAuthEvents() {
@@ -233,9 +159,10 @@ class SupabaseClient {
       // Token has changed
       changedAccessToken = token;
       realtime.setAuth(token);
-    } else if (event == AuthChangeEvent.signedOut) {
+    } else if (event == AuthChangeEvent.signedOut ||
+        event == AuthChangeEvent.userDeleted) {
       // Token is removed
-      removeAllSubscriptions();
+      realtime.setAuth(supabaseKey);
     }
   }
 }

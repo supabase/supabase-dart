@@ -24,8 +24,14 @@ class _Order {
   final bool ascending;
 }
 
-class SupabaseStreamBuilder {
+class SupabaseStreamBuilder extends Stream {
   final SupabaseQueryBuilder _queryBuilder;
+
+  final RealtimeChannel _channel;
+
+  final String _schema;
+
+  final String _table;
 
   /// StreamController for `stream()` method.
   late final StreamController<List<Map<String, dynamic>>> _streamController;
@@ -33,21 +39,22 @@ class SupabaseStreamBuilder {
   /// Contains the combined data of postgrest and realtime to emit as stream.
   late final List<Map<String, dynamic>> _streamData;
 
-  /// RealtimeSubscription used in `stream()`.
-  late final RealtimeChannel _supabaseRealtimeClient;
-
   /// `eq` filter used for both postgrest and realtime
   late final StreamPostgrestFilter? _streamFilter;
 
   /// Used to identify which row has changed
   final List<String> _uniqueColumns;
 
-  SupabaseStreamBuilder(
-    SupabaseQueryBuilder queryBuilder, {
-    required StreamPostgrestFilter? streamFilter,
+  SupabaseStreamBuilder({
+    required SupabaseQueryBuilder queryBuilder,
+    required RealtimeChannel channel,
+    required String schema,
+    required String table,
     required List<String> uniqueColumns,
   })  : _queryBuilder = queryBuilder,
-        _streamFilter = streamFilter,
+        _channel = channel,
+        _schema = schema,
+        _table = table,
         _uniqueColumns = uniqueColumns;
 
   /// Which column to order by and whether it's ascending
@@ -78,49 +85,83 @@ class SupabaseStreamBuilder {
     return this;
   }
 
-  /// Sends the request and returns a Stream.
-  Stream<List<Map<String, dynamic>>> execute() {
+  @override
+  StreamSubscription listen(
+    void Function(dynamic event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     _streamController = StreamController.broadcast(
       onCancel: () {
         if (!_streamController.hasListener) {
-          _supabaseRealtimeClient.unsubscribe();
+          _channel.unsubscribe();
           _streamController.close();
         }
       },
     );
     _getStreamData();
-    return _streamController.stream;
+    return _streamController.stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
   }
 
   Future<void> _getStreamData() async {
     _streamData = [];
-    _supabaseRealtimeClient =
-        _queryBuilder.on(SupabaseEventTypes.all, (payload) {
-      switch (payload.eventType) {
-        case 'INSERT':
-          final newRecord = Map<String, dynamic>.from(payload.newRecord!);
-          _streamData.add(newRecord);
-          break;
-        case 'UPDATE':
-          final updatedIndex = _streamData.indexWhere(
-            (element) => _isTargetRecord(record: element, payload: payload),
-          );
-          if (updatedIndex >= 0) {
-            _streamData[updatedIndex] = payload.newRecord!;
-          } else {
-            _addError('Could not find the updated record.');
-          }
-          break;
-        case 'DELETE':
-          final deletedIndex = _streamData.indexWhere(
-            (element) => _isTargetRecord(record: element, payload: payload),
-          );
-          if (deletedIndex >= 0) {
-            _streamData.removeAt(deletedIndex);
-          } else {
-            _addError('Could not find the deleted record.');
-          }
-          break;
+
+    _channel.on(
+        RealtimeListenTypes.postgresChanges,
+        ChannelFilter(
+          event: 'INSERT',
+          schema: _schema,
+          table: _table,
+          filter: _streamFilter != null
+              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
+              : null,
+        ), (payload, [ref]) {
+      final newRecord = Map<String, dynamic>.from(payload.newRecord!);
+      _streamData.add(newRecord);
+      _addStream();
+    }).on(
+        RealtimeListenTypes.postgresChanges,
+        ChannelFilter(
+          event: 'UPDATE',
+          schema: _schema,
+          table: _table,
+          filter: _streamFilter != null
+              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
+              : null,
+        ), (payload, [ref]) {
+      final updatedIndex = _streamData.indexWhere(
+        (element) => _isTargetRecord(record: element, payload: payload),
+      );
+
+      if (updatedIndex >= 0) {
+        _streamData[updatedIndex] = payload.newRecord!;
+      } else {
+        _addError('Could not find the updated record.');
+      }
+      _addStream();
+    }).on(
+        RealtimeListenTypes.postgresChanges,
+        ChannelFilter(
+          event: 'DELETE',
+          schema: _schema,
+          table: _table,
+          filter: _streamFilter != null
+              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
+              : null,
+        ), (payload, [ref]) {
+      final deletedIndex = _streamData.indexWhere(
+        (element) => _isTargetRecord(record: element, payload: payload),
+      );
+      if (deletedIndex >= 0) {
+        _streamData.removeAt(deletedIndex);
+      } else {
+        _addError('Could not find the deleted record.');
       }
       _addStream();
     }).subscribe();

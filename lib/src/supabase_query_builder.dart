@@ -1,15 +1,11 @@
 import 'package:http/http.dart';
-import 'package:supabase/src/supabase_realtime_client.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 import 'package:supabase/supabase.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
-  late final SupabaseRealtimeClient _subscription;
-  final Map<String, String> _headers;
+  late final RealtimeChannel _channel;
   final String _schema;
   final String _table;
-  final RealtimeClient _realtime;
-  final StreamPostgrestFilter? _streamFilter;
 
   SupabaseQueryBuilder(
     String url,
@@ -17,36 +13,16 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     Map<String, String> headers = const {},
     required String schema,
     required String table,
-    required StreamPostgrestFilter? streamFilter,
     Client? httpClient,
-  })  : _headers = headers,
+  })  : _channel = realtime.channel('stream'),
         _schema = schema,
         _table = table,
-        _realtime = realtime,
-        _streamFilter = streamFilter,
         super(
           url,
           headers: headers,
           schema: schema,
           httpClient: httpClient,
         );
-
-  /// Subscribe to realtime changes in your databse.
-  SupabaseRealtimeClient on(
-    SupabaseEventTypes event,
-    void Function(SupabaseRealtimePayload payload) callback,
-  ) {
-    if (_realtime.isConnected == false) {
-      _realtime.connect();
-    }
-    _subscription = SupabaseRealtimeClient(
-      _realtime,
-      _headers,
-      _schema,
-      _table,
-    );
-    return _subscription.on(event, callback);
-  }
 
   /// Notifies of data at the queried table
   ///
@@ -63,8 +39,10 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// ```
   SupabaseStreamBuilder stream(List<String> uniqueColumns) {
     return SupabaseStreamBuilder(
-      this,
-      streamFilter: _streamFilter,
+      queryBuilder: this,
+      channel: _channel,
+      schema: _schema,
+      table: _table,
       uniqueColumns: uniqueColumns,
     );
   }
