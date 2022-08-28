@@ -134,7 +134,7 @@ void main() {
 
   group('stream()', () {
     test('stream() emits data', () {
-      final stream = client.from('todos').stream(['id']).execute();
+      final stream = client.from('todos').stream(['id']);
       expect(
         stream,
         emitsInOrder([
@@ -152,8 +152,7 @@ void main() {
     });
 
     test('Can filter stream results with eq', () {
-      final stream =
-          client.from('todos:status=eq.true').stream(['id']).execute();
+      final stream = client.from('todos:status=eq.true').stream(['id']);
       expect(
         stream,
         emitsInOrder([
@@ -169,7 +168,7 @@ void main() {
     });
 
     test('stream() with order', () {
-      final stream = client.from('todos').stream(['id']).order('id').execute();
+      final stream = client.from('todos').stream(['id']).order('id');
       expect(
         stream,
         emitsInOrder([
@@ -187,8 +186,7 @@ void main() {
     });
 
     test('stream() with limit', () {
-      final stream =
-          client.from('todos').stream(['id']).order('id').limit(2).execute();
+      final stream = client.from('todos').stream(['id']).order('id').limit(2);
       expect(
         stream,
         emitsInOrder([
@@ -209,13 +207,15 @@ void main() {
     /// Constructing Supabase query within a realtime callback caused exception
     /// https://github.com/supabase-community/supabase-flutter/issues/81
     test('Calling Postgrest within realtime callback', () async {
-      client.from('todos').on(SupabaseEventTypes.all, (event) async {
+      client.channel('todos').on(RealtimeListenTypes.postgresChanges,
+          ChannelFilter(event: '*', schema: 'public', table: 'todos'), (event,
+              [_]) async {
         await client.from('todos').select('task, status');
       }).subscribe();
 
       await Future.delayed(const Duration(milliseconds: 700));
 
-      await client.removeAllSubscriptions();
+      await client.removeAllChannels();
     });
   });
 }
