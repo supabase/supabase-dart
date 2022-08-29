@@ -24,7 +24,7 @@ class SupabaseClient {
   late final GoTrueClient auth;
   late final RealtimeClient realtime;
   late final PostgrestClient rest;
-  String? changedAccessToken;
+  String? _changedAccessToken;
 
   SupabaseClient(
     this.supabaseUrl,
@@ -155,9 +155,9 @@ class SupabaseClient {
 
   void _handleTokenChanged(AuthChangeEvent event, String? token) {
     if (event == AuthChangeEvent.tokenRefreshed ||
-        event == AuthChangeEvent.signedIn && changedAccessToken != token) {
+        event == AuthChangeEvent.signedIn && _changedAccessToken != token) {
       // Token has changed
-      changedAccessToken = token;
+      _changedAccessToken = token;
       realtime.setAuth(token);
     } else if (event == AuthChangeEvent.signedOut ||
         event == AuthChangeEvent.userDeleted) {
