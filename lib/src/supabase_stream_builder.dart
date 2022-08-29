@@ -33,6 +33,9 @@ class SupabaseStreamBuilder extends Stream {
 
   final String _table;
 
+  /// Used to identify which row has changed
+  final List<String> _uniqueColumns;
+
   /// StreamController for `stream()` method.
   late final StreamController<List<Map<String, dynamic>>> _streamController;
 
@@ -40,10 +43,13 @@ class SupabaseStreamBuilder extends Stream {
   late final List<Map<String, dynamic>> _streamData;
 
   /// `eq` filter used for both postgrest and realtime
-  late final StreamPostgrestFilter? _streamFilter;
+  StreamPostgrestFilter? _streamFilter;
 
-  /// Used to identify which row has changed
-  final List<String> _uniqueColumns;
+  /// Which column to order by and whether it's ascending
+  _Order? _orderBy;
+
+  /// Count of record to be returned
+  int? _limit;
 
   SupabaseStreamBuilder({
     required SupabaseQueryBuilder queryBuilder,
@@ -57,11 +63,17 @@ class SupabaseStreamBuilder extends Stream {
         _table = table,
         _uniqueColumns = uniqueColumns;
 
-  /// Which column to order by and whether it's ascending
-  _Order? _orderBy;
-
-  /// Count of record to be returned
-  int? _limit;
+  /// Filters the results where [column] equals [value].
+  ///
+  /// Only one filter can be applied to `.stream()` and any proceding filters will override the previous.
+  ///
+  /// ```dart
+  /// supabase.from('users').stream(['id']).eq('name', 'Supabase');
+  /// ```
+  SupabaseStreamBuilder eq(String column, dynamic value) {
+    _streamFilter = StreamPostgrestFilter(column: column, value: value);
+    return this;
+  }
 
   /// Orders the result with the specified [column].
   ///
@@ -122,7 +134,7 @@ class SupabaseStreamBuilder extends Stream {
               ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
               : null,
         ), (payload, [ref]) {
-      final newRecord = Map<String, dynamic>.from(payload.newRecord!);
+      final newRecord = Map<String, dynamic>.from(payload['new']!);
       _streamData.add(newRecord);
       _addStream();
     }).on(
@@ -140,7 +152,7 @@ class SupabaseStreamBuilder extends Stream {
       );
 
       if (updatedIndex >= 0) {
-        _streamData[updatedIndex] = payload.newRecord!;
+        _streamData[updatedIndex] = payload['new']!;
       } else {
         _addError('Could not find the updated record.');
       }
@@ -187,13 +199,13 @@ class SupabaseStreamBuilder extends Stream {
 
   bool _isTargetRecord({
     required Map<String, dynamic> record,
-    required SupabaseRealtimePayload payload,
+    required Map<String, dynamic> payload,
   }) {
     late final Map<String, dynamic> targetRecord;
-    if (payload.eventType == 'UPDATE') {
-      targetRecord = payload.newRecord!;
-    } else if (payload.eventType == 'DELETE') {
-      targetRecord = payload.oldRecord!;
+    if (payload['eventType'] == 'UPDATE') {
+      targetRecord = payload['new']!;
+    } else if (payload['eventType'] == 'DELETE') {
+      targetRecord = payload['old']!;
     }
     return _uniqueColumns
         .every((column) => record[column] == targetRecord[column]);
