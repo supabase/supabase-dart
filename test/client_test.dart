@@ -11,22 +11,11 @@ void main() {
       client = SupabaseClient(supabaseUrl, supabaseKey);
     });
 
-    // test('postgrest builder url', () async {
-    //   final builder = client.from('users').select();
-    //   expect(builder.url.toString(), '/rest/v1/users?select=%2A');
-    // });
-
     test('X-Client-Info header is set properly on auth', () {
       final xClientHeaderBeforeSlash =
           client.auth.api.headers['X-Client-Info']!.split('/').first;
       expect(xClientHeaderBeforeSlash, 'supabase-dart');
     });
-
-    // test('X-Client-Info header is set properly on postgrest', () {
-    //   final xClientHeaderBeforeSlash =
-    //       client.from('cats').headers['X-Client-Info']!.split('/').first;
-    //   expect(xClientHeaderBeforeSlash, 'supabase-dart');
-    // });
 
     test('X-Client-Info header is set properly on realtime', () {
       final xClientHeaderBeforeSlash =
@@ -60,11 +49,6 @@ void main() {
       final xClientInfoHeader = client.auth.api.headers['X-Client-Info'];
       expect(xClientInfoHeader, 'supabase-flutter/0.0.0');
     });
-
-    // test('X-Client-Info header is set properly on postgrest', () {
-    //   final xClientInfoHeader = client.from('cats').headers['X-Client-Info'];
-    //   expect(xClientInfoHeader, 'supabase-flutter/0.0.0');
-    // });
 
     test('X-Client-Info header is set properly on realtime', () {
       final xClientInfoHeader = client.realtime.headers['X-Client-Info'];
