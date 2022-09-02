@@ -97,6 +97,20 @@ class SupabaseStreamBuilder extends Stream {
     return this;
   }
 
+  @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
+  Stream<List<Map<String, dynamic>>> execute() {
+    _streamController = StreamController.broadcast(
+      onCancel: () {
+        if (!_streamController.hasListener) {
+          _channel.unsubscribe();
+          _streamController.close();
+        }
+      },
+    );
+    _getStreamData();
+    return _streamController.stream;
+  }
+
   @override
   StreamSubscription<List<Map<String, dynamic>>> listen(
     void Function(List<Map<String, dynamic>> event)? onData, {
