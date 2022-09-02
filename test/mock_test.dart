@@ -82,6 +82,14 @@ void main() {
           }
           hasSentData = true;
 
+          /// `filter` might be there or not depending on whether is a filter set
+          /// to the realtime subscription, so include the filter if the request
+          /// includes a filter.
+          final requestJson = jsonDecode(request);
+          final postgresFilter = requestJson['payload']['config']
+                  ['postgres_changes']
+              .first['filter'];
+
           final replyString = jsonEncode({
             'event': 'phx_reply',
             'payload': {
@@ -91,29 +99,32 @@ void main() {
                     'id': 77086988,
                     'event': 'INSERT',
                     'schema': 'public',
-                    'table': 'todos'
+                    'table': 'todos',
+                    if (postgresFilter != null) 'filter': postgresFilter,
                   },
                   {
                     'id': 25993878,
                     'event': 'UPDATE',
                     'schema': 'public',
-                    'table': 'todos'
+                    'table': 'todos',
+                    if (postgresFilter != null) 'filter': postgresFilter,
                   },
                   {
                     'id': 48673474,
                     'event': 'DELETE',
                     'schema': 'public',
-                    'table': 'todos'
+                    'table': 'todos',
+                    if (postgresFilter != null) 'filter': postgresFilter,
                   }
                 ]
               },
               'status': 'ok'
             },
             'ref': '1',
-            'topic': 'realtime:stream'
+            'topic': 'realtime:public:todos'
           });
           webSocket!.add(replyString);
-          await Future.delayed(const Duration(milliseconds: 10));
+          await Future.delayed(Duration.zero);
           final topic = (jsonDecode(request as String) as Map)['topic'];
           final jsonString = jsonEncode({
             'topic': topic,
@@ -127,6 +138,7 @@ void main() {
                 'schema': 'public',
                 'table': 'todos',
                 'type': 'INSERT',
+                if (postgresFilter != null) 'filter': postgresFilter,
                 'columns': [
                   {
                     'name': 'id',
