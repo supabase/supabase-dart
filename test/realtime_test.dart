@@ -53,7 +53,7 @@ void main() {
               ),
               (payload, [ref]) {})
           .subscribe(
-            (event, {errorMsg}) {},
+            (event, [errorMsg]) {},
           );
       expect(
         () => channel.subscribe(),

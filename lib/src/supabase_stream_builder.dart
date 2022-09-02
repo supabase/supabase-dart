@@ -12,7 +12,7 @@ class StreamPostgrestFilter {
   final String column;
 
   /// Value of the eq filter
-  final String value;
+  final dynamic value;
 }
 
 class _Order {
@@ -25,7 +25,7 @@ class _Order {
 }
 
 class SupabaseStreamBuilder extends Stream {
-  final SupabaseQueryBuilder _queryBuilder;
+  final PostgrestQueryBuilder _queryBuilder;
 
   final RealtimeChannel _channel;
 
@@ -52,7 +52,7 @@ class SupabaseStreamBuilder extends Stream {
   int? _limit;
 
   SupabaseStreamBuilder({
-    required SupabaseQueryBuilder queryBuilder,
+    required PostgrestQueryBuilder queryBuilder,
     required RealtimeChannel channel,
     required String schema,
     required String table,
@@ -98,8 +98,8 @@ class SupabaseStreamBuilder extends Stream {
   }
 
   @override
-  StreamSubscription listen(
-    void Function(dynamic event)? onData, {
+  StreamSubscription<List<Map<String, dynamic>>> listen(
+    void Function(List<Map<String, dynamic>> event)? onData, {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
@@ -191,10 +191,16 @@ class SupabaseStreamBuilder extends Stream {
       transformQuery = (transformQuery ?? query).limit(_limit!);
     }
 
-    final data = await (transformQuery ?? query);
-    final rows = List<Map<String, dynamic>>.from(data as List);
-    _streamData.addAll(rows);
-    _addStream();
+    try {
+      final data = await (transformQuery ?? query);
+      final rows = List<Map<String, dynamic>>.from(data as List);
+      _streamData.addAll(rows);
+      _addStream();
+    } on PostgrestException catch (error) {
+      _addError(error.message);
+    } catch (error) {
+      _addError(error.toString());
+    }
   }
 
   bool _isTargetRecord({

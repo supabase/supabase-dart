@@ -12,9 +12,7 @@ dependencies:
   gotrue: ^1.0.0-dev.1
   http: ^0.13.4
   postgrest: ^1.0.0-dev.1
-  # realtime_client: ^0.1.15
-  realtime_client: 
-    path: ../realtime-dart
+  realtime_client: ^1.0.0-dev.1
   storage_client: ^1.0.0-dev.1
 
 dev_dependencies:

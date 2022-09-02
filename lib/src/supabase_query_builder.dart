@@ -3,7 +3,7 @@ import 'package:supabase/src/supabase_stream_builder.dart';
 import 'package:supabase/supabase.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
-  late final RealtimeChannel _channel;
+  final RealtimeClient _realtime;
   final String _schema;
   final String _table;
 
@@ -14,7 +14,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     required String schema,
     required String table,
     Client? httpClient,
-  })  : _channel = realtime.channel('stream'),
+  })  : _realtime = realtime,
         _schema = schema,
         _table = table,
         super(
@@ -38,9 +38,10 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// supabase.from('chats:room_id=eq.123').stream(['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream(List<String> uniqueColumns) {
+    final channel = _realtime.channel('$_schema:$_table');
     return SupabaseStreamBuilder(
       queryBuilder: this,
-      channel: _channel,
+      channel: channel,
       schema: _schema,
       table: _table,
       uniqueColumns: uniqueColumns,

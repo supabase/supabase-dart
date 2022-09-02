@@ -92,7 +92,8 @@ class SupabaseClient {
   }
 
   /// Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
-  RealtimeChannel channel(String name, {Map<String, dynamic>? opts}) {
+  RealtimeChannel channel(String name,
+      {RealtimeChannelConfig opts = const RealtimeChannelConfig()}) {
     return realtime.channel(name, opts);
   }
 
