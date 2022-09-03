@@ -81,27 +81,82 @@ void main() {
             return;
           }
           hasSentData = true;
-          await Future.delayed(const Duration(milliseconds: 10));
+
+          /// `filter` might be there or not depending on whether is a filter set
+          /// to the realtime subscription, so include the filter if the request
+          /// includes a filter.
+          final requestJson = jsonDecode(request);
+          final postgresFilter = requestJson['payload']['config']
+                  ['postgres_changes']
+              .first['filter'];
+
+          final replyString = jsonEncode({
+            'event': 'phx_reply',
+            'payload': {
+              'response': {
+                'postgres_changes': [
+                  {
+                    'id': 77086988,
+                    'event': 'INSERT',
+                    'schema': 'public',
+                    'table': 'todos',
+                    if (postgresFilter != null) 'filter': postgresFilter,
+                  },
+                  {
+                    'id': 25993878,
+                    'event': 'UPDATE',
+                    'schema': 'public',
+                    'table': 'todos',
+                    if (postgresFilter != null) 'filter': postgresFilter,
+                  },
+                  {
+                    'id': 48673474,
+                    'event': 'DELETE',
+                    'schema': 'public',
+                    'table': 'todos',
+                    if (postgresFilter != null) 'filter': postgresFilter,
+                  }
+                ]
+              },
+              'status': 'ok'
+            },
+            'ref': '1',
+            'topic': 'realtime:public:todos'
+          });
+          webSocket!.add(replyString);
+          await Future.delayed(Duration(milliseconds: 10));
           final topic = (jsonDecode(request as String) as Map)['topic'];
           final jsonString = jsonEncode({
             'topic': topic,
-            'event': 'INSERT',
+            'event': 'postgres_changes',
             'ref': null,
             'payload': {
-              'commit_timestamp': '2021-08-01T08:00:20Z',
-              'record': {'id': 3, 'task': 'task 3', 'status': 't'},
-              'schema': 'public',
-              'table': 'todos',
-              'type': 'INSERT',
-              'columns': [
-                {
-                  'name': 'id',
-                  'type': 'int4',
-                  'type_modifier': 4294967295,
-                },
-                {'name': 'task', 'type': 'text', 'type_modifier': 4294967295},
-                {'name': 'status', 'type': 'bool', 'type_modifier': 4294967295},
-              ],
+              'ids': [77086988],
+              'data': {
+                'commit_timestamp': '2021-08-01T08:00:20Z',
+                'record': {'id': 3, 'task': 'task 3', 'status': 't'},
+                'schema': 'public',
+                'table': 'todos',
+                'type': 'INSERT',
+                if (postgresFilter != null) 'filter': postgresFilter,
+                'columns': [
+                  {
+                    'name': 'id',
+                    'type': 'int4',
+                    'type_modifier': 4294967295,
+                  },
+                  {
+                    'name': 'task',
+                    'type': 'text',
+                    'type_modifier': 4294967295,
+                  },
+                  {
+                    'name': 'status',
+                    'type': 'bool',
+                    'type_modifier': 4294967295,
+                  },
+                ],
+              },
             },
           });
           webSocket!.add(jsonString);
@@ -150,8 +205,8 @@ void main() {
   });
 
   group('stream()', () {
-    test('stream() emits data', () {
-      final stream = client.from('todos').stream(['id']).execute();
+    test('emits data', () {
+      final stream = client.from('todos').stream(['id']);
       expect(
         stream,
         emitsInOrder([
@@ -168,9 +223,8 @@ void main() {
       );
     });
 
-    test('Can filter stream results with eq', () {
-      final stream =
-          client.from('todos:status=eq.true').stream(['id']).execute();
+    test('can filter stream results with eq', () {
+      final stream = client.from('todos').stream(['id']).eq('status', true);
       expect(
         stream,
         emitsInOrder([
@@ -185,8 +239,8 @@ void main() {
       );
     });
 
-    test('stream() with order', () {
-      final stream = client.from('todos').stream(['id']).order('id').execute();
+    test('with order', () {
+      final stream = client.from('todos').stream(['id']).order('id');
       expect(
         stream,
         emitsInOrder([
@@ -203,9 +257,8 @@ void main() {
       );
     });
 
-    test('stream() with limit', () {
-      final stream =
-          client.from('todos').stream(['id']).order('id').limit(2).execute();
+    test('with limit', () {
+      final stream = client.from('todos').stream(['id']).order('id').limit(2);
       expect(
         stream,
         emitsInOrder([
@@ -226,13 +279,15 @@ void main() {
     /// Constructing Supabase query within a realtime callback caused exception
     /// https://github.com/supabase-community/supabase-flutter/issues/81
     test('Calling Postgrest within realtime callback', () async {
-      client.from('todos').on(SupabaseEventTypes.all, (event) async {
-        await client.from('todos').select('task, status');
+      client.channel('todos').on(RealtimeListenTypes.postgresChanges,
+          ChannelFilter(event: '*', schema: 'public', table: 'todos'), (event,
+              [_]) async {
+        client.from('todos');
       }).subscribe();
 
       await Future.delayed(const Duration(milliseconds: 700));
 
-      await client.removeAllSubscriptions();
+      await client.removeAllChannels();
     });
   });
 }

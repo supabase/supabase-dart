@@ -1,4 +1,4 @@
-enum SupabaseEventTypes { insert, update, delete, all }
+enum SupabaseEventTypes { insert, update, delete, all, broadcast, presence }
 
 extension SupabaseEventTypesName on SupabaseEventTypes {
   String name() {

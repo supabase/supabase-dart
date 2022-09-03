@@ -7,6 +7,7 @@ import 'package:web_socket_channel/io.dart';
 void main() {
   late HttpServer mockServer;
   late SupabaseClient client;
+  late RealtimeChannel channel;
 
   group('Realtime subscriptions: ', () {
     setUp(() async {
@@ -23,8 +24,12 @@ void main() {
         'http://${mockServer.address.host}:${mockServer.port}',
         'supabaseKey',
       );
+
+      channel = client.channel('realtime');
     });
+
     tearDown(() async {
+      await client.removeAllChannels();
       await mockServer.close();
     });
 
@@ -36,107 +41,100 @@ void main() {
     /// expectation:
     /// - error
     test('subscribe on existing subscription fail', () {
-      final subscription = client
-          .from('countries')
-          .on(SupabaseEventTypes.insert, (_) {})
+      channel
+          .on(
+              RealtimeListenTypes.postgresChanges,
+              ChannelFilter(
+                event: 'INSERT',
+                schema: 'public',
+                table: 'countries',
+              ),
+              (payload, [ref]) {})
           .subscribe(
-            (event, {errorMsg}) {},
+            (event, [errorMsg]) {},
           );
       expect(
-        () => subscription.subscribe(),
+        () => channel.subscribe(),
         throwsA(const TypeMatcher<String>()),
       );
     });
 
-    /// two realtime connections
+    /// two realtime channels
     ///
-    /// 1. subscribe on table insert event
-    /// 2. subscribe on table update event
+    /// 1. `realtime` channel
+    /// 2. `anotherChannel` channel
     ///
     /// expectation:
-    /// - 2 subscriptions
-    test('two realtime connections', () {
-      client
-          .from('countries')
-          .on(SupabaseEventTypes.insert, (_) {})
-          .subscribe();
-      client
-          .from('countries')
-          .on(SupabaseEventTypes.update, (_) {})
-          .subscribe();
-      final subscriptions = client.getSubscriptions();
+    /// - 2 channels
+    test('two realtime channels', () {
+      client.channel('anotherChannel');
+
+      final channels = client.getChannels();
+
       expect(
-        subscriptions.length,
+        channels.length,
         2,
       );
     });
 
     /// remove realtime connection
     ///
-    /// 1. subscribe on table insert event
-    /// 2. subscribe on table update event
-    /// 3. remove subscription on table insert event
+    /// 1. create another Channel
+    /// 2. remove `anotherChannel`
 
     /// expectation:
-    /// - result without error
-    /// - only one subscription
+    /// - status is `ok`
+    /// - only one channel
     test('remove realtime connection', () async {
-      final first = client
-          .from('countries')
-          .on(SupabaseEventTypes.insert, (event, {error}) {})
-          .subscribe();
+      final anotherChannel = client.channel('anotherChannel');
 
-      client
-          .from('countries')
-          .on(SupabaseEventTypes.update, (event, {error}) {})
-          .subscribe();
-      final result = await client.removeSubscription(first);
+      channel.subscribe();
+      anotherChannel.subscribe();
+
       expect(
-        result.error,
-        isNull,
+        client.getChannels().length,
+        2,
       );
 
+      final status = await client.removeChannel(anotherChannel);
+
+      expect(status, 'ok');
+
       expect(
-        client.getSubscriptions().length,
+        client.getChannels().length,
         1,
       );
     });
 
     /// remove multiple realtime connection
     ///
-    /// 1. subscribe on table insert event
-    /// 2. subscribe on table update event
-    /// 3. remove both subscriptions
+    /// 1. create another channel
+    /// 2. remove both channels
     ///
     /// expectation:
-    /// - result 1 without error
-    /// - result 2 without error
+    /// - status 1 without error
+    /// - status 2 without error
     /// - no subscriptions
     test('remove multiple realtime connection', () async {
-      final first = client
-          .from('countries')
-          .on(SupabaseEventTypes.insert, (event, {error}) {})
-          .subscribe();
-      final second = client
-          .from('countries')
-          .on(SupabaseEventTypes.update, (event, {error}) {})
-          .subscribe();
-      await Future.delayed(const Duration(seconds: 2), () {});
+      final anotherChannel = client.channel('anotherChannel');
 
-      final result1 = await client.removeSubscription(first);
-      final result2 = await client.removeSubscription(second);
+      channel.subscribe();
+      anotherChannel.subscribe();
+
+      final status1 = await client.removeChannel(channel);
+      final status2 = await client.removeChannel(anotherChannel);
 
       expect(
-        result1.error,
-        isNull,
+        status1,
+        'ok',
       );
       expect(
-        result2.error,
-        isNull,
+        status2,
+        'ok',
       );
 
       expect(
-        client.getSubscriptions().length,
+        client.getChannels().length,
         0,
       );
     });
@@ -152,17 +150,12 @@ void main() {
     /// - result with 2 items
     /// - no subscriptions
     test('remove all realtime connection', () async {
-      client
-          .from('countries')
-          .on(SupabaseEventTypes.insert, (event, {error}) {})
-          .subscribe();
+      final anotherChannel = client.channel('anotherChannel');
 
-      client
-          .from('countries')
-          .on(SupabaseEventTypes.update, (event, {error}) {})
-          .subscribe();
+      channel.subscribe();
+      anotherChannel.subscribe();
 
-      final result1 = await client.removeAllSubscriptions();
+      final result1 = await client.removeAllChannels();
       expect(
         result1,
         isNotEmpty,
@@ -173,8 +166,8 @@ void main() {
       );
 
       expect(
-        client.getSubscriptions().length,
-        0,
+        client.getChannels().length,
+        isZero,
       );
     });
   });

@@ -1,15 +1,11 @@
 import 'package:http/http.dart';
-import 'package:supabase/src/supabase_realtime_client.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 import 'package:supabase/supabase.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
-  late final SupabaseRealtimeClient _subscription;
-  final Map<String, String> _headers;
+  final RealtimeClient _realtime;
   final String _schema;
   final String _table;
-  final RealtimeClient _realtime;
-  final StreamPostgrestFilter? _streamFilter;
 
   SupabaseQueryBuilder(
     String url,
@@ -17,36 +13,16 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     Map<String, String> headers = const {},
     required String schema,
     required String table,
-    required StreamPostgrestFilter? streamFilter,
     Client? httpClient,
-  })  : _headers = headers,
+  })  : _realtime = realtime,
         _schema = schema,
         _table = table,
-        _realtime = realtime,
-        _streamFilter = streamFilter,
         super(
           url,
           headers: headers,
           schema: schema,
           httpClient: httpClient,
         );
-
-  /// Subscribe to realtime changes in your databse.
-  SupabaseRealtimeClient on(
-    SupabaseEventTypes event,
-    void Function(SupabaseRealtimePayload payload) callback,
-  ) {
-    if (_realtime.isConnected() == false) {
-      _realtime.connect();
-    }
-    _subscription = SupabaseRealtimeClient(
-      _realtime,
-      _headers,
-      _schema,
-      _table,
-    );
-    return _subscription.on(event, callback);
-  }
 
   /// Notifies of data at the queried table
   ///
@@ -62,9 +38,12 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// supabase.from('chats:room_id=eq.123').stream(['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream(List<String> uniqueColumns) {
+    final channel = _realtime.channel('$_schema:$_table');
     return SupabaseStreamBuilder(
-      this,
-      streamFilter: _streamFilter,
+      queryBuilder: this,
+      channel: channel,
+      schema: _schema,
+      table: _table,
       uniqueColumns: uniqueColumns,
     );
   }
