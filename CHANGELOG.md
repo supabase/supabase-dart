@@ -1,3 +1,30 @@
+## [1.0.0-dev.5]
+
+- BREAKING: update realtime to [v1.0.0-dev.2](https://github.com/supabase-community/realtime-dart/blob/main/CHANGELOG.md#100-dev2)
+- deprecated: `.execute()` and `.stream()` can be used without it
+- BREAKING: filters on `.stream()` no longer takes the realtime syntax. `.eq()` method should be used to apply `eq` filter on `.stream()`. 
+```dart
+// before
+supabase.from('my_table:title=eq.Supabase')
+  .stream(['id'])
+  .order('created_at')
+  .limit(10)
+  .execute()
+  .listen((payload) {
+    // do something with payload here
+  });
+
+// now
+supabase.from('my_table')
+  .stream(['id'])
+  .eq('title', 'Supabase')
+  .order('created_at')
+  .limit(10)
+  .listen((payload) {
+    // do something with payload here
+  });
+```
+
 ## [1.0.0-dev.4]
 
 - fix: update storage to [v1.0.0-dev.3](https://github.com/supabase-community/storage-dart/blob/main/CHANGELOG.md#100-dev3)
