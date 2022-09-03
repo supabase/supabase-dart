@@ -124,7 +124,7 @@ void main() {
             'topic': 'realtime:public:todos'
           });
           webSocket!.add(replyString);
-          await Future.delayed(Duration.zero);
+          await Future.delayed(Duration(milliseconds: 10));
           final topic = (jsonDecode(request as String) as Map)['topic'];
           final jsonString = jsonEncode({
             'topic': topic,
@@ -205,7 +205,7 @@ void main() {
   });
 
   group('stream()', () {
-    test('stream() emits data', () {
+    test('emits data', () {
       final stream = client.from('todos').stream(['id']);
       expect(
         stream,
@@ -223,7 +223,7 @@ void main() {
       );
     });
 
-    test('Can filter stream results with eq', () {
+    test('can filter stream results with eq', () {
       final stream = client.from('todos').stream(['id']).eq('status', true);
       expect(
         stream,
@@ -239,7 +239,7 @@ void main() {
       );
     });
 
-    test('stream() with order', () {
+    test('with order', () {
       final stream = client.from('todos').stream(['id']).order('id');
       expect(
         stream,
@@ -257,7 +257,7 @@ void main() {
       );
     });
 
-    test('stream() with limit', () {
+    test('with limit', () {
       final stream = client.from('todos').stream(['id']).order('id').limit(2);
       expect(
         stream,
