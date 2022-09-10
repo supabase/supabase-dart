@@ -24,9 +24,9 @@ class _Order {
   final bool ascending;
 }
 
-typedef _StreamOutput = List<Map<String, dynamic>>;
+typedef SupabaseStreamEvent = List<Map<String, dynamic>>;
 
-class SupabaseStreamBuilder extends Stream<_StreamOutput> {
+class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   final PostgrestQueryBuilder _queryBuilder;
 
   final RealtimeChannel _channel;
@@ -39,10 +39,10 @@ class SupabaseStreamBuilder extends Stream<_StreamOutput> {
   final List<String> _uniqueColumns;
 
   /// StreamController for `stream()` method.
-  late final StreamController<_StreamOutput> _streamController;
+  late final StreamController<SupabaseStreamEvent> _streamController;
 
   /// Contains the combined data of postgrest and realtime to emit as stream.
-  late final _StreamOutput _streamData;
+  late final SupabaseStreamEvent _streamData;
 
   /// `eq` filter used for both postgrest and realtime
   StreamPostgrestFilter? _streamFilter;
@@ -100,7 +100,7 @@ class SupabaseStreamBuilder extends Stream<_StreamOutput> {
   }
 
   @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
-  Stream<_StreamOutput> execute() {
+  Stream<SupabaseStreamEvent> execute() {
     _streamController = StreamController.broadcast(
       onCancel: () {
         if (!_streamController.hasListener) {
@@ -114,8 +114,8 @@ class SupabaseStreamBuilder extends Stream<_StreamOutput> {
   }
 
   @override
-  StreamSubscription<_StreamOutput> listen(
-    void Function(_StreamOutput event)? onData, {
+  StreamSubscription<SupabaseStreamEvent> listen(
+    void Function(SupabaseStreamEvent event)? onData, {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
@@ -209,7 +209,7 @@ class SupabaseStreamBuilder extends Stream<_StreamOutput> {
 
     try {
       final data = await (transformQuery ?? query);
-      final rows = _StreamOutput.from(data as List);
+      final rows = SupabaseStreamEvent.from(data as List);
       _streamData.addAll(rows);
       _addStream();
     } on PostgrestException catch (error) {
