@@ -10,6 +10,7 @@ jobs:
   test:
     name: Test / OS ${{ matrix.os }} / Node ${{ matrix.node }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         node: ['12']
