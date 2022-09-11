@@ -1,3 +1,7 @@
+## [1.0.0-dev.6]
+
+- fix: `.stream()` method typing issue
+
 ## [1.0.0-dev.5]
 
 - BREAKING: update realtime to [v1.0.0-dev.2](https://github.com/supabase-community/realtime-dart/blob/main/CHANGELOG.md#100-dev2)
