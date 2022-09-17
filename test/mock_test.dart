@@ -86,7 +86,7 @@ void main() {
           /// to the realtime subscription, so include the filter if the request
           /// includes a filter.
           final requestJson = jsonDecode(request);
-          final postgresFilter = requestJson['payload']['config']
+          final String? postgresFilter = requestJson['payload']['config']
                   ['postgres_changes']
               .first['filter'];
 
@@ -124,9 +124,11 @@ void main() {
             'topic': 'realtime:public:todos'
           });
           webSocket!.add(replyString);
-          await Future.delayed(Duration(milliseconds: 10));
+
+          // Send an insert event
+          await Future.delayed(Duration(milliseconds: 300));
           final topic = (jsonDecode(request as String) as Map)['topic'];
-          final jsonString = jsonEncode({
+          final insertString = jsonEncode({
             'topic': topic,
             'event': 'postgres_changes',
             'ref': null,
@@ -159,7 +161,68 @@ void main() {
               },
             },
           });
-          webSocket!.add(jsonString);
+          webSocket!.add(insertString);
+
+          // Send an update event for id = 2
+          await Future.delayed(Duration(milliseconds: 10));
+          final updateString = jsonEncode({
+            'topic': topic,
+            'ref': null,
+            'event': 'postgres_changes',
+            'payload': {
+              'ids': [25993878],
+              'data': {
+                'columns': [
+                  {'name': 'id', 'type': 'int4', 'type_modifier': 4294967295},
+                  {'name': 'task', 'type': 'text', 'type_modifier': 4294967295},
+                  {
+                    'name': 'status',
+                    'type': 'bool',
+                    'type_modifier': 4294967295
+                  },
+                ],
+                'commit_timestamp': '2021-08-01T08:00:30Z',
+                'errors': null,
+                'old_record': {'id': 2},
+                'record': {'id': 2, 'task': 'task 2 updated', 'status': 'f'},
+                'schema': 'public',
+                'table': 'todos',
+                'type': 'UPDATE',
+                if (postgresFilter != null) 'filter': postgresFilter,
+              },
+            },
+          });
+          webSocket!.add(updateString);
+
+          // Send delete event for id=2
+          await Future.delayed(Duration(milliseconds: 10));
+          final deleteString = jsonEncode({
+            'ref': null,
+            'topic': topic,
+            'event': 'postgres_changes',
+            'payload': {
+              'data': {
+                'columns': [
+                  {'name': 'id', 'type': 'int4', 'type_modifier': 4294967295},
+                  {'name': 'task', 'type': 'text', 'type_modifier': 4294967295},
+                  {
+                    'name': 'status',
+                    'type': 'bool',
+                    'type_modifier': 4294967295
+                  },
+                ],
+                'commit_timestamp': '2022-09-14T02:12:52Z',
+                'errors': null,
+                'old_record': {'id': 2},
+                'schema': 'public',
+                'table': 'todos',
+                'type': 'DELETE',
+                if (postgresFilter != null) 'filter': postgresFilter,
+              },
+              'ids': [48673474]
+            },
+          });
+          webSocket!.add(deleteString);
         });
       } else {
         request.response
@@ -178,13 +241,17 @@ void main() {
         'X-Client-Info': 'supabase-flutter/0.0.0',
       },
     );
-    handleRequests(mockServer);
     hasListener = false;
     hasSentData = false;
+    handleRequests(mockServer);
   });
 
   tearDown(() async {
     listener?.cancel();
+
+    // Wait for the realtime updates to come through
+    await Future.delayed(Duration(milliseconds: 100));
+
     await webSocket?.close();
     await mockServer.close();
   });
@@ -217,6 +284,15 @@ void main() {
           containsAllInOrder([
             {'id': 1, 'task': 'task 1', 'status': true},
             {'id': 2, 'task': 'task 2', 'status': false},
+            {'id': 3, 'task': 'task 3', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 2, 'task': 'task 2 updated', 'status': false},
+            {'id': 3, 'task': 'task 3', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
             {'id': 3, 'task': 'task 3', 'status': true},
           ]),
         ]),
@@ -253,6 +329,15 @@ void main() {
             {'id': 2, 'task': 'task 2', 'status': false},
             {'id': 1, 'task': 'task 1', 'status': true},
           ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 2, 'task': 'task 2 updated', 'status': false},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 1, 'task': 'task 1', 'status': true},
+          ]),
         ]),
       );
     });
@@ -269,6 +354,14 @@ void main() {
           containsAllInOrder([
             {'id': 3, 'task': 'task 3', 'status': true},
             {'id': 2, 'task': 'task 2', 'status': false},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 2, 'task': 'task 2 updated', 'status': false},
+          ]),
+          containsAllInOrder([
+            {'id': 3, 'task': 'task 3', 'status': true},
+            {'id': 1, 'task': 'task 1', 'status': true},
           ]),
         ]),
       );
