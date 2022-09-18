@@ -1,3 +1,13 @@
+## [1.0.0-dev.7]
+
+- BREAKING: update relatime to [v1.0.0-dev.3](https://github.com/supabase-community/realtime-dart/blob/main/CHANGELOG.md#100-dev3)
+  - update payload shape on old version of realtime server to match the new version
+- fix: update gotrue to [v1.0.0-dev.4](https://github.com/supabase-community/gotrue-dart/blob/main/CHANGELOG.md#100-dev4)
+  - fix: encoding issue with some languages
+- fix: update postgrest to [v1.0.0-dev.4](https://github.com/supabase-community/postgrest-dart/blob/master/CHANGELOG.md#100-dev4)
+  - fix: update insert documentation to reflect new `returning` behavior
+
+
 ## [1.0.0-dev.6]
 
 - fix: `.stream()` method typing issue
