@@ -15,6 +15,7 @@ void main() {
 
   Future<void> handleRequests(HttpServer server) async {
     await for (final HttpRequest request in server) {
+      print(request.uri.toString());
       final headers = request.headers;
       if (headers.value('X-Client-Info') != 'supabase-flutter/0.0.0') {
         throw 'Proper header not set';
@@ -272,6 +273,34 @@ void main() {
   });
 
   group('stream()', () {
+    test("ddd", () async {
+      final stream =
+          Stream.periodic(Duration(milliseconds: 100)).asBroadcastStream();
+      final sub = stream.listen((event) {
+        print("1" + event);
+      });
+
+      await Future.delayed(Duration(milliseconds: 100));
+
+      final sub2 = stream.listen((event) {
+        print("2" + event);
+      });
+    });
+
+    test("listen, cancel and listen again", () async {
+      final stream = client.from('todos').stream(['id']);
+      final sub = stream.listen(expectAsync1((event) {}, count: 4));
+      await Future.delayed(Duration(milliseconds: 5000));
+
+      await sub.cancel();
+      await Future.delayed(Duration(milliseconds: 5000));
+      hasSentData = false;
+      hasListener = false;
+
+      final sub2 = stream.listen(expectAsync1((event) {}, count: 4));
+
+      // await Future.delayed(Duration(milliseconds: 5000));
+    });
     test('emits data', () {
       final stream = client.from('todos').stream(['id']);
       expect(
