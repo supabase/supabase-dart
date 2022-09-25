@@ -140,10 +140,12 @@ class SupabaseClient {
   }
 
   Map<String, String> _getAuthHeaders() {
-    final headers = {..._headers};
     final authBearer = auth.currentSession?.accessToken ?? supabaseKey;
-    headers['apikey'] = supabaseKey;
-    headers['Authorization'] = 'Bearer $authBearer';
+    final defaultHeaders = {
+      'apikey': supabaseKey,
+      'Authorization': 'Bearer $authBearer',
+    };
+    final headers = {...defaultHeaders, ..._headers};
     return headers;
   }
 
