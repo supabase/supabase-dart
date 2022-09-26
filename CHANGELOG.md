@@ -2,6 +2,8 @@
 
 - fix: recreate a PostgresClient with proper auth headers when calling `.rpc()` [(#143)](https://github.com/supabase-community/supabase-dart/pull/143)
 - fix: allow custom headers to be set for `SupabaseClient` [(#144)](https://github.com/supabase-community/supabase-dart/pull/144)
+- fix: update realtime to [v1.0.0-dev.4](https://github.com/supabase-community/realtime-dart/blob/main/CHANGELOG.md#100-dev4)
+  - fix: bug where it throws exception when listening to postgres changes on old version of realtime server
 
 ## [1.0.0-dev.7]
 

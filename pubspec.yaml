@@ -12,7 +12,7 @@ dependencies:
   gotrue: 1.0.0-dev.4
   http: ^0.13.4
   postgrest: 1.0.0-dev.4
-  realtime_client: 1.0.0-dev.3
+  realtime_client: 1.0.0-dev.4
   storage_client: 1.0.0-dev.4
 
 dev_dependencies:
