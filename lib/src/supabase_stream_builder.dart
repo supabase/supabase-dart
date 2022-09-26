@@ -212,8 +212,8 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
       final rows = SupabaseStreamEvent.from(data as List);
       _streamData.addAll(rows);
       _addStream();
-    } catch (error) {
-      _addException(error);
+    } catch (error, stackTrace) {
+      _addException(error, stackTrace);
     }
   }
 
@@ -260,9 +260,9 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   /// Will add error to the stream if streamController is not closed
-  void _addException(Object error) {
+  void _addException(Object error, [StackTrace? stackTrace]) {
     if (!_streamController.isClosed) {
-      _streamController.addError(error);
+      _streamController.addError(error, stackTrace ?? StackTrace.current);
     }
   }
 }
