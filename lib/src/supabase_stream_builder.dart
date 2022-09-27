@@ -170,7 +170,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
       if (updatedIndex >= 0) {
         _streamData[updatedIndex] = payload['new']!;
       } else {
-        _addError('Could not find the updated record.');
+        _addException(Exception('Could not find the updated record.'));
       }
       _addStream();
     }).on(
@@ -189,7 +189,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
       if (deletedIndex >= 0) {
         _streamData.removeAt(deletedIndex);
       } else {
-        _addError('Could not find the deleted record.');
+        _addException(Exception('Could not find the deleted record.'));
       }
       _addStream();
     }).subscribe();
@@ -212,10 +212,8 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
       final rows = SupabaseStreamEvent.from(data as List);
       _streamData.addAll(rows);
       _addStream();
-    } on PostgrestException catch (error) {
-      _addError(error.message);
-    } catch (error) {
-      _addError(error.toString());
+    } catch (error, stackTrace) {
+      _addException(error, stackTrace);
     }
   }
 
@@ -262,9 +260,9 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   /// Will add error to the stream if streamController is not closed
-  void _addError(String message) {
+  void _addException(Object error, [StackTrace? stackTrace]) {
     if (!_streamController.isClosed) {
-      _streamController.addError(message);
+      _streamController.addError(error, stackTrace ?? StackTrace.current);
     }
   }
 }
