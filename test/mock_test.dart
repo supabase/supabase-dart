@@ -10,9 +10,9 @@ void main() {
   late SupabaseClient customHeadersClient;
   late HttpServer mockServer;
   late String apiKey;
+  late String ref;
   const customApiKey = 'customApiKey';
   const customHeaders = {'customfield': 'customvalue', 'apikey': customApiKey};
-  String ref = "1";
   WebSocket? webSocket;
   bool hasListener = false;
   bool hasSentData = false;
@@ -263,6 +263,7 @@ void main() {
     );
     hasListener = false;
     hasSentData = false;
+    ref = "1";
     handleRequests(mockServer);
   });
 
