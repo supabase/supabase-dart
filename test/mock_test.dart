@@ -7,7 +7,11 @@ import 'package:test/test.dart';
 
 void main() {
   late SupabaseClient client;
+  late SupabaseClient customHeadersClient;
   late HttpServer mockServer;
+  late String apiKey;
+  const customApiKey = 'customApiKey';
+  const customHeaders = {'customfield': 'customvalue', 'apikey': customApiKey};
   WebSocket? webSocket;
   bool hasListener = false;
   bool hasSentData = false;
@@ -21,6 +25,13 @@ void main() {
         throw 'Proper header not set';
       }
       final url = request.uri.toString();
+      if (url.startsWith("/rest")) {
+        final foundApiKey = headers.value('apikey');
+        expect(foundApiKey, apiKey);
+        if (foundApiKey == customApiKey) {
+          expect(headers.value('customfield'), 'customvalue');
+        }
+      }
       if (url == '/rest/v1/todos?select=task%2Cstatus') {
         final jsonString = jsonEncode([
           {'task': 'task 1', 'status': true},
@@ -31,7 +42,8 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(jsonString)
           ..close();
-      } else if (url == '/rest/v1/todos?select=%2A') {
+      } else if (url == '/rest/v1/todos?select=%2A' ||
+          url == '/rest/v1/rpc/todos?select=%2A') {
         final jsonString = jsonEncode([
           {'id': 1, 'task': 'task 1', 'status': true},
           {'id': 2, 'task': 'task 2', 'status': false}
@@ -234,13 +246,19 @@ void main() {
   }
 
   setUp(() async {
+    apiKey = 'supabaseKey';
     mockServer = await HttpServer.bind('localhost', 0);
     client = SupabaseClient(
       'http://${mockServer.address.host}:${mockServer.port}',
-      'supabaseKey',
+      apiKey,
       headers: {
         'X-Client-Info': 'supabase-flutter/0.0.0',
       },
+    );
+    customHeadersClient = SupabaseClient(
+      'http://${mockServer.address.host}:${mockServer.port}',
+      apiKey,
+      headers: {'X-Client-Info': 'supabase-flutter/0.0.0', ...customHeaders},
     );
     hasListener = false;
     hasSentData = false;
@@ -265,6 +283,15 @@ void main() {
   group('Basic client test', () {
     test('Postgrest calls the correct endpoint', () async {
       final data = await client.from('todos').select();
+      expect(data, [
+        {'id': 1, 'task': 'task 1', 'status': true},
+        {'id': 2, 'task': 'task 2', 'status': false}
+      ]);
+    });
+
+    test('Postgrest calls the correct endpoint with custom headers', () async {
+      apiKey = customApiKey;
+      final data = await customHeadersClient.from('todos').select();
       expect(data, [
         {'id': 1, 'task': 'task 1', 'status': true},
         {'id': 2, 'task': 'task 2', 'status': false}
@@ -322,6 +349,24 @@ void main() {
           ]),
           containsAllInOrder([
             {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 3, 'task': 'task 3', 'status': true},
+          ]),
+        ]),
+      );
+    });
+    test('emits data with custom headers', () {
+      apiKey = customApiKey;
+      final stream = customHeadersClient.from('todos').stream(['id']);
+      expect(
+        stream,
+        emitsInOrder([
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false}
+          ]),
+          containsAllInOrder([
+            {'id': 1, 'task': 'task 1', 'status': true},
+            {'id': 2, 'task': 'task 2', 'status': false},
             {'id': 3, 'task': 'task 3', 'status': true},
           ]),
         ]),
@@ -394,6 +439,25 @@ void main() {
           ]),
         ]),
       );
+    });
+  });
+
+  group("rpc", () {
+    test("rpc", () async {
+      final data = await client.rpc("todos").select();
+      expect(data, [
+        {'id': 1, 'task': 'task 1', 'status': true},
+        {'id': 2, 'task': 'task 2', 'status': false}
+      ]);
+    });
+
+    test("rpc with custom headers", () async {
+      apiKey = customApiKey;
+      final data = await customHeadersClient.rpc("todos").select();
+      expect(data, [
+        {'id': 1, 'task': 'task 1', 'status': true},
+        {'id': 2, 'task': 'task 2', 'status': false}
+      ]);
     });
   });
 

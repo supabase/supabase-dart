@@ -49,12 +49,6 @@ class SupabaseClient {
       headers: headers,
     );
     realtime = _initRealtimeClient(headers: headers);
-    rest = PostgrestClient(
-      '$supabaseUrl/rest/v1',
-      headers: headers,
-      schema: schema,
-      httpClient: _httpClient,
-    );
 
     _listenForAuthEvents();
   }
@@ -88,7 +82,12 @@ class SupabaseClient {
 
   /// Perform a stored procedure call.
   PostgrestFilterBuilder rpc(String fn, {Map<String, dynamic>? params}) {
-    return rest.rpc(fn, params: params);
+    return PostgrestClient(
+      '$supabaseUrl/rest/v1',
+      headers: _getAuthHeaders(),
+      schema: schema,
+      httpClient: _httpClient,
+    ).rpc(fn, params: params);
   }
 
   /// Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
@@ -141,10 +140,12 @@ class SupabaseClient {
   }
 
   Map<String, String> _getAuthHeaders() {
-    final headers = {..._headers};
     final authBearer = auth.currentSession?.accessToken ?? supabaseKey;
-    headers['apikey'] = supabaseKey;
-    headers['Authorization'] = 'Bearer $authBearer';
+    final defaultHeaders = {
+      'apikey': supabaseKey,
+      'Authorization': 'Bearer $authBearer',
+    };
+    final headers = {...defaultHeaders, ..._headers};
     return headers;
   }
 
