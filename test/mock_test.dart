@@ -12,6 +12,7 @@ void main() {
   late String apiKey;
   const customApiKey = 'customApiKey';
   const customHeaders = {'customfield': 'customvalue', 'apikey': customApiKey};
+  String ref = "1";
   WebSocket? webSocket;
   bool hasListener = false;
   bool hasSentData = false;
@@ -133,7 +134,7 @@ void main() {
               },
               'status': 'ok'
             },
-            'ref': '1',
+            'ref': ref,
             'topic': 'realtime:public:todos'
           });
           webSocket!.add(replyString);
@@ -323,6 +324,7 @@ void main() {
       await Future.delayed(Duration(milliseconds: 5000));
       hasSentData = false;
       hasListener = false;
+      ref = "3";
 
       final sub2 = stream.listen(expectAsync1((event) {}, count: 4));
 
