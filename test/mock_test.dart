@@ -301,34 +301,18 @@ void main() {
   });
 
   group('stream()', () {
-    test("ddd", () async {
-      final stream =
-          Stream.periodic(Duration(milliseconds: 100)).asBroadcastStream();
-      final sub = stream.listen((event) {
-        print("1" + event);
-      });
-
-      await Future.delayed(Duration(milliseconds: 100));
-
-      final sub2 = stream.listen((event) {
-        print("2" + event);
-      });
-    });
-
     test("listen, cancel and listen again", () async {
       final stream = client.from('todos').stream(['id']);
       final sub = stream.listen(expectAsync1((event) {}, count: 4));
-      await Future.delayed(Duration(milliseconds: 5000));
+      await Future.delayed(Duration(seconds: 3));
 
       await sub.cancel();
-      await Future.delayed(Duration(milliseconds: 5000));
+      await Future.delayed(Duration(seconds: 1));
       hasSentData = false;
       hasListener = false;
       ref = "3";
 
-      final sub2 = stream.listen(expectAsync1((event) {}, count: 4));
-
-      // await Future.delayed(Duration(milliseconds: 5000));
+      stream.listen(expectAsync1((event) {}, count: 4));
     });
     test('emits data', () {
       final stream = client.from('todos').stream(['id']);
