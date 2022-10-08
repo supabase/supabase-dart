@@ -20,7 +20,6 @@ void main() {
 
   Future<void> handleRequests(HttpServer server) async {
     await for (final HttpRequest request in server) {
-      print(request.uri.toString());
       final headers = request.headers;
       if (headers.value('X-Client-Info') != 'supabase-flutter/0.0.0') {
         throw 'Proper header not set';

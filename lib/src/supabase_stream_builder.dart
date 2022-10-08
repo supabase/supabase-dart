@@ -144,11 +144,9 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
     _streamController = StreamController.broadcast(
       onListen: () {
-        print("onListen");
         _getStreamData();
       },
       onCancel: () {
-        print("onCancel");
         _channel?.unsubscribe();
         _streamController?.close();
       },
