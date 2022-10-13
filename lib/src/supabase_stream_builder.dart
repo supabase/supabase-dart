@@ -24,9 +24,7 @@ class _Order {
   final bool ascending;
 }
 
-typedef SupabaseStreamEvent = List<Map<String, dynamic>>;
-
-class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
+class SupabaseStreamBuilder extends Stream<List<Map<String, dynamic>>> {
   final PostgrestQueryBuilder _queryBuilder;
 
   final RealtimeChannel _channel;
@@ -39,10 +37,10 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   final List<String> _uniqueColumns;
 
   /// StreamController for `stream()` method.
-  late final StreamController<SupabaseStreamEvent> _streamController;
+  late final StreamController<List<Map<String, dynamic>>> _streamController;
 
   /// Contains the combined data of postgrest and realtime to emit as stream.
-  late final SupabaseStreamEvent _streamData;
+  late final List<Map<String, dynamic>> _streamData;
 
   /// `eq` filter used for both postgrest and realtime
   StreamPostgrestFilter? _streamFilter;
@@ -100,7 +98,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
-  Stream<SupabaseStreamEvent> execute() {
+  Stream<List<Map<String, dynamic>>> execute() {
     _streamController = StreamController.broadcast(
       onCancel: () {
         if (!_streamController.hasListener) {
@@ -114,8 +112,8 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   @override
-  StreamSubscription<SupabaseStreamEvent> listen(
-    void Function(SupabaseStreamEvent event)? onData, {
+  StreamSubscription<List<Map<String, dynamic>>> listen(
+    void Function(List<Map<String, dynamic>> event)? onData, {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
@@ -209,7 +207,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
     try {
       final data = await (transformQuery ?? query);
-      final rows = SupabaseStreamEvent.from(data as List);
+      final rows = List<Map<String, dynamic>>.from(data as List);
       _streamData.addAll(rows);
       _addStream();
     } catch (error, stackTrace) {
