@@ -252,12 +252,12 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   Future<void> _getStreamData() async {
-      _StreamPostgrestFilter? currentStreamFilter = _streamFilter;
+    final currentStreamFilter = _streamFilter;
     _streamData = [];
     String? realtimeFilter;
     if (currentStreamFilter != null) {
       realtimeFilter =
-          '${_streamFilter!.column}=${_streamFilter!.type.name}.${_streamFilter!.value}';
+          '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
     }
 
     _channel.on(
