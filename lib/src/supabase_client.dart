@@ -150,8 +150,8 @@ class SupabaseClient {
   }
 
   void _listenForAuthEvents() {
-    auth.onAuthStateChange((event, session) {
-      _handleTokenChanged(event, session?.accessToken);
+    auth.onAuthStateChange.listen((data) {
+      _handleTokenChanged(data.event, data.session?.accessToken);
     });
   }
 
