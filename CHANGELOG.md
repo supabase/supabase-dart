@@ -6,6 +6,7 @@
   ```dart
   supabase.from('my_table').stream(primaryKey: ['id']);
   ```
+- feat: `.stream()` has 5 additional filters: `neq`, `gt`, `gte`, `lt`, `lte` ([148](https://github.com/supabase-community/supabase-dart/pull/148)
 - chore: update postgrest to v1.0.0
 - chore: update realtime to v1.0.0
 - chore: update storage to v1.0.0
