@@ -26,7 +26,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
 
   /// Notifies of data at the queried table
   ///
-  /// [uniqueColumns] can be either the primary key or a combination of unique columns.
+  /// [primaryKey] list of name of primary key column(s).
   ///
   /// ```dart
   /// supabase.from('chats').stream(['my_primary_key']).execute().listen(_onChatsReceived);
@@ -37,14 +37,15 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// ```dart
   /// supabase.from('chats:room_id=eq.123').stream(['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
-  SupabaseStreamBuilder stream(List<String> uniqueColumns) {
+  SupabaseStreamBuilder stream({required List<String> primaryKey}) {
+    assert(primaryKey.isNotEmpty, 'Please specify parimary key(s).');
     return SupabaseStreamBuilder(
       queryBuilder: this,
       realtimeClient: _realtime,
       realtimeTopic: '$_schema:$_table',
       schema: _schema,
       table: _table,
-      uniqueColumns: uniqueColumns,
+      primaryKey: primaryKey,
     );
   }
 }

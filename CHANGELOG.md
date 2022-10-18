@@ -2,6 +2,10 @@
 
 - chore: v1.0.0 release 🚀
 - BREAKING: set minimum SDK of Dart at 2.15.0 ([150](https://github.com/supabase-community/supabase-dart/pull/150))
+- BREAKING: `.stream()` now takes a named parameter `primaryKey` instead of a positional argument. 
+  ```dart
+  supabase.from('my_table').stream(primaryKey: ['id']);
+  ```
 - chore: update postgrest to v1.0.0
 - chore: update realtime to v1.0.0
 - chore: update storage to v1.0.0
