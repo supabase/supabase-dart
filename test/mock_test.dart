@@ -18,7 +18,11 @@ void main() {
   bool hasSentData = false;
   StreamSubscription<dynamic>? listener;
 
-  Future<void> handleRequests(HttpServer server) async {
+  /// `testFilter` is used to test incoming realtime filter. The value should match the realtime filter set by the library.
+  Future<void> handleRequests(
+    HttpServer server, {
+    String? testFilter,
+  }) async {
     await for (final HttpRequest request in server) {
       final headers = request.headers;
       if (headers.value('X-Client-Info') != 'supabase-flutter/0.0.0') {
@@ -99,9 +103,13 @@ void main() {
           /// to the realtime subscription, so include the filter if the request
           /// includes a filter.
           final requestJson = jsonDecode(request);
-          final String? postgresFilter = requestJson['payload']['config']
+          final String? realtimeFilter = requestJson['payload']['config']
                   ['postgres_changes']
               .first['filter'];
+
+          if (testFilter != null) {
+            expect(realtimeFilter, testFilter);
+          }
 
           final replyString = jsonEncode({
             'event': 'phx_reply',
@@ -113,21 +121,21 @@ void main() {
                     'event': 'INSERT',
                     'schema': 'public',
                     'table': 'todos',
-                    if (postgresFilter != null) 'filter': postgresFilter,
+                    if (realtimeFilter != null) 'filter': realtimeFilter,
                   },
                   {
                     'id': 25993878,
                     'event': 'UPDATE',
                     'schema': 'public',
                     'table': 'todos',
-                    if (postgresFilter != null) 'filter': postgresFilter,
+                    if (realtimeFilter != null) 'filter': realtimeFilter,
                   },
                   {
                     'id': 48673474,
                     'event': 'DELETE',
                     'schema': 'public',
                     'table': 'todos',
-                    if (postgresFilter != null) 'filter': postgresFilter,
+                    if (realtimeFilter != null) 'filter': realtimeFilter,
                   }
                 ]
               },
@@ -153,7 +161,7 @@ void main() {
                 'schema': 'public',
                 'table': 'todos',
                 'type': 'INSERT',
-                if (postgresFilter != null) 'filter': postgresFilter,
+                if (realtimeFilter != null) 'filter': realtimeFilter,
                 'columns': [
                   {
                     'name': 'id',
@@ -201,7 +209,7 @@ void main() {
                 'schema': 'public',
                 'table': 'todos',
                 'type': 'UPDATE',
-                if (postgresFilter != null) 'filter': postgresFilter,
+                if (realtimeFilter != null) 'filter': realtimeFilter,
               },
             },
           });
@@ -230,7 +238,7 @@ void main() {
                 'schema': 'public',
                 'table': 'todos',
                 'type': 'DELETE',
-                if (postgresFilter != null) 'filter': postgresFilter,
+                if (realtimeFilter != null) 'filter': realtimeFilter,
               },
               'ids': [48673474]
             },
@@ -263,7 +271,6 @@ void main() {
     hasListener = false;
     hasSentData = false;
     ref = "1";
-    handleRequests(mockServer);
   });
 
   tearDown(() async {
@@ -276,91 +283,193 @@ void main() {
     await mockServer.close();
   });
 
-  test('test mock server', () async {
-    final data = await client.from('todos').select('task, status');
-    expect((data as List).length, 2);
+  group('basic test', () {
+    setUp(() async {
+      handleRequests(mockServer);
+    });
+
+    test('test mock server', () async {
+      final data = await client.from('todos').select('task, status');
+      expect((data as List).length, 2);
+    });
+
+    group('Basic client test', () {
+      test('Postgrest calls the correct endpoint', () async {
+        final data = await client.from('todos').select();
+        expect(data, [
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false}
+        ]);
+      });
+
+      test('Postgrest calls the correct endpoint with custom headers',
+          () async {
+        apiKey = customApiKey;
+        final data = await customHeadersClient.from('todos').select();
+        expect(data, [
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false}
+        ]);
+      });
+    });
+
+    group('stream()', () {
+      test("listen, cancel and listen again", () async {
+        final stream = client.from('todos').stream(primaryKey: ['id']);
+        final sub = stream.listen(expectAsync1((event) {}, count: 4));
+        await Future.delayed(Duration(seconds: 3));
+
+        await sub.cancel();
+        await Future.delayed(Duration(seconds: 1));
+        hasSentData = false;
+        hasListener = false;
+        ref = "3";
+
+        stream.listen(expectAsync1((event) {}, count: 4));
+      });
+      test('emits data', () {
+        final stream = client.from('todos').stream(primaryKey: ['id']);
+        expect(
+          stream,
+          emitsInOrder([
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 2, 'task': 'task 2', 'status': false}
+            ]),
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 2, 'task': 'task 2', 'status': false},
+              {'id': 3, 'task': 'task 3', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 2, 'task': 'task 2 updated', 'status': false},
+              {'id': 3, 'task': 'task 3', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 3, 'task': 'task 3', 'status': true},
+            ]),
+          ]),
+        );
+      });
+      test('emits data with custom headers', () {
+        apiKey = customApiKey;
+        final stream =
+            customHeadersClient.from('todos').stream(primaryKey: ['id']);
+        expect(
+          stream,
+          emitsInOrder([
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 2, 'task': 'task 2', 'status': false}
+            ]),
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 2, 'task': 'task 2', 'status': false},
+              {'id': 3, 'task': 'task 3', 'status': true},
+            ]),
+          ]),
+        );
+      });
+
+      test('with order', () {
+        final stream =
+            client.from('todos').stream(primaryKey: ['id']).order('id');
+        expect(
+          stream,
+          emitsInOrder([
+            containsAllInOrder([
+              {'id': 2, 'task': 'task 2', 'status': false},
+              {'id': 1, 'task': 'task 1', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 2, 'task': 'task 2', 'status': false},
+              {'id': 1, 'task': 'task 1', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 2, 'task': 'task 2 updated', 'status': false},
+              {'id': 1, 'task': 'task 1', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 1, 'task': 'task 1', 'status': true},
+            ]),
+          ]),
+        );
+      });
+
+      test('with limit', () {
+        final stream = client
+            .from('todos')
+            .stream(primaryKey: ['id'])
+            .order('id')
+            .limit(2);
+        expect(
+          stream,
+          emitsInOrder([
+            containsAllInOrder([
+              {'id': 2, 'task': 'task 2', 'status': false},
+              {'id': 1, 'task': 'task 1', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 2, 'task': 'task 2', 'status': false},
+            ]),
+            containsAllInOrder([
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 2, 'task': 'task 2 updated', 'status': false},
+            ]),
+            containsAllInOrder([
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 1, 'task': 'task 1', 'status': true},
+            ]),
+          ]),
+        );
+      });
+    });
+
+    group("rpc", () {
+      test("rpc", () async {
+        final data = await client.rpc("todos").select();
+        expect(data, [
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false}
+        ]);
+      });
+
+      test("rpc with custom headers", () async {
+        apiKey = customApiKey;
+        final data = await customHeadersClient.rpc("todos").select();
+        expect(data, [
+          {'id': 1, 'task': 'task 1', 'status': true},
+          {'id': 2, 'task': 'task 2', 'status': false}
+        ]);
+      });
+    });
+
+    group('realtime', () {
+      /// Constructing Supabase query within a realtime callback caused exception
+      /// https://github.com/supabase-community/supabase-flutter/issues/81
+      test('Calling Postgrest within realtime callback', () async {
+        client.channel('todos').on(RealtimeListenTypes.postgresChanges,
+            ChannelFilter(event: '*', schema: 'public', table: 'todos'), (event,
+                [_]) async {
+          client.from('todos');
+        }).subscribe();
+
+        await Future.delayed(const Duration(milliseconds: 700));
+
+        await client.removeAllChannels();
+      });
+    });
   });
 
-  group('Basic client test', () {
-    test('Postgrest calls the correct endpoint', () async {
-      final data = await client.from('todos').select();
-      expect(data, [
-        {'id': 1, 'task': 'task 1', 'status': true},
-        {'id': 2, 'task': 'task 2', 'status': false}
-      ]);
-    });
-
-    test('Postgrest calls the correct endpoint with custom headers', () async {
-      apiKey = customApiKey;
-      final data = await customHeadersClient.from('todos').select();
-      expect(data, [
-        {'id': 1, 'task': 'task 1', 'status': true},
-        {'id': 2, 'task': 'task 2', 'status': false}
-      ]);
-    });
-  });
-
-  group('stream()', () {
-    test("listen, cancel and listen again", () async {
-      final stream = client.from('todos').stream(primaryKey: ['id']);
-      final sub = stream.listen(expectAsync1((event) {}, count: 4));
-      await Future.delayed(Duration(seconds: 3));
-
-      await sub.cancel();
-      await Future.delayed(Duration(seconds: 1));
-      hasSentData = false;
-      hasListener = false;
-      ref = "3";
-
-      stream.listen(expectAsync1((event) {}, count: 4));
-    });
-    test('emits data', () {
-      final stream = client.from('todos').stream(primaryKey: ['id']);
-      expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false}
-          ]),
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 3, 'task': 'task 3', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2 updated', 'status': false},
-            {'id': 3, 'task': 'task 3', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 3, 'task': 'task 3', 'status': true},
-          ]),
-        ]),
-      );
-    });
-    test('emits data with custom headers', () {
-      apiKey = customApiKey;
-      final stream =
-          customHeadersClient.from('todos').stream(primaryKey: ['id']);
-      expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false}
-          ]),
-          containsAllInOrder([
-            {'id': 1, 'task': 'task 1', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 3, 'task': 'task 3', 'status': true},
-          ]),
-        ]),
-      );
-    });
-
+  group('realtime filter', () {
     test('can filter stream results with eq', () {
+      handleRequests(mockServer, testFilter: 'status=eq.true');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).eq('status', true);
       expect(
@@ -377,93 +486,24 @@ void main() {
       );
     });
 
-    test('with order', () {
-      final stream =
-          client.from('todos').stream(primaryKey: ['id']).order('id');
-      expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 2, 'task': 'task 2 updated', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-        ]),
-      );
+    test('can filter stream results with gt', () {
+      handleRequests(mockServer, testFilter: 'id=gt.2');
+      client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
     });
 
-    test('with limit', () {
-      final stream =
-          client.from('todos').stream(primaryKey: ['id']).order('id').limit(2);
-      expect(
-        stream,
-        emitsInOrder([
-          containsAllInOrder([
-            {'id': 2, 'task': 'task 2', 'status': false},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 2, 'task': 'task 2', 'status': false},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 2, 'task': 'task 2 updated', 'status': false},
-          ]),
-          containsAllInOrder([
-            {'id': 3, 'task': 'task 3', 'status': true},
-            {'id': 1, 'task': 'task 1', 'status': true},
-          ]),
-        ]),
-      );
-    });
-  });
-
-  group("rpc", () {
-    test("rpc", () async {
-      final data = await client.rpc("todos").select();
-      expect(data, [
-        {'id': 1, 'task': 'task 1', 'status': true},
-        {'id': 2, 'task': 'task 2', 'status': false}
-      ]);
+    test('can filter stream results with gte', () {
+      handleRequests(mockServer, testFilter: 'id=gte.2');
+      client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
     });
 
-    test("rpc with custom headers", () async {
-      apiKey = customApiKey;
-      final data = await customHeadersClient.rpc("todos").select();
-      expect(data, [
-        {'id': 1, 'task': 'task 1', 'status': true},
-        {'id': 2, 'task': 'task 2', 'status': false}
-      ]);
+    test('can filter stream results with lt', () {
+      handleRequests(mockServer, testFilter: 'id=lt.2');
+      client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
     });
-  });
 
-  group('realtime', () {
-    /// Constructing Supabase query within a realtime callback caused exception
-    /// https://github.com/supabase-community/supabase-flutter/issues/81
-    test('Calling Postgrest within realtime callback', () async {
-      client.channel('todos').on(RealtimeListenTypes.postgresChanges,
-          ChannelFilter(event: '*', schema: 'public', table: 'todos'), (event,
-              [_]) async {
-        client.from('todos');
-      }).subscribe();
-
-      await Future.delayed(const Duration(milliseconds: 700));
-
-      await client.removeAllChannels();
+    test('can filter stream results with lte', () {
+      handleRequests(mockServer, testFilter: 'id=lte.2');
+      client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
     });
   });
 }
