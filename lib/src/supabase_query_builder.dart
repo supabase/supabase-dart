@@ -38,10 +38,10 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// supabase.from('chats:room_id=eq.123').stream(['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream(List<String> uniqueColumns) {
-    final channel = _realtime.channel('$_schema:$_table');
     return SupabaseStreamBuilder(
       queryBuilder: this,
-      channel: channel,
+      realtimeClient: _realtime,
+      realtimeTopic: '$_schema:$_table',
       schema: _schema,
       table: _table,
       uniqueColumns: uniqueColumns,
