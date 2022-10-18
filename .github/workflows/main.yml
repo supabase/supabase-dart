@@ -8,13 +8,13 @@ on:
 
 jobs:
   test:
-    name: Test / OS ${{ matrix.os }} / Node ${{ matrix.node }}
+    name: Test / SDK ${{ matrix.sdk }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
         node: ['12']
-        sdk: [stable, beta, dev]
+        sdk: [2.15.0, stable, beta, dev]
 
     runs-on: ${{ matrix.os }}
 
