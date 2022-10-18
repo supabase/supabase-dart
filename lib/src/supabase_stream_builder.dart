@@ -35,7 +35,13 @@ typedef SupabaseStreamEvent = List<Map<String, dynamic>>;
 class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   final PostgrestQueryBuilder _queryBuilder;
 
-  final RealtimeChannel _channel;
+  final RealtimeClient _realtimeClient;
+
+  final String _realtimeTopic;
+
+  RealtimeChannel? _channel;
+
+  PostgrestBuilder? _postgrestBuilder;
 
   final String _schema;
 
@@ -45,10 +51,10 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   final List<String> _uniqueColumns;
 
   /// StreamController for `stream()` method.
-  late final StreamController<SupabaseStreamEvent> _streamController;
+  StreamController<SupabaseStreamEvent>? _streamController;
 
   /// Contains the combined data of postgrest and realtime to emit as stream.
-  late final SupabaseStreamEvent _streamData;
+  SupabaseStreamEvent _streamData = [];
 
   /// `eq` filter used for both postgrest and realtime
   _StreamPostgrestFilter? _streamFilter;
@@ -61,12 +67,14 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   SupabaseStreamBuilder({
     required PostgrestQueryBuilder queryBuilder,
-    required RealtimeChannel channel,
+    required String realtimeTopic,
+    required RealtimeClient realtimeClient,
     required String schema,
     required String table,
     required List<String> uniqueColumns,
   })  : _queryBuilder = queryBuilder,
-        _channel = channel,
+        _realtimeTopic = realtimeTopic,
+        _realtimeClient = realtimeClient,
         _schema = schema,
         _table = table,
         _uniqueColumns = uniqueColumns;
@@ -217,14 +225,12 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   Stream<SupabaseStreamEvent> execute() {
     _streamController = StreamController.broadcast(
       onCancel: () {
-        if (!_streamController.hasListener) {
-          _channel.unsubscribe();
-          _streamController.close();
-        }
+        _channel?.unsubscribe();
+        _streamController?.close();
       },
     );
     _getStreamData();
-    return _streamController.stream;
+    return _streamController!.stream;
   }
 
   @override
@@ -234,16 +240,32 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
+    if (_postgrestBuilder == null) {
+      PostgrestFilterBuilder query = _queryBuilder.select();
+      if (_streamFilter != null) {
+        query = query.eq(_streamFilter!.column, _streamFilter!.value);
+      }
+      PostgrestTransformBuilder? transformQuery;
+      if (_orderBy != null) {
+        transformQuery =
+            query.order(_orderBy!.column, ascending: _orderBy!.ascending);
+      }
+      if (_limit != null) {
+        transformQuery = (transformQuery ?? query).limit(_limit!);
+      }
+      _postgrestBuilder = transformQuery ?? query;
+    }
+
     _streamController = StreamController.broadcast(
+      onListen: () {
+        _getStreamData();
+      },
       onCancel: () {
-        if (!_streamController.hasListener) {
-          _channel.unsubscribe();
-          _streamController.close();
-        }
+        _channel?.unsubscribe();
+        _streamController?.close();
       },
     );
-    _getStreamData();
-    return _streamController.stream.listen(
+    return _streamController!.stream.listen(
       onData,
       onError: onError,
       onDone: onDone,
@@ -260,7 +282,8 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
     }
 
-    _channel.on(
+    _channel = _realtimeClient.channel(_realtimeTopic);
+    _channel!.on(
         RealtimeListenTypes.postgresChanges,
         ChannelFilter(
           event: 'INSERT',
@@ -345,7 +368,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     }
 
     try {
-      final data = await (transformQuery ?? query);
+      final data = await _postgrestBuilder;
       final rows = SupabaseStreamEvent.from(data as List);
       _streamData.addAll(rows);
       _addStream();
@@ -389,17 +412,17 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     if (_orderBy != null) {
       _sortData();
     }
-    if (!_streamController.isClosed) {
+    if (!(_streamController?.isClosed ?? true)) {
       final emitData =
           (_limit != null ? _streamData.take(_limit!) : _streamData).toList();
-      _streamController.add(emitData);
+      _streamController!.add(emitData);
     }
   }
 
   /// Will add error to the stream if streamController is not closed
   void _addException(Object error, [StackTrace? stackTrace]) {
-    if (!_streamController.isClosed) {
-      _streamController.addError(error, stackTrace ?? StackTrace.current);
+    if (!(_streamController?.isClosed ?? true)) {
+      _streamController?.addError(error, stackTrace ?? StackTrace.current);
     }
   }
 }

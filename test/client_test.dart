@@ -11,12 +11,6 @@ void main() {
       client = SupabaseClient(supabaseUrl, supabaseKey);
     });
 
-    test('X-Client-Info header is set properly on auth', () {
-      final xClientHeaderBeforeSlash =
-          client.auth.api.headers['X-Client-Info']!.split('/').first;
-      expect(xClientHeaderBeforeSlash, 'supabase-dart');
-    });
-
     test('X-Client-Info header is set properly on realtime', () {
       final xClientHeaderBeforeSlash =
           client.realtime.headers['X-Client-Info']!.split('/').first;
@@ -43,11 +37,6 @@ void main() {
           'X-Client-Info': 'supabase-flutter/0.0.0',
         },
       );
-    });
-
-    test('X-Client-Info header is set properly on auth', () {
-      final xClientInfoHeader = client.auth.api.headers['X-Client-Info'];
-      expect(xClientInfoHeader, 'supabase-flutter/0.0.0');
     });
 
     test('X-Client-Info header is set properly on realtime', () {

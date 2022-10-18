@@ -10,6 +10,7 @@ void main() {
   late SupabaseClient customHeadersClient;
   late HttpServer mockServer;
   late String apiKey;
+  late String ref;
   const customApiKey = 'customApiKey';
   const customHeaders = {'customfield': 'customvalue', 'apikey': customApiKey};
   WebSocket? webSocket;
@@ -140,7 +141,7 @@ void main() {
               },
               'status': 'ok'
             },
-            'ref': '1',
+            'ref': ref,
             'topic': 'realtime:public:todos'
           });
           webSocket!.add(replyString);
@@ -269,6 +270,7 @@ void main() {
     );
     hasListener = false;
     hasSentData = false;
+    ref = "1";
   });
 
   tearDown(() async {
@@ -312,6 +314,19 @@ void main() {
     });
 
     group('stream()', () {
+      test("listen, cancel and listen again", () async {
+        final stream = client.from('todos').stream(['id']);
+        final sub = stream.listen(expectAsync1((event) {}, count: 4));
+        await Future.delayed(Duration(seconds: 3));
+
+        await sub.cancel();
+        await Future.delayed(Duration(seconds: 1));
+        hasSentData = false;
+        hasListener = false;
+        ref = "3";
+
+        stream.listen(expectAsync1((event) {}, count: 4));
+      });
       test('emits data', () {
         final stream = client.from('todos').stream(['id']);
         expect(

@@ -5,17 +5,17 @@ homepage: 'https://supabase.io'
 repository: 'https://github.com/supabase/supabase-dart'
 
 environment:
-  sdk: '>=2.16.0 <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
 
 dependencies:
-  functions_client: 1.0.0-dev.4
-  gotrue: 1.0.0-dev.4
+  functions_client: ^1.0.0
+  gotrue: ^1.0.0
   http: ^0.13.4
-  postgrest: 1.0.0-dev.4
-  realtime_client: 1.0.0-dev.5
-  storage_client: 1.0.0-dev.4
+  postgrest: ^1.0.0
+  realtime_client: ^1.0.0
+  storage_client: ^1.0.0
 
 dev_dependencies:
-  lints: ^2.0.0
+  lints: ^1.0.1
   test: ^1.17.9
   web_socket_channel: ^2.2.0

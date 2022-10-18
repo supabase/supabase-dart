@@ -10,7 +10,6 @@ export 'package:postgrest/postgrest.dart';
 export 'package:realtime_client/realtime_client.dart';
 export 'package:storage_client/storage_client.dart';
 
-export 'src/auth_session.dart';
 export 'src/auth_user.dart';
 export 'src/remove_subscription_result.dart';
 export 'src/supabase_client.dart';

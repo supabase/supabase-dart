@@ -25,6 +25,7 @@ class SupabaseClient {
   late final RealtimeClient realtime;
   late final PostgrestClient rest;
   String? _changedAccessToken;
+  late StreamSubscription<AuthState> _authStateSubscription;
 
   SupabaseClient(
     this.supabaseUrl,
@@ -113,6 +114,10 @@ class SupabaseClient {
     return realtime.removeAllChannels();
   }
 
+  void dispose() {
+    _authStateSubscription.cancel();
+  }
+
   GoTrueClient _initSupabaseAuthClient({
     bool? autoRefreshToken,
     required Map<String, String> headers,
@@ -150,8 +155,8 @@ class SupabaseClient {
   }
 
   void _listenForAuthEvents() {
-    auth.onAuthStateChange((event, session) {
-      _handleTokenChanged(event, session?.accessToken);
+    _authStateSubscription = auth.onAuthStateChange.listen((data) {
+      _handleTokenChanged(data.event, data.session?.accessToken);
     });
   }
 
