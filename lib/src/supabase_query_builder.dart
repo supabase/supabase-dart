@@ -38,7 +38,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// supabase.from('chats:room_id=eq.123').stream(['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream({required List<String> primaryKey}) {
-    assert(primaryKey.isNotEmpty, 'Please specify parimary key(s).');
+    assert(primaryKey.isNotEmpty, 'Please specify primary key(s).');
     return SupabaseStreamBuilder(
       queryBuilder: this,
       realtimeClient: _realtime,
