@@ -71,13 +71,13 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     required RealtimeClient realtimeClient,
     required String schema,
     required String table,
-    required List<String> uniqueColumns,
+    required List<String> primaryKey,
   })  : _queryBuilder = queryBuilder,
         _realtimeTopic = realtimeTopic,
         _realtimeClient = realtimeClient,
         _schema = schema,
         _table = table,
-        _uniqueColumns = uniqueColumns;
+        _uniqueColumns = primaryKey;
 
   /// Filters the results where [column] equals [value].
   ///

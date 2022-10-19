@@ -315,7 +315,7 @@ void main() {
 
     group('stream()', () {
       test("listen, cancel and listen again", () async {
-        final stream = client.from('todos').stream(['id']);
+        final stream = client.from('todos').stream(primaryKey: ['id']);
         final sub = stream.listen(expectAsync1((event) {}, count: 4));
         await Future.delayed(Duration(seconds: 3));
 
@@ -328,7 +328,7 @@ void main() {
         stream.listen(expectAsync1((event) {}, count: 4));
       });
       test('emits data', () {
-        final stream = client.from('todos').stream(['id']);
+        final stream = client.from('todos').stream(primaryKey: ['id']);
         expect(
           stream,
           emitsInOrder([
@@ -355,7 +355,8 @@ void main() {
       });
       test('emits data with custom headers', () {
         apiKey = customApiKey;
-        final stream = customHeadersClient.from('todos').stream(['id']);
+        final stream =
+            customHeadersClient.from('todos').stream(primaryKey: ['id']);
         expect(
           stream,
           emitsInOrder([
@@ -373,7 +374,8 @@ void main() {
       });
 
       test('with order', () {
-        final stream = client.from('todos').stream(['id']).order('id');
+        final stream =
+            client.from('todos').stream(primaryKey: ['id']).order('id');
         expect(
           stream,
           emitsInOrder([
@@ -400,7 +402,11 @@ void main() {
       });
 
       test('with limit', () {
-        final stream = client.from('todos').stream(['id']).order('id').limit(2);
+        final stream = client
+            .from('todos')
+            .stream(primaryKey: ['id'])
+            .order('id')
+            .limit(2);
         expect(
           stream,
           emitsInOrder([
@@ -464,7 +470,8 @@ void main() {
   group('realtime filter', () {
     test('can filter stream results with eq', () {
       handleRequests(mockServer, testFilter: 'status=eq.true');
-      final stream = client.from('todos').stream(['id']).eq('status', true);
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).eq('status', true);
       expect(
         stream,
         emitsInOrder([
@@ -481,22 +488,22 @@ void main() {
 
     test('can filter stream results with gt', () {
       handleRequests(mockServer, testFilter: 'id=gt.2');
-      client.from('todos').stream(['id']).gt('id', 2);
+      client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
     });
 
     test('can filter stream results with gte', () {
       handleRequests(mockServer, testFilter: 'id=gte.2');
-      client.from('todos').stream(['id']).gte('id', 2);
+      client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
     });
 
     test('can filter stream results with lt', () {
       handleRequests(mockServer, testFilter: 'id=lt.2');
-      client.from('todos').stream(['id']).lt('id', 2);
+      client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
     });
 
     test('can filter stream results with lte', () {
       handleRequests(mockServer, testFilter: 'id=lte.2');
-      client.from('todos').stream(['id']).lte('id', 2);
+      client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
     });
   });
 }
