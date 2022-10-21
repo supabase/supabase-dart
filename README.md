@@ -36,14 +36,13 @@ A Dart client for [Supabase](https://supabase.io/).
 import 'package:supabase/supabase.dart';
 
 main() {
-  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  final supabase = SupabaseClient('supabaseUrl', 'supabaseKey');
 
   // Select from table `countries` ordering by `name`
-  final response = await client
+  final data = await supabase
       .from('countries')
       .select()
-      .order('name', ascending: true)
-      .execute();
+      .order('name', ascending: true);
 }
 ```
 
@@ -53,18 +52,19 @@ main() {
 import 'package:supabase/supabase.dart';
 
 main() {
-  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  final supabase = SupabaseClient('supabaseUrl', 'supabaseKey');
 
   // Set up a listener to listen to changes in `countries` table
-  final subscription = await client
-      .from('countries')
-      .on(SupabaseEventTypes.all, (payload) {
-        // Do something when there is an update
-      })
-      .subscribe();
+  supabase.channel('my_channel').on(RealtimeListenTypes.postgresChanges, ChannelFilter(
+      event: '*',
+      schema: 'public',
+      table: 'countries'
+    ), (payload, [ref]) {
+      // Do something when there is an update
+    }).subscribe();
 
-  // remember to remove subscription when you're done
-  client.removeSubscription(subscription);
+  // remember to remove the channels when you're done
+  supabase.removeAllChannels();
 }
 ```
 
@@ -76,15 +76,14 @@ To receive realtime updates, you have to first enable Realtime on from your Supa
 import 'package:supabase/supabase.dart';
 
 main() {
-  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  final supabase = SupabaseClient('supabaseUrl', 'supabaseKey');
 
   // Set up a listener to listen to changes in `countries` table
-  final subscription = await client
+  final subscription = supabase
       .from('countries')
-      .stream(['id']) // Pass list of primary key column names
+      .stream(primaryKey: ['id']) // Pass list of primary key column names
       .order('name')
       .limit(30)
-      .execute()
       .listen(_handleCountriesStream);
 
   // remember to remove subscription when you're done
@@ -98,12 +97,12 @@ main() {
 import 'package:supabase/supabase.dart';
 
 main() {
-  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  final supabase = SupabaseClient('supabaseUrl', 'supabaseKey');
 
   // Sign up user with email and password
-  final response = await client
-      .auth
-      .signUp('email', 'password');
+  final response = await supabase
+    .auth
+    .signUp(email: 'sample@email.com', password: 'password');
 }
 ```
 
@@ -113,12 +112,12 @@ main() {
 import 'package:supabase/supabase.dart';
 
 main() {
-  final client = SupabaseClient('supabaseUrl', 'supabaseKey');
+  final supabase = SupabaseClient('supabaseUrl', 'supabaseKey');
 
   // Create file `example.txt` and upload it in `public` bucket
   final file = File('example.txt');
   file.writeAsStringSync('File content');
-  final storageResponse = await client
+  final storageResponse = await supabase
       .storage
       .from('public')
       .upload('example.txt', file);
@@ -127,7 +126,7 @@ main() {
 
 ## Authentication
 
-Initialize a [`SupabaseClient`](https://pub.dev/documentation/supabase/latest/supabase/SupabaseClient-class.html) by passing your **Supabase URL** and **Supabase KEY**. The keys can be found in your supabase project in `/setting/API`.
+Initialize a [`SupabaseClient`](https://supabase.com/docs/reference/dart/initializing#access-supabaseclient-instance) by passing your **Supabase URL** and **Supabase KEY**. The keys can be found in your supabase project in `/setting/API`.
 
 ```dart
 final client = SupabaseClient('supabaseUrl', 'supabaseKey');
@@ -137,59 +136,46 @@ The `client` has a [`auth`](https://pub.dev/documentation/supabase/latest/supaba
 
 ### Sign up
 
-Use the [`signUp`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient/signUp.html) method, which returns a [`GotrueSessionResponse`](https://github.com/supabase/gotrue-dart/blob/7e58474b444e7d9ea303d11dd058d07f68b3d781/lib/src/gotrue_response.dart#L19).
-
-If the `error` attribute is `null`, the request was successful and the method returns `data` of type [`Session`](https://pub.dev/documentation/gotrue/latest/gotrue/Session-class.html).
+Use the [`signUp`](https://supabase.com/docs/reference/dart/auth-signup) method to create a new user account.
 
 ```dart
 // Sign up user with email and password
-final response = await client.auth.signUp('email', 'password');
-
-if (response.error != null) {
-  // Error
-  print('Error: ${response.error?.message}');
-} else {
-  // Success
-  final session = response.session;
-}
+final response = await supabase.auth.signUp(email: email, password: password);
+final Session? session = response.session;
+final User? user = response.user;
 ```
 
 ### Sign in
 
-Use the [`signIn`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient/signIn.html) method. It works similar to the `signUp` method.
+There are a few ways to sign in a user into your app. 
+
+Use the [`signInWithPassword`](https://supabase.com/docs/reference/dart/auth-signinwithpassword) method to sign in a user with their email or phone with password.
 
 ```dart
 // Sign in user with email and password
-final response = await client.auth.signIn(email: 'email', password: 'password');
-
-if (response.error != null) {
-  // Error
-  print('Error: ${response.error?.message}');
-} else {
-  // Success
-  final session = response.session;
-}
+final response = await client.auth.signInWithPassword(email: email, password: password);
+final Session? session = response.session;
+final User? user = response.user;
 ```
+
+Use the [`signInWithOtp`](https://supabase.com/docs/reference/dart/auth-signinwithotp) method to sign in a user using magic link with email or one time password using phone number.
+
+```dart
+// Sign in user with email and password
+await client.auth.signInWithOtp(email: email);
+```
+
 
 ### Sign out
 
-Use the [`signOut`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient/signOut.html) method, which returns a [`GotrueResponse`](https://github.com/supabase/gotrue-dart/blob/7e58474b444e7d9ea303d11dd058d07f68b3d781/lib/src/gotrue_response.dart#L6).
-
-Also for the sign out check that `error` is `null` to know if the request was successful.
+Use the [`signOut`](https://supabase.com/docs/reference/dart/auth-signout) method to sign out a user.
 
 ```dart
 // Sign out user
-final response = await client.auth.signOut();
-
-if (response.error != null) {
-  // Error
-  print('Error: ${response.error?.message}');
-} else {
-  // Success
-}
+await client.auth.signOut();
 ```
 
-Check out the [**Official Documentation**](https://pub.dev/documentation/gotrue/latest/gotrue/gotrue-library.html) to learn all the other available methods.
+Check out the [**Official Documentation**](https://supabase.com/docs/reference/dart/) to learn all the other available methods.
 
 ## Guides
 
