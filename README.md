@@ -30,7 +30,7 @@ A Dart client for [Supabase](https://supabase.io/).
 
 ## Docs
 
-Find the documentation [here](https://supabase.io/docs/reference/dart/initializing).
+Find the documentation [here](https://supabase.com/docs/reference/dart/initializing).
 
 ## Usage example
 
