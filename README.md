@@ -29,7 +29,7 @@ A Dart client for [Supabase](https://supabase.io/).
 
 ## Docs
 
-`supabase-dart` mirrors the design of `supabase-js`. Find the documentation [here](https://supabase.io/docs/reference/javascript/initializing).
+Find the documentation [here](https://supabase.io/docs/reference/dart/initializing).
 
 ## Usage example
 
@@ -96,6 +96,8 @@ main() {
 
 ### [Authentication](https://supabase.io/docs/guides/auth)
 
+This package does not persist auth state automatically. User [supabase_flutter](https://pub.dev/packages/supabase_flutter) for Flutter apps to persist auth state instead of this package.
+
 ```dart
 import 'package:supabase/supabase.dart';
 
@@ -127,62 +129,8 @@ main() {
 }
 ```
 
-## Authentication
-
-Initialize a [`SupabaseClient`](https://supabase.com/docs/reference/dart/initializing#access-supabaseclient-instance) by passing your **Supabase URL** and **Supabase KEY**. The keys can be found in your supabase project in `/setting/API`.
-
-```dart
-final client = SupabaseClient('supabaseUrl', 'supabaseKey');
-```
-
-The `client` has a [`auth`](https://pub.dev/documentation/supabase/latest/supabase/SupabaseClient/auth.html) attribute (of type [`GoTrueClient`](https://pub.dev/documentation/gotrue/latest/gotrue/GoTrueClient-class.html)) that you can use to authenticate your users using supabase.
-
-### Sign up
-
-Use the [`signUp`](https://supabase.com/docs/reference/dart/auth-signup) method to create a new user account.
-
-```dart
-// Sign up user with email and password
-final response = await supabase.auth.signUp(email: email, password: password);
-final Session? session = response.session;
-final User? user = response.user;
-```
-
-### Sign in
-
-There are a few ways to sign in a user into your app. 
-
-Use the [`signInWithPassword`](https://supabase.com/docs/reference/dart/auth-signinwithpassword) method to sign in a user with their email or phone with password.
-
-```dart
-// Sign in user with email and password
-final response = await client.auth.signInWithPassword(email: email, password: password);
-final Session? session = response.session;
-final User? user = response.user;
-```
-
-Use the [`signInWithOtp`](https://supabase.com/docs/reference/dart/auth-signinwithotp) method to sign in a user using magic link with email or one time password using phone number.
-
-```dart
-// Sign in user with email and password
-await client.auth.signInWithOtp(email: email);
-```
-
-
-### Sign out
-
-Use the [`signOut`](https://supabase.com/docs/reference/dart/auth-signout) method to sign out a user.
-
-```dart
-// Sign out user
-await client.auth.signOut();
-```
-
 Check out the [**Official Documentation**](https://supabase.com/docs/reference/dart/) to learn all the other available methods.
 
-## Guides
-
-- Flutter Supabase Authentication - [Blog](https://www.sandromaglione.com/2021/04/24/flutter-supabase-authentication/)
 
 ## Contributing
 
