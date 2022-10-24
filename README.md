@@ -97,7 +97,7 @@ main() {
 
 ### [Authentication](https://supabase.io/docs/guides/auth)
 
-This package does not persist auth state automatically. User [supabase_flutter](https://pub.dev/packages/supabase_flutter) for Flutter apps to persist auth state instead of this package.
+This package does not persist auth state automatically. Use [supabase_flutter](https://pub.dev/packages/supabase_flutter) for Flutter apps to persist auth state instead of this package.
 
 ```dart
 import 'package:supabase/supabase.dart';
