@@ -1,5 +1,8 @@
 # `supabase-dart`
 
+> **Note**
+> If you are developing a Flutter application, use [supabase_flutter](https://pub.dev/packages/supabase_flutter) instead. This package is for non-Flutter Dart environments.
+
 A Dart client for [Supabase](https://supabase.io/).
 
 [![pub package](https://img.shields.io/pub/v/supabase.svg)](https://pub.dev/packages/supabase)
