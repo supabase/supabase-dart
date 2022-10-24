@@ -4,7 +4,7 @@ A Dart client for [Supabase](https://supabase.io/).
 
 > **Note**
 >
-> If you are developing a Flutter application, use [supabase_flutter](https://pub.dev/packages/supabase_flutter) instead. This package is for non-Flutter Dart environments.
+> If you are developing a Flutter application, use [supabase_flutter](https://pub.dev/packages/supabase_flutter) instead. [supabase] package is for non-Flutter Dart environments.
 
 [![pub package](https://img.shields.io/pub/v/supabase.svg)](https://pub.dev/packages/supabase)
 [![pub test](https://github.com/supabase/supabase-dart/workflows/Test/badge.svg)](https://github.com/supabase/supabase-dart/actions?query=workflow%3ATest)
