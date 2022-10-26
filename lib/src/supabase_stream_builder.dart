@@ -244,7 +244,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Sets up the stream controller and calls the method to get data as necessary
   void _setupStream() {
     final isFirstListener = _streamController == null;
-    _streamController ??= StreamController.broadcast(
+    _streamController = StreamController.broadcast(
       onListen: () {
         if (isFirstListener) {
           // Get the data from server on first listener

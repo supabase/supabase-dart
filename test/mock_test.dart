@@ -339,6 +339,17 @@ void main() {
 
         stream.listen(expectAsync1((event) {}, count: 4));
       });
+      test("can listen twice at the same time", () async {
+        final stream = client.from('todos').stream(primaryKey: ['id']);
+        stream.listen(expectAsync1((event) {}, count: 4));
+
+        await Future.delayed(Duration(seconds: 3));
+
+        // All realtime events are done emitting, so should receive the currnet data
+        stream.listen(expectAsync1((event) {
+          print('called');
+        }, count: 1));
+      });
       test('emits data', () {
         final stream = client.from('todos').stream(primaryKey: ['id']);
         expect(
