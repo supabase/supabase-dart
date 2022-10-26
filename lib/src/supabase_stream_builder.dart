@@ -284,9 +284,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           event: 'UPDATE',
           schema: _schema,
           table: _table,
-          filter: _streamFilter != null
-              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
-              : null,
+          filter: realtimeFilter,
         ), (payload, [ref]) {
       final updatedIndex = _streamData.indexWhere(
         (element) => _isTargetRecord(record: element, payload: payload),
@@ -304,9 +302,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           event: 'DELETE',
           schema: _schema,
           table: _table,
-          filter: _streamFilter != null
-              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
-              : null,
+          filter: realtimeFilter,
         ), (payload, [ref]) {
       final deletedIndex = _streamData.indexWhere(
         (element) => _isTargetRecord(record: element, payload: payload),
