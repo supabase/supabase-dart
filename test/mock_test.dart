@@ -21,7 +21,7 @@ void main() {
   /// `testFilter` is used to test incoming realtime filter. The value should match the realtime filter set by the library.
   Future<void> handleRequests(
     HttpServer server, {
-    String? testFilter,
+    String? expectedFilter,
   }) async {
     await for (final HttpRequest request in server) {
       final headers = request.headers;
@@ -37,10 +37,8 @@ void main() {
         }
 
         // Check that rest api contains the correct filter in the URL
-        if (testFilter != null) {
-          // Filter that should be applied in this request e.g. eq, neq, etc...
-          final filterType = testFilter.split('=').last.split('.').first;
-          expect(url.contains(filterType), isTrue);
+        if (expectedFilter != null) {
+          expect(url.contains(expectedFilter), isTrue);
         }
       }
       if (url == '/rest/v1/todos?select=task%2Cstatus') {
@@ -121,8 +119,8 @@ void main() {
                   ['postgres_changes']
               .first['filter'];
 
-          if (testFilter != null) {
-            expect(realtimeFilter, testFilter);
+          if (expectedFilter != null) {
+            expect(realtimeFilter, expectedFilter);
           }
 
           final replyString = jsonEncode({
@@ -483,7 +481,7 @@ void main() {
 
   group('realtime filter', () {
     test('can filter stream results with eq', () {
-      handleRequests(mockServer, testFilter: 'status=eq.true');
+      handleRequests(mockServer, expectedFilter: 'status=eq.true');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).eq('status', true);
       expect(
@@ -501,35 +499,35 @@ void main() {
     });
 
     test('can filter stream results with neq', () {
-      handleRequests(mockServer, testFilter: 'id=neq.2');
+      handleRequests(mockServer, expectedFilter: 'id=neq.2');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).neq('id', 2);
       expect(stream, emits(isList));
     });
 
     test('can filter stream results with gt', () {
-      handleRequests(mockServer, testFilter: 'id=gt.2');
+      handleRequests(mockServer, expectedFilter: 'id=gt.2');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
       expect(stream, emits(isList));
     });
 
     test('can filter stream results with gte', () {
-      handleRequests(mockServer, testFilter: 'id=gte.2');
+      handleRequests(mockServer, expectedFilter: 'id=gte.2');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
       expect(stream, emits(isList));
     });
 
     test('can filter stream results with lt', () {
-      handleRequests(mockServer, testFilter: 'id=lt.2');
+      handleRequests(mockServer, expectedFilter: 'id=lt.2');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
       expect(stream, emits(isList));
     });
 
     test('can filter stream results with lte', () {
-      handleRequests(mockServer, testFilter: 'id=lte.2');
+      handleRequests(mockServer, expectedFilter: 'id=lte.2');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
       expect(stream, emits(isList));

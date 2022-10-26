@@ -221,15 +221,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
   Stream<SupabaseStreamEvent> execute() {
-    _streamController = StreamController.broadcast(
-      onListen: () {
-        _getStreamData();
-      },
-      onCancel: () {
-        _channel?.unsubscribe();
-        _streamController?.close();
-      },
-    );
+    _setupStream();
     return _streamController!.stream;
   }
 
@@ -240,20 +232,34 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    _streamController = StreamController.broadcast(
-      onListen: () {
-        _getStreamData();
-      },
-      onCancel: () {
-        _channel?.unsubscribe();
-        _streamController?.close();
-      },
-    );
+    _setupStream();
     return _streamController!.stream.listen(
       onData,
       onError: onError,
       onDone: onDone,
       cancelOnError: cancelOnError,
+    );
+  }
+
+  /// Sets up the stream controller and calls the method to get data as necessary
+  void _setupStream() {
+    final isFirstListener = _streamController == null;
+    _streamController ??= StreamController.broadcast(
+      onListen: () {
+        if (isFirstListener) {
+          // Get the data from server on first listener
+          _getStreamData();
+        } else {
+          /// Add the existing data in memory to the stream for later streams
+          /// This avoids unnecessary refetching of data
+          _addStream();
+        }
+      },
+      onCancel: () {
+        _channel?.unsubscribe();
+        _streamController?.close();
+        _streamController = null;
+      },
     );
   }
 
