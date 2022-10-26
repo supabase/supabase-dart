@@ -82,7 +82,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).eq('name', 'Supabase');
+  /// supabase.from('users').stream(primaryKey: ['id']).eq('name', 'Supabase');
   /// ```
   SupabaseStreamBuilder eq(String column, dynamic value) {
     assert(
@@ -102,7 +102,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).neq('name', 'Supabase');
+  /// supabase.from('users').stream(primaryKey: ['id']).neq('name', 'Supabase');
   /// ```
   SupabaseStreamBuilder neq(String column, dynamic value) {
     assert(
@@ -122,7 +122,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).lt('likes', 100);
+  /// supabase.from('users').stream(primaryKey: ['id']).lt('likes', 100);
   /// ```
   SupabaseStreamBuilder lt(String column, dynamic value) {
     assert(
@@ -142,7 +142,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).lte('likes', 100);
+  /// supabase.from('users').stream(primaryKey: ['id']).lte('likes', 100);
   /// ```
   SupabaseStreamBuilder lte(String column, dynamic value) {
     assert(
@@ -162,7 +162,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).gt('likes', '100');
+  /// supabase.from('users').stream(primaryKey: ['id']).gt('likes', '100');
   /// ```
   SupabaseStreamBuilder gt(String column, dynamic value) {
     assert(
@@ -182,7 +182,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).gte('likes', 100);
+  /// supabase.from('users').stream(primaryKey: ['id']).gte('likes', 100);
   /// ```
   SupabaseStreamBuilder gte(String column, dynamic value) {
     assert(
@@ -202,7 +202,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// When `ascending` value is true, the result will be in ascending order.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).order('username', ascending: false);
+  /// supabase.from('users').stream(primaryKey: ['id']).order('username', ascending: false);
   /// ```
   SupabaseStreamBuilder order(String column, {bool ascending = false}) {
     _orderBy = _Order(column: column, ascending: ascending);
@@ -212,7 +212,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Limits the result with the specified `count`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).limit(10);
+  /// supabase.from('users').stream(primaryKey: ['id']).limit(10);
   /// ```
   SupabaseStreamBuilder limit(int count) {
     _limit = count;
