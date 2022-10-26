@@ -1,106 +1,76 @@
-// import 'dart:async';
-// import 'dart:io';
+import 'dart:async';
+import 'dart:io';
 
-// import 'package:supabase/supabase.dart';
+import 'package:supabase/supabase.dart';
 
-// Future<void> main() async {
-//   const supabaseUrl = '';
-//   const supabaseKey = '';
-//   final client = SupabaseClient(supabaseUrl, supabaseKey);
+Future<void> main() async {
+  const supabaseUrl = 'YOUR_SUPABASE_URL';
+  const supabaseKey = 'YOUR_ANON_KEY';
+  final supabase = SupabaseClient(supabaseUrl, supabaseKey);
 
-//   // query data
-//   final selectResponse = await client
-//       .from('countries')
-//       .select()
-//       .order('name', ascending: true)
-//       .execute(count: CountOption.exact);
-//   if (selectResponse.error == null) {
-//     print('response.data: ${selectResponse.data}');
-//   }
+  // query data
+  final data =
+      await supabase.from('countries').select().order('name', ascending: true);
+  print(data);
 
-//   // insert data
-//   final insertResponse = await client.from('countries').insert([
-//     {'name': 'Singapore'},
-//   ]).execute();
-//   if (insertResponse.error == null) {
-//     print('insertResponse.data: ${insertResponse.data}');
-//   }
+  // insert data
+  await supabase.from('countries').insert([
+    {'name': 'Singapore'},
+  ]);
 
-//   // update data
-//   final updateResponse = await client
-//       .from('countries')
-//       .update({'name': 'Singapore'})
-//       .eq('id', 1)
-//       .execute();
-//   if (updateResponse.error == null) {
-//     print('updateResponse.data: ${updateResponse.data}');
-//   }
+  // update data
+  await supabase.from('countries').update({'name': 'Singapore'}).eq('id', 1);
 
-//   // delete data
-//   final deleteResponse =
-//       await client.from('countries').delete().eq('id', 1).execute();
-//   if (deleteResponse.error == null) {
-//     print('deleteResponse.data: ${deleteResponse.data}');
-//   }
+  // delete data
+  await supabase.from('countries').delete().eq('id', 1);
 
-//   // realtime
-//   final subscription1 =
-//       client.from('countries').on(SupabaseEventTypes.delete, (x) {
-//     print('on countries.delete: ${x.table} ${x.eventType} ${x.oldRecord}');
-//   }).subscribe((String event, {String? errorMsg}) {
-//     print('event: $event error: $errorMsg');
-//   });
+  // realtime
+  final realtimeChannel = supabase.channel('my_channel');
+  realtimeChannel
+      .on(
+          RealtimeListenTypes.postgresChanges,
+          ChannelFilter(event: '*', schema: 'public', table: 'countries'),
+          (payload, [ref]) {})
+      .subscribe();
 
-//   final subscription2 = client.from('todos').on(SupabaseEventTypes.insert, (x) {
-//     print('on todos.insert: ${x.table} ${x.eventType} ${x.newRecord}');
-//   }).subscribe((String event, {String? errorMsg}) {
-//     print('event: $event error: $errorMsg');
-//   });
+  // remember to remove channel when no longer needed
+  supabase.removeChannel(realtimeChannel);
 
-//   // remember to remove subscription
-//   client.removeSubscription(subscription1);
-//   client.removeSubscription(subscription2);
+  // stream
+  final streamSubscription = supabase
+      .from('countries')
+      .stream(primaryKey: ['id'])
+      .order('name')
+      .limit(10)
+      .listen((snapshot) {
+        print('snapshot: $snapshot');
+      });
 
-//   // stream
-//   final streamSubscription = client
-//       .from('countries')
-//       .stream(['id'])
-//       .order('name')
-//       .limit(10)
-//       .execute()
-//       .listen((snapshot) {
-//         print('snapshot: $snapshot');
-//       });
+  // remember to remove subscription
+  streamSubscription.cancel();
 
-//   // remember to remove subscription
-//   streamSubscription.cancel();
+  // Upload file to bucket "public"
+  final file = File('example.txt');
+  file.writeAsStringSync('File content');
+  final storageResponse =
+      await supabase.storage.from('public').upload('example.txt', file);
+  print('upload response : $storageResponse');
 
-//   // Upload file to bucket "public"
-//   final file = File('example.txt');
-//   file.writeAsStringSync('File content');
-//   final storageResponse =
-//       await client.storage.from('public').upload('example.txt', file);
-//   print('upload response : ${storageResponse.data}');
+  // Get download url
+  final urlResponse =
+      await supabase.storage.from('public').createSignedUrl('example.txt', 60);
+  print('download url : $urlResponse');
 
-//   // Get download url
-//   final urlResponse =
-//       await client.storage.from('public').createSignedUrl('example.txt', 60);
-//   print('download url : ${urlResponse.data}');
+  // Download text file
+  final fileResponse =
+      await supabase.storage.from('public').download('example.txt');
+  print('downloaded file : ${String.fromCharCodes(fileResponse)}');
 
-//   // Download text file
-//   final fileResponse =
-//       await client.storage.from('public').download('example.txt');
-//   if (fileResponse.hasError) {
-//     print('Error while downloading file : ${fileResponse.error}');
-//   } else {
-//     print('downloaded file : ${String.fromCharCodes(fileResponse.data!)}');
-//   }
+  // Delete file
+  final deleteFileResponse =
+      await supabase.storage.from('public').remove(['example.txt']);
+  print('deleted file id : ${deleteFileResponse.first.id}');
 
-//   // Delete file
-//   final deleteFileResponse =
-//       await client.storage.from('public').remove(['example.txt']);
-//   print('deleted file id : ${deleteFileResponse.data?.first.id}');
-
-//   // Local file cleanup
-//   if (file.existsSync()) file.deleteSync();
-// }
+  // Local file cleanup
+  if (file.existsSync()) file.deleteSync();
+}
