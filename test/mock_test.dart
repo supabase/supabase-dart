@@ -35,6 +35,13 @@ void main() {
         if (foundApiKey == customApiKey) {
           expect(headers.value('customfield'), 'customvalue');
         }
+
+        // Check that rest api contains the correct filter in the URL
+        if (testFilter != null) {
+          // Filter that should be applied in this request e.g. eq, neq, etc...
+          final filterType = testFilter.split('=').last.split('.').first;
+          expect(url.contains(filterType), isTrue);
+        }
       }
       if (url == '/rest/v1/todos?select=task%2Cstatus') {
         final jsonString = jsonEncode([
