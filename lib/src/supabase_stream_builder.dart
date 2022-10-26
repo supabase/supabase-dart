@@ -41,8 +41,6 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   RealtimeChannel? _channel;
 
-  PostgrestBuilder? _postgrestBuilder;
-
   final String _schema;
 
   final String _table;
@@ -224,12 +222,14 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
   Stream<SupabaseStreamEvent> execute() {
     _streamController = StreamController.broadcast(
+      onListen: () {
+        _getStreamData();
+      },
       onCancel: () {
         _channel?.unsubscribe();
         _streamController?.close();
       },
     );
-    _getStreamData();
     return _streamController!.stream;
   }
 
@@ -240,22 +240,6 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    if (_postgrestBuilder == null) {
-      PostgrestFilterBuilder query = _queryBuilder.select();
-      if (_streamFilter != null) {
-        query = query.eq(_streamFilter!.column, _streamFilter!.value);
-      }
-      PostgrestTransformBuilder? transformQuery;
-      if (_orderBy != null) {
-        transformQuery =
-            query.order(_orderBy!.column, ascending: _orderBy!.ascending);
-      }
-      if (_limit != null) {
-        transformQuery = (transformQuery ?? query).limit(_limit!);
-      }
-      _postgrestBuilder = transformQuery ?? query;
-    }
-
     _streamController = StreamController.broadcast(
       onListen: () {
         _getStreamData();
@@ -368,7 +352,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     }
 
     try {
-      final data = await _postgrestBuilder;
+      final data = await (transformQuery ?? query);
       final rows = SupabaseStreamEvent.from(data as List);
       _streamData.addAll(rows);
       _addStream();
