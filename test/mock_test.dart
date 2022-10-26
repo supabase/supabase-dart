@@ -495,22 +495,38 @@ void main() {
 
     test('can filter stream results with gt', () {
       handleRequests(mockServer, testFilter: 'id=gt.2');
-      client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
+      client
+          .from('todos')
+          .stream(primaryKey: ['id'])
+          .gt('id', 2)
+          .listen((event) {});
     });
 
     test('can filter stream results with gte', () {
       handleRequests(mockServer, testFilter: 'id=gte.2');
-      client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
+      client
+          .from('todos')
+          .stream(primaryKey: ['id'])
+          .gte('id', 2)
+          .listen((event) {});
     });
 
     test('can filter stream results with lt', () {
       handleRequests(mockServer, testFilter: 'id=lt.2');
-      client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
+      client
+          .from('todos')
+          .stream(primaryKey: ['id'])
+          .lt('id', 2)
+          .listen((event) {});
     });
 
     test('can filter stream results with lte', () {
       handleRequests(mockServer, testFilter: 'id=lte.2');
-      client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
+      client
+          .from('todos')
+          .stream(primaryKey: ['id'])
+          .lte('id', 2)
+          .listen((event) {});
     });
   });
 }
