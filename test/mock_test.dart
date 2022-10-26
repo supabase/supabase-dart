@@ -94,6 +94,13 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(jsonString)
           ..close();
+      } else if (url.contains('rest')) {
+        // Just return an empty string as dummy data if any other rest request
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..headers.contentType = ContentType.json
+          ..write('[]')
+          ..close();
       } else if (url.contains('realtime')) {
         webSocket = await WebSocketTransformer.upgrade(request);
         if (hasListener) {
@@ -493,40 +500,39 @@ void main() {
       );
     });
 
+    test('can filter stream results with neq', () {
+      handleRequests(mockServer, testFilter: 'id=neq.2');
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).neq('id', 2);
+      expect(stream, emits(isList));
+    });
+
     test('can filter stream results with gt', () {
       handleRequests(mockServer, testFilter: 'id=gt.2');
-      client
-          .from('todos')
-          .stream(primaryKey: ['id'])
-          .gt('id', 2)
-          .listen((event) {});
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
+      expect(stream, emits(isList));
     });
 
     test('can filter stream results with gte', () {
       handleRequests(mockServer, testFilter: 'id=gte.2');
-      client
-          .from('todos')
-          .stream(primaryKey: ['id'])
-          .gte('id', 2)
-          .listen((event) {});
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
+      expect(stream, emits(isList));
     });
 
     test('can filter stream results with lt', () {
       handleRequests(mockServer, testFilter: 'id=lt.2');
-      client
-          .from('todos')
-          .stream(primaryKey: ['id'])
-          .lt('id', 2)
-          .listen((event) {});
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
+      expect(stream, emits(isList));
     });
 
     test('can filter stream results with lte', () {
       handleRequests(mockServer, testFilter: 'id=lte.2');
-      client
-          .from('todos')
-          .stream(primaryKey: ['id'])
-          .lte('id', 2)
-          .listen((event) {});
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
+      expect(stream, emits(isList));
     });
   });
 }
