@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:supabase/supabase.dart';
 
 enum _FilterType { eq, neq, lt, lte, gt, gte }
@@ -49,7 +50,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   final List<String> _uniqueColumns;
 
   /// StreamController for `stream()` method.
-  StreamController<SupabaseStreamEvent>? _streamController;
+  BehaviorSubject<SupabaseStreamEvent>? _streamController;
 
   /// Contains the combined data of postgrest and realtime to emit as stream.
   SupabaseStreamEvent _streamData = [];
@@ -243,17 +244,9 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   /// Sets up the stream controller and calls the method to get data as necessary
   void _setupStream() {
-    final isFirstListener = _streamController == null;
-    _streamController = StreamController.broadcast(
+    _streamController ??= BehaviorSubject(
       onListen: () {
-        if (isFirstListener) {
-          // Get the data from server on first listener
-          _getStreamData();
-        } else {
-          /// Add the existing data in memory to the stream for later streams
-          /// This avoids unnecessary refetching of data
-          _addStream();
-        }
+        _getStreamData();
       },
       onCancel: () {
         _channel?.unsubscribe();
