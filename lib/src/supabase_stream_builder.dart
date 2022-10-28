@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:supabase/supabase.dart';
 
 enum _FilterType { eq, neq, lt, lte, gt, gte }
@@ -41,8 +42,6 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   RealtimeChannel? _channel;
 
-  PostgrestBuilder? _postgrestBuilder;
-
   final String _schema;
 
   final String _table;
@@ -51,7 +50,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   final List<String> _uniqueColumns;
 
   /// StreamController for `stream()` method.
-  StreamController<SupabaseStreamEvent>? _streamController;
+  BehaviorSubject<SupabaseStreamEvent>? _streamController;
 
   /// Contains the combined data of postgrest and realtime to emit as stream.
   SupabaseStreamEvent _streamData = [];
@@ -84,7 +83,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).eq('name', 'Supabase');
+  /// supabase.from('users').stream(primaryKey: ['id']).eq('name', 'Supabase');
   /// ```
   SupabaseStreamBuilder eq(String column, dynamic value) {
     assert(
@@ -104,7 +103,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).neq('name', 'Supabase');
+  /// supabase.from('users').stream(primaryKey: ['id']).neq('name', 'Supabase');
   /// ```
   SupabaseStreamBuilder neq(String column, dynamic value) {
     assert(
@@ -124,7 +123,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).lt('likes', 100);
+  /// supabase.from('users').stream(primaryKey: ['id']).lt('likes', 100);
   /// ```
   SupabaseStreamBuilder lt(String column, dynamic value) {
     assert(
@@ -144,7 +143,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).lte('likes', 100);
+  /// supabase.from('users').stream(primaryKey: ['id']).lte('likes', 100);
   /// ```
   SupabaseStreamBuilder lte(String column, dynamic value) {
     assert(
@@ -164,7 +163,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).gt('likes', '100');
+  /// supabase.from('users').stream(primaryKey: ['id']).gt('likes', '100');
   /// ```
   SupabaseStreamBuilder gt(String column, dynamic value) {
     assert(
@@ -184,7 +183,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).gte('likes', 100);
+  /// supabase.from('users').stream(primaryKey: ['id']).gte('likes', 100);
   /// ```
   SupabaseStreamBuilder gte(String column, dynamic value) {
     assert(
@@ -204,7 +203,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// When `ascending` value is true, the result will be in ascending order.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).order('username', ascending: false);
+  /// supabase.from('users').stream(primaryKey: ['id']).order('username', ascending: false);
   /// ```
   SupabaseStreamBuilder order(String column, {bool ascending = false}) {
     _orderBy = _Order(column: column, ascending: ascending);
@@ -214,7 +213,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Limits the result with the specified `count`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(['id']).limit(10);
+  /// supabase.from('users').stream(primaryKey: ['id']).limit(10);
   /// ```
   SupabaseStreamBuilder limit(int count) {
     _limit = count;
@@ -223,13 +222,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
   Stream<SupabaseStreamEvent> execute() {
-    _streamController = StreamController.broadcast(
-      onCancel: () {
-        _channel?.unsubscribe();
-        _streamController?.close();
-      },
-    );
-    _getStreamData();
+    _setupStream();
     return _streamController!.stream;
   }
 
@@ -240,36 +233,26 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    if (_postgrestBuilder == null) {
-      PostgrestFilterBuilder query = _queryBuilder.select();
-      if (_streamFilter != null) {
-        query = query.eq(_streamFilter!.column, _streamFilter!.value);
-      }
-      PostgrestTransformBuilder? transformQuery;
-      if (_orderBy != null) {
-        transformQuery =
-            query.order(_orderBy!.column, ascending: _orderBy!.ascending);
-      }
-      if (_limit != null) {
-        transformQuery = (transformQuery ?? query).limit(_limit!);
-      }
-      _postgrestBuilder = transformQuery ?? query;
-    }
+    _setupStream();
+    return _streamController!.stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+  }
 
-    _streamController = StreamController.broadcast(
+  /// Sets up the stream controller and calls the method to get data as necessary
+  void _setupStream() {
+    _streamController ??= BehaviorSubject(
       onListen: () {
         _getStreamData();
       },
       onCancel: () {
         _channel?.unsubscribe();
         _streamController?.close();
+        _streamController = null;
       },
-    );
-    return _streamController!.stream.listen(
-      onData,
-      onError: onError,
-      onDone: onDone,
-      cancelOnError: cancelOnError,
     );
   }
 
@@ -300,9 +283,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           event: 'UPDATE',
           schema: _schema,
           table: _table,
-          filter: _streamFilter != null
-              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
-              : null,
+          filter: realtimeFilter,
         ), (payload, [ref]) {
       final updatedIndex = _streamData.indexWhere(
         (element) => _isTargetRecord(record: element, payload: payload),
@@ -320,9 +301,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           event: 'DELETE',
           schema: _schema,
           table: _table,
-          filter: _streamFilter != null
-              ? '${_streamFilter!.column}=eq.${_streamFilter!.value}'
-              : null,
+          filter: realtimeFilter,
         ), (payload, [ref]) {
       final deletedIndex = _streamData.indexWhere(
         (element) => _isTargetRecord(record: element, payload: payload),
@@ -368,7 +347,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     }
 
     try {
-      final data = await _postgrestBuilder;
+      final data = await (transformQuery ?? query);
       final rows = SupabaseStreamEvent.from(data as List);
       _streamData.addAll(rows);
       _addStream();

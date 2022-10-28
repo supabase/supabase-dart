@@ -21,7 +21,7 @@ void main() {
   /// `testFilter` is used to test incoming realtime filter. The value should match the realtime filter set by the library.
   Future<void> handleRequests(
     HttpServer server, {
-    String? testFilter,
+    String? expectedFilter,
   }) async {
     await for (final HttpRequest request in server) {
       final headers = request.headers;
@@ -34,6 +34,11 @@ void main() {
         expect(foundApiKey, apiKey);
         if (foundApiKey == customApiKey) {
           expect(headers.value('customfield'), 'customvalue');
+        }
+
+        // Check that rest api contains the correct filter in the URL
+        if (expectedFilter != null) {
+          expect(url.contains(expectedFilter), isTrue);
         }
       }
       if (url == '/rest/v1/todos?select=task%2Cstatus') {
@@ -87,6 +92,13 @@ void main() {
           ..headers.contentType = ContentType.json
           ..write(jsonString)
           ..close();
+      } else if (url.contains('rest')) {
+        // Just return an empty string as dummy data if any other rest request
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..headers.contentType = ContentType.json
+          ..write('[]')
+          ..close();
       } else if (url.contains('realtime')) {
         webSocket = await WebSocketTransformer.upgrade(request);
         if (hasListener) {
@@ -107,8 +119,8 @@ void main() {
                   ['postgres_changes']
               .first['filter'];
 
-          if (testFilter != null) {
-            expect(realtimeFilter, testFilter);
+          if (expectedFilter != null) {
+            expect(realtimeFilter, expectedFilter);
           }
 
           final replyString = jsonEncode({
@@ -327,6 +339,23 @@ void main() {
 
         stream.listen(expectAsync1((event) {}, count: 4));
       });
+      test("can listen twice at the same time", () async {
+        final stream = client.from('todos').stream(primaryKey: ['id']);
+        stream.listen(expectAsync1((event) {}, count: 4));
+        stream.listen(expectAsync1((event) {}, count: 4));
+
+        // All realtime events are done emitting, so should receive the currnet data
+      });
+      test("stream should emit the last emitted data when listened to",
+          () async {
+        final stream = client.from('todos').stream(primaryKey: ['id']);
+        stream.listen(expectAsync1((event) {}, count: 4));
+
+        await Future.delayed(Duration(seconds: 3));
+
+        // All realtime events are done emitting, so should receive the currnet data
+        stream.listen(expectAsync1((event) {}, count: 1));
+      });
       test('emits data', () {
         final stream = client.from('todos').stream(primaryKey: ['id']);
         expect(
@@ -469,7 +498,7 @@ void main() {
 
   group('realtime filter', () {
     test('can filter stream results with eq', () {
-      handleRequests(mockServer, testFilter: 'status=eq.true');
+      handleRequests(mockServer, expectedFilter: 'status=eq.true');
       final stream =
           client.from('todos').stream(primaryKey: ['id']).eq('status', true);
       expect(
@@ -486,24 +515,39 @@ void main() {
       );
     });
 
+    test('can filter stream results with neq', () {
+      handleRequests(mockServer, expectedFilter: 'id=neq.2');
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).neq('id', 2);
+      expect(stream, emits(isList));
+    });
+
     test('can filter stream results with gt', () {
-      handleRequests(mockServer, testFilter: 'id=gt.2');
-      client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
+      handleRequests(mockServer, expectedFilter: 'id=gt.2');
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).gt('id', 2);
+      expect(stream, emits(isList));
     });
 
     test('can filter stream results with gte', () {
-      handleRequests(mockServer, testFilter: 'id=gte.2');
-      client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
+      handleRequests(mockServer, expectedFilter: 'id=gte.2');
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).gte('id', 2);
+      expect(stream, emits(isList));
     });
 
     test('can filter stream results with lt', () {
-      handleRequests(mockServer, testFilter: 'id=lt.2');
-      client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
+      handleRequests(mockServer, expectedFilter: 'id=lt.2');
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).lt('id', 2);
+      expect(stream, emits(isList));
     });
 
     test('can filter stream results with lte', () {
-      handleRequests(mockServer, testFilter: 'id=lte.2');
-      client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
+      handleRequests(mockServer, expectedFilter: 'id=lte.2');
+      final stream =
+          client.from('todos').stream(primaryKey: ['id']).lte('id', 2);
+      expect(stream, emits(isList));
     });
   });
 }
