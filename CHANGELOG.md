@@ -2,15 +2,24 @@
 
 - fix: stream filter other than eq is not properly applied. [(#156)](https://github.com/supabase-community/supabase-dart/pull/156)
 - fix: update examples [(#157)](https://github.com/supabase-community/supabase-dart/pull/157)
-- feat: update gotrue to v1.1.0
+- feat: update gotrue to v1.1.1
   - fail to getSessionFromUrl throws error on `onAuthStateChange`
-  ```dart
-  supabase.onAuthStateChange.listen((data) {
-    // handle auth state change here
-  }, onError: (error) {
-    // handle error here
-  });
-  ```
+    ```dart
+    supabase.onAuthStateChange.listen((data) {
+      // handle auth state change here
+    }, onError: (error) {
+      // handle error here
+    });
+    ```
+- feat: update postgrest to v1.1.0
+  - feat: add generic types to `.select()`
+    ```dart
+    // data is `List<Map<String, dynamic>>`
+    final data = await supabase.from<List<Map<String, dynamic>>>('users').select();
+
+    // data is `Map<String, dynamic>`
+    final data = await supabase.from<Map<String, dynamic>>('users').select().eq('id', myId).single();
+    ```
 
 
 ## [1.0.1]
