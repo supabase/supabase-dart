@@ -1,15 +1,40 @@
+## [1.1.0]
+
+- fix: stream filter other than eq is not properly applied. [(#156)](https://github.com/supabase-community/supabase-dart/pull/156)
+- fix: update examples [(#157)](https://github.com/supabase-community/supabase-dart/pull/157)
+- feat: update gotrue to v1.1.1
+  - fail to getSessionFromUrl throws error on `onAuthStateChange`
+    ```dart
+    supabase.onAuthStateChange.listen((data) {
+      // handle auth state change here
+    }, onError: (error) {
+      // handle error here
+    });
+    ```
+- feat: update postgrest to v1.1.0
+  - feat: add generic types to `.select()`
+    ```dart
+    // data is `List<Map<String, dynamic>>`
+    final data = await supabase.from<List<Map<String, dynamic>>>('users').select();
+
+    // data is `Map<String, dynamic>`
+    final data = await supabase.from<Map<String, dynamic>>('users').select().eq('id', myId).single();
+    ```
+
+
 ## [1.0.1]
 
 - fix: update sample code on readme.md
+
 ## [1.0.0]
 
 - chore: v1.0.0 release 🚀
-- BREAKING: set minimum SDK of Dart at 2.15.0 ([150](https://github.com/supabase-community/supabase-dart/pull/150))
+- BREAKING: set minimum SDK of Dart at 2.15.0 [(#150)](https://github.com/supabase-community/supabase-dart/pull/150)
 - BREAKING: `.stream()` now takes a named parameter `primaryKey` instead of a positional argument. 
   ```dart
   supabase.from('my_table').stream(primaryKey: ['id']);
   ```
-- feat: `.stream()` has 5 additional filters: `neq`, `gt`, `gte`, `lt`, `lte` ([148](https://github.com/supabase-community/supabase-dart/pull/148)
+- feat: `.stream()` has 5 additional filters: `neq`, `gt`, `gte`, `lt`, `lte` [(#148)](https://github.com/supabase-community/supabase-dart/pull/148)
 - chore: update postgrest to v1.0.0
 - chore: update realtime to v1.0.0
 - chore: update storage to v1.0.0
