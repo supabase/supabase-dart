@@ -404,4 +404,81 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
       _streamController?.addError(error, stackTrace ?? StackTrace.current);
     }
   }
+
+  @override
+  bool get isBroadcast => true;
+
+  @override
+  Stream<E> asyncMap<E>(
+      FutureOr<E> Function(SupabaseStreamEvent event) convert) {
+    // Copied from [Stream.asyncMap]
+
+    final controller = BehaviorSubject<E>();
+
+    controller.onListen = () {
+      StreamSubscription<SupabaseStreamEvent> subscription = listen(null,
+          onError: controller.addError, // Avoid Zone error replacement.
+          onDone: controller.close);
+      FutureOr<void> add(E value) {
+        controller.add(value);
+      }
+
+      final addError = controller.addError;
+      final resume = subscription.resume;
+      subscription.onData((SupabaseStreamEvent event) {
+        FutureOr<E> newValue;
+        try {
+          newValue = convert(event);
+        } catch (e, s) {
+          controller.addError(e, s);
+          return;
+        }
+        if (newValue is Future<E>) {
+          subscription.pause();
+          newValue.then(add, onError: addError).whenComplete(resume);
+        } else {
+          controller.add(newValue as dynamic);
+        }
+      });
+      controller.onCancel = subscription.cancel;
+      if (!isBroadcast) {
+        controller
+          ..onPause = subscription.pause
+          ..onResume = resume;
+      }
+    };
+    return controller.stream;
+  }
+
+  @override
+  Stream<E> asyncExpand<E>(
+      Stream<E>? Function(SupabaseStreamEvent event) convert) {
+    //Copied from [Stream.asyncExpand]
+    final controller = BehaviorSubject<E>();
+    controller.onListen = () {
+      StreamSubscription<SupabaseStreamEvent> subscription = listen(null,
+          onError: controller.addError, // Avoid Zone error replacement.
+          onDone: controller.close);
+      subscription.onData((SupabaseStreamEvent event) {
+        Stream<E>? newStream;
+        try {
+          newStream = convert(event);
+        } catch (e, s) {
+          controller.addError(e, s);
+          return;
+        }
+        if (newStream != null) {
+          subscription.pause();
+          controller.addStream(newStream).whenComplete(subscription.resume);
+        }
+      });
+      controller.onCancel = subscription.cancel;
+      if (!isBroadcast) {
+        controller
+          ..onPause = subscription.pause
+          ..onResume = subscription.resume;
+      }
+    };
+    return controller.stream;
+  }
 }

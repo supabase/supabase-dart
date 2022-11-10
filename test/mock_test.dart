@@ -382,6 +382,59 @@ void main() {
           ]),
         );
       });
+
+      test('emits data with asyncMap', () {
+        final stream = client.from('todos').stream(
+            primaryKey: ['id']).asyncMap((event) => Future.value([event]));
+        expect(
+          stream,
+          emitsInOrder([
+            containsAllInOrder([
+              [
+                {'id': 1, 'task': 'task 1', 'status': true},
+                {'id': 2, 'task': 'task 2', 'status': false}
+              ]
+            ]),
+            containsAllInOrder([
+              [
+                {'id': 1, 'task': 'task 1', 'status': true},
+                {'id': 2, 'task': 'task 2', 'status': false},
+                {'id': 3, 'task': 'task 3', 'status': true},
+              ]
+            ]),
+            containsAllInOrder([
+              [
+                {'id': 1, 'task': 'task 1', 'status': true},
+                {'id': 2, 'task': 'task 2 updated', 'status': false},
+                {'id': 3, 'task': 'task 3', 'status': true},
+              ]
+            ]),
+            containsAllInOrder([
+              [
+                {'id': 1, 'task': 'task 1', 'status': true},
+                {'id': 3, 'task': 'task 3', 'status': true},
+              ]
+            ]),
+          ]),
+        );
+      });
+
+      test("can listen twice at the same time with asyncMap", () async {
+        final stream = client
+            .from('todos')
+            .stream(primaryKey: ['id']).asyncMap((event) => event);
+        stream.listen(expectAsync1((event) {
+          print(event);
+        }, count: 4));
+
+        await Future.delayed(Duration(seconds: 3));
+
+        // All realtime events are done emitting, so should receive the currnet data
+        stream.listen(expectAsync1((event) {
+          print('called');
+        }, count: 1));
+      });
+
       test('emits data with custom headers', () {
         apiKey = customApiKey;
         final stream =
