@@ -1,5 +1,6 @@
 ## [1.1.1]
 
+- fix: update postgrest to v1.1.1
 - fix: implement asyncMap and asyncExpand [(#159)](https://github.com/supabase/supabase-dart/pull/159)
 
 ## [1.1.0]

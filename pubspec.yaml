@@ -11,7 +11,7 @@ dependencies:
   functions_client: ^1.0.0
   gotrue: ^1.1.1
   http: ^0.13.4
-  postgrest: ^1.1.0
+  postgrest: ^1.1.1
   realtime_client: ^1.0.0
   storage_client: ^1.0.0
   rxdart: ^0.27.5
