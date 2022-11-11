@@ -265,7 +265,8 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
     }
 
-    _channel = _realtimeClient.channel(_realtimeTopic);
+    _channel =
+        _realtimeClient.channel('$_realtimeTopic${realtimeFilter ?? ''}');
     _channel!.on(
         RealtimeListenTypes.postgresChanges,
         ChannelFilter(
