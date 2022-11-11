@@ -45,11 +45,10 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     return SupabaseStreamBuilder(
       queryBuilder: this,
       realtimeClient: _realtime,
-      realtimeTopic: '$_schema:$_table',
+      realtimeTopic: '$_schema:$_table:$_incrementId',
       schema: _schema,
       table: _table,
       primaryKey: primaryKey,
-      incrementId: _incrementId,
     );
   }
 }

@@ -49,9 +49,6 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Used to identify which row has changed
   final List<String> _uniqueColumns;
 
-  /// Increment ID of the stream to create different realtime topic for each stream
-  final int _incrementId;
-
   /// StreamController for `stream()` method.
   BehaviorSubject<SupabaseStreamEvent>? _streamController;
 
@@ -74,14 +71,12 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     required String schema,
     required String table,
     required List<String> primaryKey,
-    required int incrementId,
   })  : _queryBuilder = queryBuilder,
         _realtimeTopic = realtimeTopic,
         _realtimeClient = realtimeClient,
         _schema = schema,
         _table = table,
-        _uniqueColumns = primaryKey,
-        _incrementId = incrementId;
+        _uniqueColumns = primaryKey;
 
   /// Filters the results where [column] equals [value].
   ///
@@ -270,7 +265,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
     }
 
-    _channel = _realtimeClient.channel('$_realtimeTopic:$_incrementId');
+    _channel = _realtimeClient.channel(_realtimeTopic);
     _channel!.on(
         RealtimeListenTypes.postgresChanges,
         ChannelFilter(
