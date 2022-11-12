@@ -27,6 +27,9 @@ class SupabaseClient {
   String? _changedAccessToken;
   late StreamSubscription<AuthState> _authStateSubscription;
 
+  /// Increment ID of the stream to create different realtime topic for each stream
+  int _incrementId = 0;
+
   SupabaseClient(
     this.supabaseUrl,
     this.supabaseKey, {
@@ -71,6 +74,7 @@ class SupabaseClient {
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
     final url = '$restUrl/$table';
+    _incrementId++;
     return SupabaseQueryBuilder(
       url,
       realtime,
@@ -78,6 +82,7 @@ class SupabaseClient {
       schema: schema,
       table: table,
       httpClient: _httpClient,
+      incrementId: _incrementId,
     );
   }
 
