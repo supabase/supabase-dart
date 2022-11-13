@@ -1,3 +1,4 @@
+
 ## [1.1.2]
 
 - fix: adds increment ID in channel topic inside stream() to enable listening to the same stream multiple times [(#161)](https://github.com/supabase/supabase-dart/pull/161)

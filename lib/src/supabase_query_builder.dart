@@ -6,6 +6,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   final RealtimeClient _realtime;
   final String _schema;
   final String _table;
+  final int _incrementId;
 
   SupabaseQueryBuilder(
     String url,
@@ -14,9 +15,11 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     required String schema,
     required String table,
     Client? httpClient,
+    required int incrementId,
   })  : _realtime = realtime,
         _schema = schema,
         _table = table,
+        _incrementId = incrementId,
         super(
           url,
           headers: headers,
@@ -42,7 +45,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     return SupabaseStreamBuilder(
       queryBuilder: this,
       realtimeClient: _realtime,
-      realtimeTopic: '$_schema:$_table',
+      realtimeTopic: '$_schema:$_table:$_incrementId',
       schema: _schema,
       table: _table,
       primaryKey: primaryKey,

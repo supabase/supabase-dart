@@ -10,12 +10,11 @@ void main() {
   late SupabaseClient customHeadersClient;
   late HttpServer mockServer;
   late String apiKey;
-  late String ref;
+  final Set<String> listeners = {};
   const customApiKey = 'customApiKey';
   const customHeaders = {'customfield': 'customvalue', 'apikey': customApiKey};
   WebSocket? webSocket;
   bool hasListener = false;
-  bool hasSentData = false;
   StreamSubscription<dynamic>? listener;
 
   /// `testFilter` is used to test incoming realtime filter. The value should match the realtime filter set by the library.
@@ -106,15 +105,22 @@ void main() {
         }
         hasListener = true;
         listener = webSocket!.listen((request) async {
-          if (hasSentData) {
-            return;
-          }
-          hasSentData = true;
-
           /// `filter` might be there or not depending on whether is a filter set
           /// to the realtime subscription, so include the filter if the request
           /// includes a filter.
           final requestJson = jsonDecode(request);
+          final topic = requestJson['topic'];
+          final ref = requestJson["ref"];
+
+          if (requestJson["event"] == "phx_leave") {
+            listeners.remove(topic);
+            return;
+          }
+          if (listeners.contains(topic)) {
+            return;
+          }
+          listeners.add(topic);
+
           final String? realtimeFilter = requestJson['payload']['config']
                   ['postgres_changes']
               .first['filter'];
@@ -154,13 +160,12 @@ void main() {
               'status': 'ok'
             },
             'ref': ref,
-            'topic': 'realtime:public:todos'
+            'topic': topic
           });
           webSocket!.add(replyString);
 
           // Send an insert event
           await Future.delayed(Duration(milliseconds: 300));
-          final topic = (jsonDecode(request as String) as Map)['topic'];
           final insertString = jsonEncode({
             'topic': topic,
             'event': 'postgres_changes',
@@ -281,12 +286,11 @@ void main() {
       headers: {'X-Client-Info': 'supabase-flutter/0.0.0', ...customHeaders},
     );
     hasListener = false;
-    hasSentData = false;
-    ref = "1";
   });
 
   tearDown(() async {
     listener?.cancel();
+    listeners.clear();
 
     // Wait for the realtime updates to come through
     await Future.delayed(Duration(milliseconds: 100));
@@ -329,16 +333,14 @@ void main() {
       test("listen, cancel and listen again", () async {
         final stream = client.from('todos').stream(primaryKey: ['id']);
         final sub = stream.listen(expectAsync1((event) {}, count: 4));
-        await Future.delayed(Duration(seconds: 3));
+        await Future.delayed(Duration(seconds: 1));
 
         await sub.cancel();
         await Future.delayed(Duration(seconds: 1));
-        hasSentData = false;
-        hasListener = false;
-        ref = "3";
 
         stream.listen(expectAsync1((event) {}, count: 4));
       });
+
       test("can listen twice at the same time", () async {
         final stream = client.from('todos').stream(primaryKey: ['id']);
         stream.listen(expectAsync1((event) {}, count: 4));
@@ -346,6 +348,15 @@ void main() {
 
         // All realtime events are done emitting, so should receive the currnet data
       });
+
+      test("Create two stream to same table", () async {
+        final stream1 = client.from('todos').stream(primaryKey: ['id']);
+        final stream2 = client.from('todos').stream(primaryKey: ['id']);
+        stream1.listen(expectAsync1((event) {}, count: 4));
+
+        stream2.listen(expectAsync1((event) {}, count: 4));
+      });
+
       test("stream should emit the last emitted data when listened to",
           () async {
         final stream = client.from('todos').stream(primaryKey: ['id']);

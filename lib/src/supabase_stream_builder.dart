@@ -18,7 +18,7 @@ class _StreamPostgrestFilter {
   /// Value of the eq filter
   final dynamic value;
 
-  // Type of the filer being applied
+  /// Type of the filer being applied
   final _FilterType type;
 }
 
