@@ -30,6 +30,9 @@ class SupabaseClient {
   /// Increment ID of the stream to create different realtime topic for each stream
   int _incrementId = 0;
 
+  /// Number of retries storage client should do on file failed file uploads.
+  final int _storageRetryAttempts;
+
   SupabaseClient(
     this.supabaseUrl,
     this.supabaseKey, {
@@ -37,6 +40,7 @@ class SupabaseClient {
     bool autoRefreshToken = true,
     Map<String, String> headers = Constants.defaultHeaders,
     Client? httpClient,
+    int storageRetryAttempts = 0,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
@@ -47,7 +51,8 @@ class SupabaseClient {
             : '$supabaseUrl/functions/v1',
         schema = schema ?? 'public',
         _headers = headers,
-        _httpClient = httpClient {
+        _httpClient = httpClient,
+        _storageRetryAttempts = storageRetryAttempts {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
       headers: headers,
@@ -69,6 +74,7 @@ class SupabaseClient {
         storageUrl,
         _getAuthHeaders(),
         httpClient: _httpClient,
+        retryAttempts: _storageRetryAttempts,
       );
 
   /// Perform a table operation.
