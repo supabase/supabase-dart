@@ -33,6 +33,18 @@ class SupabaseClient {
   /// Number of retries storage client should do on file failed file uploads.
   final int _storageRetryAttempts;
 
+  /// Creates a Supabase client to interact with your Supabase instance.
+  ///
+  /// [supabaseUrl] and [supabaseKey] can be found on your Supabase dashboard.
+  ///
+  /// You can access none public schema by passing different [schema].
+  ///
+  /// Default headers can be overridden by specifying [headers].
+  ///
+  /// Custom http client can be used by passing [httpClient] parameter.
+  ///
+  /// [storageRetryAttempts] specifies how many retry attempts there should be to
+  ///  upload a file to Supabase storage when failed due to network interruption.
   SupabaseClient(
     this.supabaseUrl,
     this.supabaseKey, {
