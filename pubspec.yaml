@@ -13,7 +13,7 @@ dependencies:
   http: ^0.13.4
   postgrest: ^1.1.1
   realtime_client: ^1.0.0
-  storage_client: ^1.0.0
+  storage_client: ^1.1.0
   rxdart: ^0.27.5
 
 dev_dependencies:
