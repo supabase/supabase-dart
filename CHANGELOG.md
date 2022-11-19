@@ -2,7 +2,7 @@
 
 - feat: add storage retry option to enable storage to auto retry failed upload attempts [(#163)](https://github.com/supabase/supabase-dart/pull/163)
   ```dart
-  // The following will initialize a supabase client that will retry failed uploads up to 25 times
+  // The following will initialize a supabase client that will retry failed uploads up to 25 times,
   // which is about 10 minutes of retrying.
   final supabase = SupabaseClient('Supabase_URL', 'Anon_key', storageRetryAttempts: 25);
   ```
