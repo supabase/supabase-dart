@@ -32,13 +32,13 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// [primaryKey] list of name of primary key column(s).
   ///
   /// ```dart
-  /// supabase.from('chats').stream(primaryKey: ['my_primary_key']).execute().listen(_onChatsReceived);
+  /// supabase.from('chats').stream(primaryKey: ['my_primary_key']).listen(_onChatsReceived);
   /// ```
   ///
   /// `eq`, `order`, `limit` filter are available to limit the data being queried.
   ///
   /// ```dart
-  /// supabase.from('chats:room_id=eq.123').stream(primaryKey: ['my_primary_key']).order('created_at').limit(20).execute().listen(_onChatsReceived);
+  /// supabase.from('chats:room_id=eq.123').stream(primaryKey: ['my_primary_key']).order('created_at').limit(20).listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream({required List<String> primaryKey}) {
     assert(primaryKey.isNotEmpty, 'Please specify primary key column(s).');
