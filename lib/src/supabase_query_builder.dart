@@ -38,7 +38,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   /// `eq`, `order`, `limit` filter are available to limit the data being queried.
   ///
   /// ```dart
-  /// supabase.from('chats:room_id=eq.123').stream(primaryKey: ['my_primary_key']).order('created_at').limit(20).listen(_onChatsReceived);
+  /// supabase.from('chats').stream(primaryKey: ['my_primary_key']).eq('room_id','123').order('created_at').limit(20).listen(_onChatsReceived);
   /// ```
   SupabaseStreamBuilder stream({required List<String> primaryKey}) {
     assert(primaryKey.isNotEmpty, 'Please specify primary key column(s).');
