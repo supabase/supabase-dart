@@ -289,10 +289,11 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
         (element) => _isTargetRecord(record: element, payload: payload),
       );
 
+      final updatedRecord = Map<String, dynamic>.from(payload['new']!);
       if (updatedIndex >= 0) {
-        _streamData[updatedIndex] = payload['new']!;
+        _streamData[updatedIndex] = updatedRecord;
       } else {
-        _addException(Exception('Could not find the updated record.'));
+        _streamData.add(updatedRecord);
       }
       _addStream();
     }).on(
@@ -307,11 +308,10 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
         (element) => _isTargetRecord(record: element, payload: payload),
       );
       if (deletedIndex >= 0) {
+        /// Delete the data from in memory cache if it was found
         _streamData.removeAt(deletedIndex);
-      } else {
-        _addException(Exception('Could not find the deleted record.'));
+        _addStream();
       }
-      _addStream();
     }).subscribe();
 
     PostgrestFilterBuilder query = _queryBuilder.select();
