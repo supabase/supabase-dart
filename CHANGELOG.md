@@ -1,3 +1,45 @@
+## [1.3.0]
+
+- feat: update gotrue to v1.4.0
+  - add support for [MFA](https://supabase.com/docs/guides/auth/auth-mfa)
+    ```dart
+    // Start the enrollment process for a new Multi-Factor Authentication (MFA) factor
+    final res = await client.mfa
+      .enroll(issuer: 'MyFriend', friendlyName: 'MyFriendName');
+
+    // Prepares a challenge used to verify that a user has access to a MFA factor.
+    final res = await client.mfa.challenge(factorId: factorId1);
+
+    // Verifies a code against a challenge.
+    final res = await client.mfa
+            .verify(factorId: factorId1, challengeId: challengeId, code: getTOTP());
+    ```
+    Read more about MFA with Supabase [here](https://supabase.com/docs/guides/auth/auth-mfa)
+  - paginate `admin.listUsers()`
+    ```dart
+    auth.admin.listUsers(page: 2, perPage: 10);
+    ```
+- feat: update postgrest to v1.2.1
+- fix: update realtime to v1.0.2
+  - export realtime presence
+- feat: update storage to v1.2.0
+  - add transform option to `createSignedUrl()`, `getPublicUrl()`, and `.download()` to transform images on the fly
+    ```dart
+    final signedUrl = await storage.from(newBucketName).createSignedUrl(uploadPath, 2000,
+                transform: TransformOptions(
+                  width: 100,
+                  height: 100,
+                ));
+    final publicUrl = storage.from(bucket).getPublicUrl(path,
+            transform: TransformOptions(width: 200, height: 300));
+    final file = await storage.from(newBucketName).download(uploadPath,
+            transform: TransformOptions(
+              width: 200,
+              height: 200,
+            ));
+    ```
+
+
 ## [1.2.0]
 
 - feat: add storage retry option to enable storage to auto retry failed upload attempts [(#163)](https://github.com/supabase/supabase-dart/pull/163)
