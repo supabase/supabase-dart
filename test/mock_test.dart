@@ -261,6 +261,70 @@ void main() {
             },
           });
           webSocket!.add(deleteString);
+
+          /// Send an update event for id = 4
+          /// Record with id = 4 did not exist in the initial data fetch,
+          /// so the SDK should insert the record in the in memory cache
+          await Future.delayed(Duration(milliseconds: 10));
+          final updateId4 = jsonEncode({
+            'topic': topic,
+            'ref': null,
+            'event': 'postgres_changes',
+            'payload': {
+              'ids': [25993878],
+              'data': {
+                'columns': [
+                  {'name': 'id', 'type': 'int4', 'type_modifier': 4294967295},
+                  {'name': 'task', 'type': 'text', 'type_modifier': 4294967295},
+                  {
+                    'name': 'status',
+                    'type': 'bool',
+                    'type_modifier': 4294967295
+                  },
+                ],
+                'commit_timestamp': '2021-08-01T08:00:30Z',
+                'errors': null,
+                'old_record': {'id': 4},
+                'record': {'id': 4, 'task': 'task 4', 'status': 't'},
+                'schema': 'public',
+                'table': 'todos',
+                'type': 'UPDATE',
+                if (realtimeFilter != null) 'filter': realtimeFilter,
+              },
+            },
+          });
+          webSocket!.add(updateId4);
+
+          // Send delete event for id=5
+          /// Should be ignored by the SDK
+          await Future.delayed(Duration(milliseconds: 10));
+          final ignoredDeleteString = jsonEncode({
+            'ref': null,
+            'topic': topic,
+            'event': 'postgres_changes',
+            'payload': {
+              'data': {
+                'columns': [
+                  {'name': 'id', 'type': 'int4', 'type_modifier': 4294967295},
+                  {'name': 'task', 'type': 'text', 'type_modifier': 4294967295},
+                  {
+                    'name': 'status',
+                    'type': 'bool',
+                    'type_modifier': 4294967295
+                  },
+                ],
+                'commit_timestamp': '2022-09-14T02:12:52Z',
+                'errors': null,
+                'old_record': {'id': 5},
+                'schema': 'public',
+                'table': 'todos',
+                'type': 'DELETE',
+                if (realtimeFilter != null) 'filter': realtimeFilter,
+              },
+              'ids': [48673474]
+            },
+          });
+          webSocket!.add(ignoredDeleteString);
         });
       } else {
         request.response
@@ -332,19 +396,19 @@ void main() {
     group('stream()', () {
       test("listen, cancel and listen again", () async {
         final stream = client.from('todos').stream(primaryKey: ['id']);
-        final sub = stream.listen(expectAsync1((event) {}, count: 4));
+        final sub = stream.listen(expectAsync1((event) {}, count: 5));
         await Future.delayed(Duration(seconds: 1));
 
         await sub.cancel();
         await Future.delayed(Duration(seconds: 1));
 
-        stream.listen(expectAsync1((event) {}, count: 4));
+        stream.listen(expectAsync1((event) {}, count: 5));
       });
 
       test("can listen twice at the same time", () async {
         final stream = client.from('todos').stream(primaryKey: ['id']);
-        stream.listen(expectAsync1((event) {}, count: 4));
-        stream.listen(expectAsync1((event) {}, count: 4));
+        stream.listen(expectAsync1((event) {}, count: 5));
+        stream.listen(expectAsync1((event) {}, count: 5));
 
         // All realtime events are done emitting, so should receive the currnet data
       });
@@ -352,15 +416,15 @@ void main() {
       test("Create two stream to same table", () async {
         final stream1 = client.from('todos').stream(primaryKey: ['id']);
         final stream2 = client.from('todos').stream(primaryKey: ['id']);
-        stream1.listen(expectAsync1((event) {}, count: 4));
+        stream1.listen(expectAsync1((event) {}, count: 5));
 
-        stream2.listen(expectAsync1((event) {}, count: 4));
+        stream2.listen(expectAsync1((event) {}, count: 5));
       });
 
       test("stream should emit the last emitted data when listened to",
           () async {
         final stream = client.from('todos').stream(primaryKey: ['id']);
-        stream.listen(expectAsync1((event) {}, count: 4));
+        stream.listen(expectAsync1((event) {}, count: 5));
 
         await Future.delayed(Duration(seconds: 3));
 
@@ -389,6 +453,11 @@ void main() {
             containsAllInOrder([
               {'id': 1, 'task': 'task 1', 'status': true},
               {'id': 3, 'task': 'task 3', 'status': true},
+            ]),
+            containsAllInOrder([
+              {'id': 1, 'task': 'task 1', 'status': true},
+              {'id': 3, 'task': 'task 3', 'status': true},
+              {'id': 4, 'task': 'task 4', 'status': true},
             ]),
           ]),
         );
@@ -436,7 +505,7 @@ void main() {
             .stream(primaryKey: ['id']).asyncMap((event) => event);
         stream.listen(expectAsync1((event) {
           print(event);
-        }, count: 4));
+        }, count: 5));
 
         await Future.delayed(Duration(seconds: 3));
 
