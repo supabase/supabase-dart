@@ -1,5 +1,6 @@
 ## [1.3.0]
 
+- fix: handle update and delete on record that wasn't found properly using stream [#167](https://github.com/supabase/supabase-dart/pull/167)
 - feat: update gotrue to v1.4.0
   - add support for [MFA](https://supabase.com/docs/guides/auth/auth-mfa)
     ```dart
