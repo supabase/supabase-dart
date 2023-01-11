@@ -8,6 +8,7 @@ import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
+import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 
 class SupabaseClient {
   final String supabaseUrl;
@@ -26,6 +27,7 @@ class SupabaseClient {
   late final PostgrestClient rest;
   String? _changedAccessToken;
   late StreamSubscription<AuthState> _authStateSubscription;
+  late final YAJsonIsolate _isolate;
 
   /// Increment ID of the stream to create different realtime topic for each stream
   int _incrementId = 0;
@@ -64,7 +66,8 @@ class SupabaseClient {
         schema = schema ?? 'public',
         _headers = headers,
         _httpClient = httpClient,
-        _storageRetryAttempts = storageRetryAttempts {
+        _storageRetryAttempts = storageRetryAttempts,
+        _isolate = YAJsonIsolate() {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
       headers: headers,
@@ -79,6 +82,7 @@ class SupabaseClient {
         functionsUrl,
         _getAuthHeaders(),
         httpClient: _httpClient,
+        isolate: _isolate,
       );
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
@@ -101,6 +105,7 @@ class SupabaseClient {
       table: table,
       httpClient: _httpClient,
       incrementId: _incrementId,
+      isolate: _isolate,
     );
   }
 

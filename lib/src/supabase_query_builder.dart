@@ -1,6 +1,7 @@
 import 'package:http/http.dart';
 import 'package:supabase/src/supabase_stream_builder.dart';
 import 'package:supabase/supabase.dart';
+import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 
 class SupabaseQueryBuilder extends PostgrestQueryBuilder {
   final RealtimeClient _realtime;
@@ -16,6 +17,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
     required String table,
     Client? httpClient,
     required int incrementId,
+    required YAJsonIsolate isolate,
   })  : _realtime = realtime,
         _schema = schema,
         _table = table,
@@ -25,6 +27,7 @@ class SupabaseQueryBuilder extends PostgrestQueryBuilder {
           headers: headers,
           schema: schema,
           httpClient: httpClient,
+          isolate: isolate,
         );
 
   /// Notifies of data at the queried table

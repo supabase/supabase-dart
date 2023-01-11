@@ -8,13 +8,14 @@ environment:
   sdk: '>=2.15.0 <3.0.0'
 
 dependencies:
-  functions_client: ^1.0.0
+  functions_client: ^1.0.1
   gotrue: ^1.4.0
   http: ^0.13.4
   postgrest: ^1.2.1
   realtime_client: ^1.0.2
   storage_client: ^1.2.0
   rxdart: ^0.27.5
+  yet_another_json_isolate: ^1.0.1
 
 dev_dependencies:
   lints: ^1.0.1
