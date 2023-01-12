@@ -30,6 +30,7 @@ void main() {
 
     tearDown(() async {
       await client.removeAllChannels();
+      await client.dispose();
       await mockServer.close();
     });
 

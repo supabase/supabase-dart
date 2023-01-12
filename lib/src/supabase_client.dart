@@ -142,8 +142,8 @@ class SupabaseClient {
     return realtime.removeAllChannels();
   }
 
-  void dispose() {
-    _isolate.dispose();
+  Future<void> dispose() async {
+    await _isolate.dispose();
     _authStateSubscription.cancel();
   }
 
