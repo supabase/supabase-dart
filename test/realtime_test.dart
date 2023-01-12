@@ -32,10 +32,10 @@ void main() {
     });
 
     tearDown(() async {
-      await subscription.cancel();
-      await client.removeAllChannels();
       await client.dispose();
-      await mockServer.close();
+      await client.removeAllChannels();
+      await subscription.cancel();
+      await mockServer.close(force: true);
     });
 
     /// subscribe on existing subscription fail

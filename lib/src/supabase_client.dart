@@ -143,7 +143,7 @@ class SupabaseClient {
   }
 
   Future<void> dispose() async {
-    _authStateSubscription.cancel();
+    await _authStateSubscription.cancel();
     await _isolate.dispose();
   }
 
