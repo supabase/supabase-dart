@@ -353,8 +353,8 @@ void main() {
   });
 
   tearDown(() async {
-    listener?.cancel();
     listeners.clear();
+    await listener?.cancel();
 
     await client.dispose();
 
