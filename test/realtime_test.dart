@@ -36,7 +36,7 @@ void main() {
       await client.removeAllChannels();
       await subscription.cancel();
       await mockServer.close(force: true);
-      await Future.delayed(Duration(milliseconds: 10));
+      await Future.delayed(Duration(milliseconds: 100));
     });
 
     /// subscribe on existing subscription fail
