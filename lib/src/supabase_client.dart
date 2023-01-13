@@ -55,6 +55,7 @@ class SupabaseClient {
     Map<String, String> headers = Constants.defaultHeaders,
     Client? httpClient,
     int storageRetryAttempts = 0,
+    YAJsonIsolate? isolate,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
@@ -67,7 +68,8 @@ class SupabaseClient {
         _headers = headers,
         _httpClient = httpClient,
         _storageRetryAttempts = storageRetryAttempts,
-        _isolate = YAJsonIsolate() {
+        _isolate = isolate ?? YAJsonIsolate()
+          ..initialize() {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
       headers: headers,
