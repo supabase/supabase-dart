@@ -11,6 +11,10 @@ void main() {
       client = SupabaseClient(supabaseUrl, supabaseKey);
     });
 
+    tearDown(() async {
+      await client.dispose();
+    });
+
     test('X-Client-Info header is set properly on realtime', () {
       final xClientHeaderBeforeSlash =
           client.realtime.headers['X-Client-Info']!.split('/').first;

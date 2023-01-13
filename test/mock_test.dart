@@ -353,8 +353,10 @@ void main() {
   });
 
   tearDown(() async {
-    listener?.cancel();
     listeners.clear();
+    await listener?.cancel();
+
+    await client.dispose();
 
     // Wait for the realtime updates to come through
     await Future.delayed(Duration(milliseconds: 100));

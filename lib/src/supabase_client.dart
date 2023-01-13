@@ -8,6 +8,7 @@ import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
+import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 
 class SupabaseClient {
   final String supabaseUrl;
@@ -26,6 +27,7 @@ class SupabaseClient {
   late final PostgrestClient rest;
   String? _changedAccessToken;
   late StreamSubscription<AuthState> _authStateSubscription;
+  late final YAJsonIsolate _isolate;
 
   /// Increment ID of the stream to create different realtime topic for each stream
   int _incrementId = 0;
@@ -45,6 +47,9 @@ class SupabaseClient {
   ///
   /// [storageRetryAttempts] specifies how many retry attempts there should be to
   ///  upload a file to Supabase storage when failed due to network interruption.
+  ///
+  /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
+  /// isolate instance. A new instance will be created if [isolate] is omitted.
   SupabaseClient(
     this.supabaseUrl,
     this.supabaseKey, {
@@ -53,6 +58,7 @@ class SupabaseClient {
     Map<String, String> headers = Constants.defaultHeaders,
     Client? httpClient,
     int storageRetryAttempts = 0,
+    YAJsonIsolate? isolate,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
@@ -64,7 +70,8 @@ class SupabaseClient {
         schema = schema ?? 'public',
         _headers = headers,
         _httpClient = httpClient,
-        _storageRetryAttempts = storageRetryAttempts {
+        _storageRetryAttempts = storageRetryAttempts,
+        _isolate = isolate ?? (YAJsonIsolate()..initialize()) {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
       headers: headers,
@@ -79,6 +86,7 @@ class SupabaseClient {
         functionsUrl,
         _getAuthHeaders(),
         httpClient: _httpClient,
+        isolate: _isolate,
       );
 
   /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
@@ -101,6 +109,7 @@ class SupabaseClient {
       table: table,
       httpClient: _httpClient,
       incrementId: _incrementId,
+      isolate: _isolate,
     );
   }
 
@@ -137,8 +146,9 @@ class SupabaseClient {
     return realtime.removeAllChannels();
   }
 
-  void dispose() {
-    _authStateSubscription.cancel();
+  Future<void> dispose() async {
+    await _authStateSubscription.cancel();
+    await _isolate.dispose();
   }
 
   GoTrueClient _initSupabaseAuthClient({

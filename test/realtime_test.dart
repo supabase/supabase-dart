@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:supabase/supabase.dart';
@@ -8,12 +9,14 @@ void main() {
   late HttpServer mockServer;
   late SupabaseClient client;
   late RealtimeChannel channel;
+  late StreamSubscription<WebSocket> subscription;
 
   group('Realtime subscriptions: ', () {
     setUp(() async {
       mockServer = await HttpServer.bind('localhost', 0);
 
-      mockServer.transform(WebSocketTransformer()).listen((webSocket) {
+      subscription =
+          mockServer.transform(WebSocketTransformer()).listen((webSocket) {
         final channel = IOWebSocketChannel(webSocket);
         channel.stream.listen((request) {
           channel.sink.add(request);
@@ -29,8 +32,10 @@ void main() {
     });
 
     tearDown(() async {
+      await client.dispose();
       await client.removeAllChannels();
-      await mockServer.close();
+      await subscription.cancel();
+      await mockServer.close(force: true);
     });
 
     /// subscribe on existing subscription fail
