@@ -47,6 +47,9 @@ class SupabaseClient {
   ///
   /// [storageRetryAttempts] specifies how many retry attempts there should be to
   ///  upload a file to Supabase storage when failed due to network interruption.
+  ///
+  /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
+  /// isolate instance. A new instance will be created if [isolate] is omitted.
   SupabaseClient(
     this.supabaseUrl,
     this.supabaseKey, {
@@ -68,8 +71,7 @@ class SupabaseClient {
         _headers = headers,
         _httpClient = httpClient,
         _storageRetryAttempts = storageRetryAttempts,
-        _isolate = (isolate ?? YAJsonIsolate())
-          ..initialize() {
+        _isolate = (isolate ?? YAJsonIsolate())..initialize() {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
       headers: headers,
