@@ -1,3 +1,12 @@
+## [1.4.0]
+
+- feat: use single isolate for functions and postgrest and add `isolate` parameter to `SupabaseClient` [#169](https://github.com/supabase/supabase-dart/pull/169)
+- fix: update gotrue to v1.4.1
+  - downgrade minimum `collection` version to support wider range of Flutter SDK versions
+- fix: update storage to v1.2.1
+  - correct path parameter documentation
+
+
 ## [1.3.0]
 
 - fix: handle update and delete on record that wasn't found properly using stream [#167](https://github.com/supabase/supabase-dart/pull/167)
