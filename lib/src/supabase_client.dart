@@ -68,7 +68,7 @@ class SupabaseClient {
         _headers = headers,
         _httpClient = httpClient,
         _storageRetryAttempts = storageRetryAttempts,
-        _isolate = isolate ?? YAJsonIsolate()
+        _isolate = (isolate ?? YAJsonIsolate())
           ..initialize() {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
