@@ -2,6 +2,7 @@
 
 - feat: use single isolate for functions and postgrest and add `isolate` parameter to `SupabaseClient` [#169](https://github.com/supabase/supabase-dart/pull/169)
 - fix: update gotrue to v1.4.1
+  - `onAuthStateChanged` now emits the latest `AuthState`
   - downgrade minimum `collection` version to support wider range of Flutter SDK versions
 - fix: update storage to v1.2.1
   - correct path parameter documentation
