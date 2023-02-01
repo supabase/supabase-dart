@@ -183,7 +183,7 @@ class SupabaseClient {
       realtimeUrl,
       params: {
         'apikey': supabaseKey,
-        if (eventsPerSecond != null) 'eventsPerSecond': eventsPerSecond
+        if (eventsPerSecond != null) 'eventsPerSecond': '$eventsPerSecond'
       },
       headers: headers,
     );
