@@ -48,6 +48,8 @@ class SupabaseClient {
   /// [storageRetryAttempts] specifies how many retry attempts there should be to
   ///  upload a file to Supabase storage when failed due to network interruption.
   ///
+  /// [realtimeParams] sets the parameters on realtime client.
+  ///
   /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
   /// isolate instance. A new instance will be created if [isolate] is omitted.
   SupabaseClient(
@@ -58,6 +60,7 @@ class SupabaseClient {
     Map<String, String> headers = Constants.defaultHeaders,
     Client? httpClient,
     int storageRetryAttempts = 0,
+    Map<String, dynamic> realtimeParams = const {},
     YAJsonIsolate? isolate,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
@@ -76,7 +79,10 @@ class SupabaseClient {
       autoRefreshToken: autoRefreshToken,
       headers: headers,
     );
-    realtime = _initRealtimeClient(headers: headers);
+    realtime = _initRealtimeClient(
+      headers: headers,
+      params: realtimeParams,
+    );
 
     _listenForAuthEvents();
   }
@@ -169,10 +175,11 @@ class SupabaseClient {
 
   RealtimeClient _initRealtimeClient({
     required Map<String, String> headers,
+    required Map<String, dynamic> params,
   }) {
     return RealtimeClient(
       realtimeUrl,
-      params: {'apikey': supabaseKey},
+      params: {'apikey': supabaseKey, ...params},
       headers: headers,
     );
   }
