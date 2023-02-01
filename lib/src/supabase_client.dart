@@ -7,7 +7,7 @@ import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
-import 'package:supabase/src/realtime_params.dart';
+import 'package:supabase/src/realtime_client_options.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
 import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 
@@ -49,7 +49,7 @@ class SupabaseClient {
   /// [storageRetryAttempts] specifies how many retry attempts there should be to
   ///  upload a file to Supabase storage when failed due to network interruption.
   ///
-  /// [realtimeParams] sets the parameters on realtime client.
+  /// [realtimeClientOptions] specifies different options you can pass to `RealtimeClient`.
   ///
   /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
   /// isolate instance. A new instance will be created if [isolate] is omitted.
