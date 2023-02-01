@@ -7,6 +7,7 @@ import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
+import 'package:supabase/src/realtime_params.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
 import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 
@@ -60,7 +61,7 @@ class SupabaseClient {
     Map<String, String> headers = Constants.defaultHeaders,
     Client? httpClient,
     int storageRetryAttempts = 0,
-    Map<String, dynamic> realtimeParams = const {},
+    RealtimeClientOptions realtimeClientOptions = const RealtimeClientOptions(),
     YAJsonIsolate? isolate,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
@@ -81,7 +82,7 @@ class SupabaseClient {
     );
     realtime = _initRealtimeClient(
       headers: headers,
-      params: realtimeParams,
+      options: realtimeClientOptions,
     );
 
     _listenForAuthEvents();
@@ -175,11 +176,15 @@ class SupabaseClient {
 
   RealtimeClient _initRealtimeClient({
     required Map<String, String> headers,
-    required Map<String, dynamic> params,
+    required RealtimeClientOptions options,
   }) {
+    final eventsPerSecond = options.eventsPerSecond;
     return RealtimeClient(
       realtimeUrl,
-      params: {'apikey': supabaseKey, ...params},
+      params: {
+        'apikey': supabaseKey,
+        if (eventsPerSecond != null) 'eventsPerSecond': eventsPerSecond
+      },
       headers: headers,
     );
   }
