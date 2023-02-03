@@ -9,7 +9,10 @@ environment:
 
 dependencies:
   functions_client: ^1.0.2
-  gotrue: ^1.4.2
+  gotrue: #^1.4.2
+    git:
+      url: https://github.com/supabase/gotrue-dart
+      ref: signInWithIdToken
   http: ^0.13.4
   postgrest: ^1.2.1
   realtime_client: ^1.0.2
