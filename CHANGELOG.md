@@ -1,3 +1,10 @@
+## [1.5.0]
+
+- feat: add `realtimeClientOptions` to SupabaseClient [#173](https://github.com/supabase/supabase-dart/pull/173)
+- fix: update postgrest to v1.2.2
+  - improve comment docs
+  - deprecate `returning` parameter of `.delete()`
+
 ## [1.4.0]
 
 - feat: use single isolate for functions and postgrest and add `isolate` parameter to `SupabaseClient` [#169](https://github.com/supabase/supabase-dart/pull/169)
