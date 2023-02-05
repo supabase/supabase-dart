@@ -1,6 +1,7 @@
 ## [1.5.0]
 
 - feat: add `realtimeClientOptions` to SupabaseClient [#173](https://github.com/supabase/supabase-dart/pull/173)
+- fix: add missing `options` parameter to rpc [#174](https://github.com/supabase/supabase-dart/pull/174)
 - fix: update postgrest to v1.2.2
   - improve comment docs
   - deprecate `returning` parameter of `.delete()`
