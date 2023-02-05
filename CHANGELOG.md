@@ -5,7 +5,8 @@
 - fix: update postgrest to v1.2.2
   - improve comment docs
   - deprecate `returning` parameter of `.delete()`
-
+- fix: update storage to v1.2.2
+  - properly parse content type 
 ## [1.4.0]
 
 - feat: use single isolate for functions and postgrest and add `isolate` parameter to `SupabaseClient` [#169](https://github.com/supabase/supabase-dart/pull/169)
