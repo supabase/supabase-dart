@@ -1,3 +1,7 @@
+## [1.5.1]
+
+- fix: reuse isolate for `.rpc()` call [#177](https://github.com/supabase/supabase-dart/pull/177)
+
 ## [1.5.0]
 
 - feat: add `realtimeClientOptions` to SupabaseClient [#173](https://github.com/supabase/supabase-dart/pull/173)
