@@ -131,6 +131,7 @@ class SupabaseClient {
       headers: _getAuthHeaders(),
       schema: schema,
       httpClient: _httpClient,
+      isolate: _isolate,
     ).rpc(fn, params: params, options: options);
   }
 
