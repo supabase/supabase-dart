@@ -7,6 +7,7 @@ import 'package:postgrest/postgrest.dart';
 import 'package:realtime_client/realtime_client.dart';
 import 'package:storage_client/storage_client.dart';
 import 'package:supabase/src/constants.dart';
+import 'package:supabase/src/realtime_client_options.dart';
 import 'package:supabase/src/supabase_query_builder.dart';
 import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 
@@ -48,6 +49,8 @@ class SupabaseClient {
   /// [storageRetryAttempts] specifies how many retry attempts there should be to
   ///  upload a file to Supabase storage when failed due to network interruption.
   ///
+  /// [realtimeClientOptions] specifies different options you can pass to `RealtimeClient`.
+  ///
   /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
   /// isolate instance. A new instance will be created if [isolate] is omitted.
   SupabaseClient(
@@ -58,6 +61,7 @@ class SupabaseClient {
     Map<String, String> headers = Constants.defaultHeaders,
     Client? httpClient,
     int storageRetryAttempts = 0,
+    RealtimeClientOptions realtimeClientOptions = const RealtimeClientOptions(),
     YAJsonIsolate? isolate,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
@@ -76,7 +80,10 @@ class SupabaseClient {
       autoRefreshToken: autoRefreshToken,
       headers: headers,
     );
-    realtime = _initRealtimeClient(headers: headers);
+    realtime = _initRealtimeClient(
+      headers: headers,
+      options: realtimeClientOptions,
+    );
 
     _listenForAuthEvents();
   }
@@ -114,13 +121,18 @@ class SupabaseClient {
   }
 
   /// Perform a stored procedure call.
-  PostgrestFilterBuilder rpc(String fn, {Map<String, dynamic>? params}) {
+  PostgrestFilterBuilder rpc(
+    String fn, {
+    Map<String, dynamic>? params,
+    FetchOptions options = const FetchOptions(),
+  }) {
     return PostgrestClient(
       '$supabaseUrl/rest/v1',
       headers: _getAuthHeaders(),
       schema: schema,
       httpClient: _httpClient,
-    ).rpc(fn, params: params);
+      isolate: _isolate,
+    ).rpc(fn, params: params, options: options);
   }
 
   /// Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
@@ -169,10 +181,15 @@ class SupabaseClient {
 
   RealtimeClient _initRealtimeClient({
     required Map<String, String> headers,
+    required RealtimeClientOptions options,
   }) {
+    final eventsPerSecond = options.eventsPerSecond;
     return RealtimeClient(
       realtimeUrl,
-      params: {'apikey': supabaseKey},
+      params: {
+        'apikey': supabaseKey,
+        if (eventsPerSecond != null) 'eventsPerSecond': '$eventsPerSecond'
+      },
       headers: headers,
     );
   }
