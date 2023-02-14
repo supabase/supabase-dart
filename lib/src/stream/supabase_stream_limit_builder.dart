@@ -8,8 +8,8 @@ class SupabaseLimitBuilder extends SupabaseStreamBuilder {
     required String schema,
     required String table,
     required List<String> primaryKey,
-    required StreamFilter? filter,
-    required StreamOrder? order,
+    required _StreamFilter? filter,
+    required _StreamOrder? order,
   }) : super(
           queryBuilder: queryBuilder,
           realtimeTopic: realtimeTopic,

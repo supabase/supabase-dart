@@ -8,7 +8,7 @@ class SupabaseStreamOrderBuilder extends SupabaseLimitBuilder {
     required String schema,
     required String table,
     required List<String> primaryKey,
-    required StreamFilter? filter,
+    required _StreamFilter? filter,
   }) : super(
           queryBuilder: queryBuilder,
           realtimeTopic: realtimeTopic,
@@ -36,7 +36,7 @@ class SupabaseStreamOrderBuilder extends SupabaseLimitBuilder {
       table: _table,
       primaryKey: _uniqueColumns,
       filter: _filter,
-      order: StreamOrder(
+      order: _StreamOrder(
         column: column,
         ascending: ascending,
       ),

@@ -7,10 +7,10 @@ part 'supabase_stream_filter_builder.dart';
 part 'supabase_stream_limit_builder.dart';
 part 'supabase_stream_order_builder.dart';
 
-enum StreamFilterType { eq, neq, lt, lte, gt, gte }
+enum _StreamFilterType { eq, neq, lt, lte, gt, gte }
 
-class StreamFilter {
-  StreamFilter({
+class _StreamFilter {
+  _StreamFilter({
     required this.column,
     required this.value,
     required this.type,
@@ -23,11 +23,11 @@ class StreamFilter {
   final dynamic value;
 
   /// Type of the filer being applied
-  final StreamFilterType type;
+  final _StreamFilterType type;
 }
 
-class StreamOrder {
-  StreamOrder({
+class _StreamOrder {
+  _StreamOrder({
     required this.column,
     required this.ascending,
   });
@@ -60,10 +60,10 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   SupabaseStreamEvent _streamData = [];
 
   /// `eq` filter used for both postgrest and realtime
-  final StreamFilter? _filter;
+  final _StreamFilter? _filter;
 
   /// Which column to order by and whether it's ascending
-  final StreamOrder? _order;
+  final _StreamOrder? _order;
 
   /// Count of record to be returned
   final int? _limit;
@@ -75,8 +75,8 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     required String schema,
     required String table,
     required List<String> primaryKey,
-    required StreamFilter? filter,
-    required StreamOrder? order,
+    required _StreamFilter? filter,
+    required _StreamOrder? order,
     required int? limit,
   })  : _queryBuilder = queryBuilder,
         _realtimeTopic = realtimeTopic,
@@ -185,22 +185,22 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     PostgrestFilterBuilder query = _queryBuilder.select();
     if (_filter != null) {
       switch (_filter!.type) {
-        case StreamFilterType.eq:
+        case _StreamFilterType.eq:
           query = query.eq(_filter!.column, _filter!.value);
           break;
-        case StreamFilterType.neq:
+        case _StreamFilterType.neq:
           query = query.neq(_filter!.column, _filter!.value);
           break;
-        case StreamFilterType.lt:
+        case _StreamFilterType.lt:
           query = query.lt(_filter!.column, _filter!.value);
           break;
-        case StreamFilterType.lte:
+        case _StreamFilterType.lte:
           query = query.lte(_filter!.column, _filter!.value);
           break;
-        case StreamFilterType.gt:
+        case _StreamFilterType.gt:
           query = query.gt(_filter!.column, _filter!.value);
           break;
-        case StreamFilterType.gte:
+        case _StreamFilterType.gte:
           query = query.gte(_filter!.column, _filter!.value);
           break;
       }

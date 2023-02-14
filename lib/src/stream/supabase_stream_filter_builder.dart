@@ -33,8 +33,8 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
       schema: _schema,
       table: _table,
       primaryKey: _uniqueColumns,
-      filter: StreamFilter(
-        type: StreamFilterType.eq,
+      filter: _StreamFilter(
+        type: _StreamFilterType.eq,
         column: column,
         value: value,
       ),
@@ -56,8 +56,8 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
       schema: _schema,
       table: _table,
       primaryKey: _uniqueColumns,
-      filter: StreamFilter(
-        type: StreamFilterType.neq,
+      filter: _StreamFilter(
+        type: _StreamFilterType.neq,
         column: column,
         value: value,
       ),
@@ -79,8 +79,8 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
       schema: _schema,
       table: _table,
       primaryKey: _uniqueColumns,
-      filter: StreamFilter(
-        type: StreamFilterType.lt,
+      filter: _StreamFilter(
+        type: _StreamFilterType.lt,
         column: column,
         value: value,
       ),
@@ -102,8 +102,8 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
       schema: _schema,
       table: _table,
       primaryKey: _uniqueColumns,
-      filter: StreamFilter(
-        type: StreamFilterType.lte,
+      filter: _StreamFilter(
+        type: _StreamFilterType.lte,
         column: column,
         value: value,
       ),
@@ -125,8 +125,8 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
       schema: _schema,
       table: _table,
       primaryKey: _uniqueColumns,
-      filter: StreamFilter(
-        type: StreamFilterType.gt,
+      filter: _StreamFilter(
+        type: _StreamFilterType.gt,
         column: column,
         value: value,
       ),
@@ -148,8 +148,8 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
       schema: _schema,
       table: _table,
       primaryKey: _uniqueColumns,
-      filter: StreamFilter(
-        type: StreamFilterType.gte,
+      filter: _StreamFilter(
+        type: _StreamFilterType.gte,
         column: column,
         value: value,
       ),
