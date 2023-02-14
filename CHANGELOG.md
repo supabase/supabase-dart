@@ -1,8 +1,10 @@
+## [1.5.1+1]
+- feat: update gotrue to v1.5.1
+  - add support for `signInWithIdToken`
+
 ## [1.5.1]
 
 - fix: reuse isolate for `.rpc()` call [#177](https://github.com/supabase/supabase-dart/pull/177)
-- feat: update gotrue to v1.5.1
-  - add support for `signInWithIdToken`
 
 ## [1.5.0]
 
