@@ -1,12 +1,17 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:supabase/supabase.dart';
 
-enum _FilterType { eq, neq, lt, lte, gt, gte }
+part 'supabase_stream_filter_builder.dart';
+part 'supabase_stream_limit_builder.dart';
+part 'supabase_stream_order_builder.dart';
 
-class _StreamPostgrestFilter {
-  _StreamPostgrestFilter({
+enum StreamFilterType { eq, neq, lt, lte, gt, gte }
+
+class StreamFilter {
+  StreamFilter({
     required this.column,
     required this.value,
     required this.type,
@@ -19,11 +24,11 @@ class _StreamPostgrestFilter {
   final dynamic value;
 
   /// Type of the filer being applied
-  final _FilterType type;
+  final StreamFilterType type;
 }
 
-class _Order {
-  _Order({
+class StreamOrder {
+  StreamOrder({
     required this.column,
     required this.ascending,
   });
@@ -56,13 +61,13 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   SupabaseStreamEvent _streamData = [];
 
   /// `eq` filter used for both postgrest and realtime
-  _StreamPostgrestFilter? _streamFilter;
+  final StreamFilter? _filter;
 
   /// Which column to order by and whether it's ascending
-  _Order? _orderBy;
+  final StreamOrder? _order;
 
   /// Count of record to be returned
-  int? _limit;
+  final int? _limit;
 
   SupabaseStreamBuilder({
     required PostgrestQueryBuilder queryBuilder,
@@ -71,154 +76,18 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     required String schema,
     required String table,
     required List<String> primaryKey,
+    required StreamFilter? filter,
+    required StreamOrder? order,
+    required int? limit,
   })  : _queryBuilder = queryBuilder,
         _realtimeTopic = realtimeTopic,
         _realtimeClient = realtimeClient,
         _schema = schema,
         _table = table,
-        _uniqueColumns = primaryKey;
-
-  /// Filters the results where [column] equals [value].
-  ///
-  /// Only one filter can be applied to `.stream()`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).eq('name', 'Supabase');
-  /// ```
-  SupabaseStreamBuilder eq(String column, dynamic value) {
-    assert(
-      _streamFilter == null,
-      'Only one filter can be applied to `.stream()`',
-    );
-    _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.eq,
-      column: column,
-      value: value,
-    );
-    return this;
-  }
-
-  /// Filters the results where [column] does not equal [value].
-  ///
-  /// Only one filter can be applied to `.stream()`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).neq('name', 'Supabase');
-  /// ```
-  SupabaseStreamBuilder neq(String column, dynamic value) {
-    assert(
-      _streamFilter == null,
-      'Only one filter can be applied to `.stream()`',
-    );
-    _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.neq,
-      column: column,
-      value: value,
-    );
-    return this;
-  }
-
-  /// Filters the results where [column] is less than [value].
-  ///
-  /// Only one filter can be applied to `.stream()`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).lt('likes', 100);
-  /// ```
-  SupabaseStreamBuilder lt(String column, dynamic value) {
-    assert(
-      _streamFilter == null,
-      'Only one filter can be applied to `.stream()`',
-    );
-    _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.lt,
-      column: column,
-      value: value,
-    );
-    return this;
-  }
-
-  /// Filters the results where [column] is less than or equal to [value].
-  ///
-  /// Only one filter can be applied to `.stream()`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).lte('likes', 100);
-  /// ```
-  SupabaseStreamBuilder lte(String column, dynamic value) {
-    assert(
-      _streamFilter == null,
-      'Only one filter can be applied to `.stream()`',
-    );
-    _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.lte,
-      column: column,
-      value: value,
-    );
-    return this;
-  }
-
-  /// Filters the results where [column] is greater than [value].
-  ///
-  /// Only one filter can be applied to `.stream()`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).gt('likes', '100');
-  /// ```
-  SupabaseStreamBuilder gt(String column, dynamic value) {
-    assert(
-      _streamFilter == null,
-      'Only one filter can be applied to `.stream()`',
-    );
-    _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.gt,
-      column: column,
-      value: value,
-    );
-    return this;
-  }
-
-  /// Filters the results where [column] is greater than or equal to [value].
-  ///
-  /// Only one filter can be applied to `.stream()`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).gte('likes', 100);
-  /// ```
-  SupabaseStreamBuilder gte(String column, dynamic value) {
-    assert(
-      _streamFilter == null,
-      'Only one filter can be applied to `.stream()`',
-    );
-    _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.gte,
-      column: column,
-      value: value,
-    );
-    return this;
-  }
-
-  /// Orders the result with the specified [column].
-  ///
-  /// When `ascending` value is true, the result will be in ascending order.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).order('username', ascending: false);
-  /// ```
-  SupabaseStreamBuilder order(String column, {bool ascending = false}) {
-    _orderBy = _Order(column: column, ascending: ascending);
-    return this;
-  }
-
-  /// Limits the result with the specified `count`.
-  ///
-  /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).limit(10);
-  /// ```
-  SupabaseStreamBuilder limit(int count) {
-    _limit = count;
-    return this;
-  }
+        _uniqueColumns = primaryKey,
+        _filter = filter,
+        _order = order,
+        _limit = limit;
 
   @Deprecated('Directly listen without execute instead. Deprecated in 1.0.0')
   Stream<SupabaseStreamEvent> execute() {
@@ -257,7 +126,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   Future<void> _getStreamData() async {
-    final currentStreamFilter = _streamFilter;
+    final currentStreamFilter = _filter;
     _streamData = [];
     String? realtimeFilter;
     if (currentStreamFilter != null) {
@@ -315,32 +184,32 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     }).subscribe();
 
     PostgrestFilterBuilder query = _queryBuilder.select();
-    if (_streamFilter != null) {
-      switch (_streamFilter!.type) {
-        case _FilterType.eq:
-          query = query.eq(_streamFilter!.column, _streamFilter!.value);
+    if (_filter != null) {
+      switch (_filter!.type) {
+        case StreamFilterType.eq:
+          query = query.eq(_filter!.column, _filter!.value);
           break;
-        case _FilterType.neq:
-          query = query.neq(_streamFilter!.column, _streamFilter!.value);
+        case StreamFilterType.neq:
+          query = query.neq(_filter!.column, _filter!.value);
           break;
-        case _FilterType.lt:
-          query = query.lt(_streamFilter!.column, _streamFilter!.value);
+        case StreamFilterType.lt:
+          query = query.lt(_filter!.column, _filter!.value);
           break;
-        case _FilterType.lte:
-          query = query.lte(_streamFilter!.column, _streamFilter!.value);
+        case StreamFilterType.lte:
+          query = query.lte(_filter!.column, _filter!.value);
           break;
-        case _FilterType.gt:
-          query = query.gt(_streamFilter!.column, _streamFilter!.value);
+        case StreamFilterType.gt:
+          query = query.gt(_filter!.column, _filter!.value);
           break;
-        case _FilterType.gte:
-          query = query.gte(_streamFilter!.column, _streamFilter!.value);
+        case StreamFilterType.gte:
+          query = query.gte(_filter!.column, _filter!.value);
           break;
       }
     }
     PostgrestTransformBuilder? transformQuery;
-    if (_orderBy != null) {
+    if (_order != null) {
       transformQuery =
-          query.order(_orderBy!.column, ascending: _orderBy!.ascending);
+          query.order(_order!.column, ascending: _order!.ascending);
     }
     if (_limit != null) {
       transformQuery = (transformQuery ?? query).limit(_limit!);
@@ -371,15 +240,15 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   }
 
   void _sortData() {
-    final orderModifier = _orderBy!.ascending ? 1 : -1;
+    final orderModifier = _order!.ascending ? 1 : -1;
     _streamData.sort((a, b) {
-      if (a[_orderBy!.column] is String && b[_orderBy!.column] is String) {
+      if (a[_order!.column] is String && b[_order!.column] is String) {
         return orderModifier *
-            (a[_orderBy!.column] as String)
-                .compareTo(b[_orderBy!.column] as String);
-      } else if (a[_orderBy!.column] is int && b[_orderBy!.column] is int) {
+            (a[_order!.column] as String)
+                .compareTo(b[_order!.column] as String);
+      } else if (a[_order!.column] is int && b[_order!.column] is int) {
         return orderModifier *
-            (a[_orderBy!.column] as int).compareTo(b[_orderBy!.column] as int);
+            (a[_order!.column] as int).compareTo(b[_order!.column] as int);
       } else {
         return 0;
       }
@@ -388,7 +257,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
 
   /// Will add new data to the stream if streamController is not closed
   void _addStream() {
-    if (_orderBy != null) {
+    if (_order != null) {
       _sortData();
     }
     if (!(_streamController?.isClosed ?? true)) {
