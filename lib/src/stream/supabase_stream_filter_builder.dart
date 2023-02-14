@@ -48,7 +48,6 @@ class SupabaseStreamFilterBuilder extends SupabaseStreamOrderBuilder {
   /// ```dart
   /// supabase.from('users').stream(primaryKey: ['id']).neq('name', 'Supabase');
   /// ```
-  @override
   SupabaseStreamOrderBuilder neq(String column, dynamic value) {
     return SupabaseStreamOrderBuilder(
       queryBuilder: _queryBuilder,
