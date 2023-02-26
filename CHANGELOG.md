@@ -1,4 +1,4 @@
-## [1.5.1+1]
+## [1.6.0]
 - feat: update gotrue to v1.5.1
   - add support for `signInWithIdToken`
 
