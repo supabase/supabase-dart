@@ -23,10 +23,7 @@ A Dart client for [Supabase](https://supabase.io/).
 
 ## Status
 
-- [x] Alpha: Under heavy development
-- [x] Public Alpha: Ready for testing. But go easy on us, there will be bugs and missing functionality.
-- [x] Public Beta: Stable. No breaking changes expected in this version but possible bugs.
-- [ ] Public: Production-ready
+Public Beta: Stable. No breaking changes expected in this version but possible bugs.
 
 ## Docs
 
