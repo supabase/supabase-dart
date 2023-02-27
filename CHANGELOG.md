@@ -1,6 +1,8 @@
 ## [1.6.0]
 - feat: update gotrue to v1.5.1
   - add support for `signInWithIdToken`
+- feat: update functions_client to v1.1.0
+  - add method parameter to invoke() to support all GET, POST, PUT, PATCH, DELETE methods
 
 ## [1.5.1]
 
