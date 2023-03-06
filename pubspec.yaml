@@ -20,4 +20,4 @@ dependencies:
 dev_dependencies:
   lints: ^1.0.1
   test: ^1.17.9
-  web_socket_channel: 2.2.0
+  web_socket_channel: ^2.2.0
