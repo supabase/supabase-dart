@@ -24,6 +24,12 @@ class SupabaseClient {
   final Client? _httpClient;
 
   late final GoTrueClient auth;
+
+  /// Supabase Functions allows you to deploy and invoke edge functions.
+  late final FunctionsClient functions;
+
+  /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
+  late final SupabaseStorageClient storage;
   late final RealtimeClient realtime;
   late final PostgrestClient rest;
   String? _changedAccessToken;
@@ -80,6 +86,8 @@ class SupabaseClient {
       autoRefreshToken: autoRefreshToken,
       headers: headers,
     );
+    functions = _initFunctionsClient();
+    storage = _initStorageClient();
     realtime = _initRealtimeClient(
       headers: headers,
       options: realtimeClientOptions,
@@ -87,22 +95,6 @@ class SupabaseClient {
 
     _listenForAuthEvents();
   }
-
-  /// Supabase Functions allows you to deploy and invoke edge functions.
-  FunctionsClient get functions => FunctionsClient(
-        functionsUrl,
-        _getAuthHeaders(),
-        httpClient: _httpClient,
-        isolate: _isolate,
-      );
-
-  /// Supabase Storage allows you to manage user-generated content, such as photos or videos.
-  SupabaseStorageClient get storage => SupabaseStorageClient(
-        storageUrl,
-        _getAuthHeaders(),
-        httpClient: _httpClient,
-        retryAttempts: _storageRetryAttempts,
-      );
 
   /// Perform a table operation.
   SupabaseQueryBuilder from(String table) {
@@ -179,6 +171,24 @@ class SupabaseClient {
     );
   }
 
+  FunctionsClient _initFunctionsClient() {
+    return FunctionsClient(
+      functionsUrl,
+      _getAuthHeaders(),
+      httpClient: _httpClient,
+      isolate: _isolate,
+    );
+  }
+
+  SupabaseStorageClient _initStorageClient() {
+    return SupabaseStorageClient(
+      storageUrl,
+      _getAuthHeaders(),
+      httpClient: _httpClient,
+      retryAttempts: _storageRetryAttempts,
+    );
+  }
+
   RealtimeClient _initRealtimeClient({
     required Map<String, String> headers,
     required RealtimeClientOptions options,
@@ -215,10 +225,14 @@ class SupabaseClient {
         event == AuthChangeEvent.signedIn && _changedAccessToken != token) {
       // Token has changed
       _changedAccessToken = token;
+      storage.setAuth(token);
+      functions.setAuth(token!);
       realtime.setAuth(token);
     } else if (event == AuthChangeEvent.signedOut ||
         event == AuthChangeEvent.userDeleted) {
       // Token is removed
+      storage.setAuth(supabaseKey);
+      functions.setAuth(supabaseKey);
       realtime.setAuth(supabaseKey);
     }
   }
