@@ -225,8 +225,8 @@ class SupabaseClient {
         event == AuthChangeEvent.signedIn && _changedAccessToken != token) {
       // Token has changed
       _changedAccessToken = token;
-      storage.setAuth(token);
-      functions.setAuth(token!);
+      storage.setAuth(token!);
+      functions.setAuth(token);
       realtime.setAuth(token);
     } else if (event == AuthChangeEvent.signedOut ||
         event == AuthChangeEvent.userDeleted) {
