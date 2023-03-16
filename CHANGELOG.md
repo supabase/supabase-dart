@@ -1,3 +1,8 @@
+## [1.6.1]
+- fix: update storage to v1.2.3
+  - add `setAuth()` function
+- fix: keep one storage and functions instance to persist auth [#182](https://github.com/supabase/supabase-dart/pull/182)
+
 ## [1.6.0]
 - feat: update gotrue to v1.5.1
   - add support for `signInWithIdToken`
