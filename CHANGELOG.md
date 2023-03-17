@@ -1,3 +1,17 @@
+## [1.7.0]
+- chore: update minimum Dart SDK to 2.17.0
+- fix: update functions_client to v1.1.1
+  - use utf8 encoding for text response
+- fix: update gotrue to v1.5.2
+  - make `Factor.friendlyName` nullable
+- fix: update http to v0.13.5
+- fix: update realtime_client to v1.0.3
+  - catch SocketException
+- fix: update storage_client to v1.2.3
+  - add setAuth method
+- fix: update rxdart to v0.27.7
+- fix: update yet_another_json_isolate to v1.0.2
+
 ## [1.6.0]
 - feat: update gotrue to v1.5.1
   - add support for `signInWithIdToken`
