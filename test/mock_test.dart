@@ -165,7 +165,7 @@ void main() {
           webSocket!.add(replyString);
 
           // Send an insert event
-          await Future.delayed(Duration(milliseconds: 300));
+          await Future.delayed(Duration(milliseconds: 10));
           final insertString = jsonEncode({
             'topic': topic,
             'event': 'postgres_changes',
@@ -354,14 +354,21 @@ void main() {
 
   tearDown(() async {
     listeners.clear();
-    await listener?.cancel();
 
     await client.dispose();
+    await customHeadersClient.dispose();
+
+    //Manually disconnect the socket channel to avoid automatic retrying to reconnect. This caused failing in later executed tests.
+    client.realtime.disconnect();
+    customHeadersClient.realtime.disconnect();
 
     // Wait for the realtime updates to come through
     await Future.delayed(Duration(milliseconds: 100));
 
     await webSocket?.close();
+
+    await listener?.cancel();
+
     await mockServer.close();
   });
 

@@ -35,6 +35,9 @@ void main() {
       await client.dispose();
       await client.removeAllChannels();
       await subscription.cancel();
+
+      await Future.delayed(Duration(milliseconds: 100));
+
       await mockServer.close(force: true);
     });
 
