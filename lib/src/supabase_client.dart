@@ -42,6 +42,21 @@ class SupabaseClient {
   /// Number of retries storage client should do on file failed file uploads.
   final int _storageRetryAttempts;
 
+  /// Getter for the HTTP headers
+  Map<String, String> get headers {
+    return _headers;
+  }
+
+  /// Setter for the HTTP headers
+  set headers(Map<String, String> value) {
+    final keysToRemove =
+        _headers.keys.toSet().where((key) => !value.containsKey(key));
+
+    _headers
+      ..addAll(value)
+      ..removeWhere((key, _) => keysToRemove.contains(key));
+  }
+
   /// Creates a Supabase client to interact with your Supabase instance.
   ///
   /// [supabaseUrl] and [supabaseKey] can be found on your Supabase dashboard.
