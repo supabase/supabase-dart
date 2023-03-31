@@ -86,6 +86,7 @@ class SupabaseClient {
       autoRefreshToken: autoRefreshToken,
       headers: headers,
     );
+    rest = _initRestClient();
     functions = _initFunctionsClient();
     storage = _initStorageClient();
     realtime = _initRealtimeClient(
@@ -103,7 +104,7 @@ class SupabaseClient {
     return SupabaseQueryBuilder(
       url,
       realtime,
-      headers: _getAuthHeaders(),
+      headers: rest.headers,
       schema: schema,
       table: table,
       httpClient: _httpClient,
@@ -118,13 +119,7 @@ class SupabaseClient {
     Map<String, dynamic>? params,
     FetchOptions options = const FetchOptions(),
   }) {
-    return PostgrestClient(
-      '$supabaseUrl/rest/v1',
-      headers: _getAuthHeaders(),
-      schema: schema,
-      httpClient: _httpClient,
-      isolate: _isolate,
-    ).rpc(fn, params: params, options: options);
+    return rest.rpc(fn, params: params, options: options);
   }
 
   /// Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
@@ -168,6 +163,16 @@ class SupabaseClient {
       headers: authHeaders,
       autoRefreshToken: autoRefreshToken,
       httpClient: _httpClient,
+    );
+  }
+
+  PostgrestClient _initRestClient() {
+    return PostgrestClient(
+      restUrl,
+      headers: _getAuthHeaders(),
+      schema: schema,
+      httpClient: _httpClient,
+      isolate: _isolate,
     );
   }
 
@@ -225,12 +230,14 @@ class SupabaseClient {
         event == AuthChangeEvent.signedIn && _changedAccessToken != token) {
       // Token has changed
       _changedAccessToken = token;
+      rest.setAuth(token);
       storage.setAuth(token!);
       functions.setAuth(token);
       realtime.setAuth(token);
     } else if (event == AuthChangeEvent.signedOut ||
         event == AuthChangeEvent.userDeleted) {
       // Token is removed
+      rest.setAuth(supabaseKey);
       storage.setAuth(supabaseKey);
       functions.setAuth(supabaseKey);
       realtime.setAuth(supabaseKey);
