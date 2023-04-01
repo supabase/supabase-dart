@@ -230,8 +230,8 @@ class SupabaseClient {
         event == AuthChangeEvent.signedIn && _changedAccessToken != token) {
       // Token has changed
       _changedAccessToken = token;
-      rest.auth(token!);
-      storage.setAuth(token);
+      rest.setAuth(token);
+      storage.setsetAuth(token!);
       functions.setAuth(token);
       realtime.setAuth(token);
     } else if (event == AuthChangeEvent.signedOut ||
