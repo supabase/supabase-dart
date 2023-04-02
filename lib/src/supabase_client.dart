@@ -237,7 +237,7 @@ class SupabaseClient {
     } else if (event == AuthChangeEvent.signedOut ||
         event == AuthChangeEvent.userDeleted) {
       // Token is removed
-      rest.auth(supabaseKey);
+      rest.setAuth(supabaseKey);
       storage.setAuth(supabaseKey);
       functions.setAuth(supabaseKey);
       realtime.setAuth(supabaseKey);
