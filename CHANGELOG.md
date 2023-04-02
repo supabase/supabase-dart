@@ -1,3 +1,7 @@
+## [1.6.2]
+- fix: handle onAuthStateChange errors silently [#187](https://github.com/supabase/supabase-dart/pull/187)
+- fix: persist a single postgrest client [#186](https://github.com/supabase/supabase-dart/pull/186)
+
 ## [1.6.1]
 - fix: update storage to v1.2.3
   - add `setAuth()` function
