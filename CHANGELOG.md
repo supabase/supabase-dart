@@ -1,3 +1,6 @@
+## [1.6.3]
+- fix: copy headers value on from() call [#189](https://github.com/supabase/supabase-dart/pull/189)
+
 ## [1.6.2]
 - fix: handle onAuthStateChange errors silently [#187](https://github.com/supabase/supabase-dart/pull/187)
 - fix: persist a single postgrest client [#186](https://github.com/supabase/supabase-dart/pull/186)
