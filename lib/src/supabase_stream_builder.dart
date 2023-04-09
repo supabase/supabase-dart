@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:supabase/supabase.dart';
 
-enum _FilterType { eq, neq, lt, lte, gt, gte, in_ }
+enum _FilterType { eq, neq, lt, lte, gt, gte, inFilter }
 
 class _StreamPostgrestFilter {
   _StreamPostgrestFilter({
@@ -203,15 +203,15 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
   /// Only one filter can be applied to `.stream()`.
   ///
   /// ```dart
-  /// supabase.from('users').stream(primaryKey: ['id']).in_('name', ['Andy', 'Amy', 'Terry']);
+  /// supabase.from('users').stream(primaryKey: ['id']).inFilter('name', ['Andy', 'Amy', 'Terry']);
   /// ```
-  SupabaseStreamBuilder in_(String column, List<dynamic> values) {
+  SupabaseStreamBuilder inFilter(String column, List<dynamic> values) {
     assert(
       _streamFilter == null,
       'Only one filter can be applied to `.stream()`',
     );
     _streamFilter = _StreamPostgrestFilter(
-      type: _FilterType.in_,
+      type: _FilterType.inFilter,
       column: column,
       value: values,
     );
@@ -281,9 +281,10 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     _streamData = [];
     String? realtimeFilter;
     if (currentStreamFilter != null) {
-      if (currentStreamFilter.type == _FilterType.in_) {
+      if (currentStreamFilter.type == _FilterType.inFilter) {
+        final List value = currentStreamFilter.value;
         realtimeFilter =
-            '${currentStreamFilter.column}=in.(${currentStreamFilter.value.join(',')})';
+            '${currentStreamFilter.column}=in.(${value.join(',')})';
       } else {
         realtimeFilter =
             '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
@@ -360,7 +361,7 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
         case _FilterType.gte:
           query = query.gte(_streamFilter!.column, _streamFilter!.value);
           break;
-        case _FilterType.in_:
+        case _FilterType.inFilter:
           query = query.in_(_streamFilter!.column, _streamFilter!.value);
           break;
       }
