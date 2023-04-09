@@ -198,6 +198,13 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     return this;
   }
 
+  /// Filters the results where [column] is included in [value].
+  ///
+  /// Only one filter can be applied to `.stream()`.
+  ///
+  /// ```dart
+  /// supabase.from('users').stream(primaryKey: ['id']).in_('name', ['Andy', 'Amy', 'Terry']);
+  /// ```
   SupabaseStreamBuilder in_(String column, List<dynamic> values) {
     assert(
       _streamFilter == null,
