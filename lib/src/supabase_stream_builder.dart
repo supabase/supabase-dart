@@ -282,9 +282,14 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     String? realtimeFilter;
     if (currentStreamFilter != null) {
       if (currentStreamFilter.type == _FilterType.inFilter) {
-        final List value = currentStreamFilter.value;
-        realtimeFilter =
-            '${currentStreamFilter.column}=in.(${value.join(',')})';
+        final value = currentStreamFilter.value;
+        if (value is List<String>) {
+          realtimeFilter =
+              '${currentStreamFilter.column}=in.(${value.map((s) => '"$s"').join(',')})';
+        } else {
+          realtimeFilter =
+              '${currentStreamFilter.column}=in.(${value.join(',')})';
+        }
       } else {
         realtimeFilter =
             '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
