@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:supabase/supabase.dart';
 
-enum _FilterType { eq, neq, lt, lte, gt, gte }
+enum _FilterType { eq, neq, lt, lte, gt, gte, in_ }
 
 class _StreamPostgrestFilter {
   _StreamPostgrestFilter({
@@ -198,6 +198,19 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     return this;
   }
 
+  SupabaseStreamBuilder in_(String column, List<dynamic> values) {
+    assert(
+      _streamFilter == null,
+      'Only one filter can be applied to `.stream()`',
+    );
+    _streamFilter = _StreamPostgrestFilter(
+      type: _FilterType.in_,
+      column: column,
+      value: values,
+    );
+    return this;
+  }
+
   /// Orders the result with the specified [column].
   ///
   /// When `ascending` value is true, the result will be in ascending order.
@@ -261,8 +274,13 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     _streamData = [];
     String? realtimeFilter;
     if (currentStreamFilter != null) {
-      realtimeFilter =
-          '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
+      if (currentStreamFilter.type == _FilterType.in_) {
+        realtimeFilter =
+            '${currentStreamFilter.column}=in.(${currentStreamFilter.value.join(',')})';
+      } else {
+        realtimeFilter =
+            '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
+      }
     }
 
     _channel = _realtimeClient.channel(_realtimeTopic);
@@ -334,6 +352,9 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           break;
         case _FilterType.gte:
           query = query.gte(_streamFilter!.column, _streamFilter!.value);
+          break;
+        case _FilterType.in_:
+          query = query.in_(_streamFilter!.column, _streamFilter!.value);
           break;
       }
     }
