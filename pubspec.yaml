@@ -9,7 +9,9 @@ environment:
 
 dependencies:
   functions_client: ^1.1.0
-  gotrue: ^1.6.0
+  # gotrue: ^1.6.0
+  gotrue:
+    path: ../gotrue-dart
   http: ^0.13.4
   postgrest: ^1.2.3
   realtime_client: ^1.0.2

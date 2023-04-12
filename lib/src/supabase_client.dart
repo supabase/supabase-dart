@@ -30,7 +30,8 @@ import 'package:yet_another_json_isolate/yet_another_json_isolate.dart';
 /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
 /// isolate instance. A new instance will be created if [isolate] is omitted.
 ///
-/// Pass an instance of [gotrueAsyncStorage] in order to perform auth actions with pkce flow.
+/// Pass an instance of [gotrueAsyncStorage] and set the [authFlowType] to
+/// `AuthFlowType.pkce`in order to perform auth actions with pkce flow.
 /// {@endtemplate}
 class SupabaseClient {
   final String supabaseUrl;
@@ -75,6 +76,7 @@ class SupabaseClient {
     RealtimeClientOptions realtimeClientOptions = const RealtimeClientOptions(),
     YAJsonIsolate? isolate,
     GotrueAsyncStorage? gotrueAsyncStorage,
+    AuthFlowType authFlowType = AuthFlowType.implicit,
   })  : restUrl = '$supabaseUrl/rest/v1',
         realtimeUrl = '$supabaseUrl/realtime/v1'.replaceAll('http', 'ws'),
         authUrl = '$supabaseUrl/auth/v1',
@@ -92,6 +94,7 @@ class SupabaseClient {
       autoRefreshToken: autoRefreshToken,
       headers: headers,
       gotrueAsyncStorage: gotrueAsyncStorage,
+      authFlowType: authFlowType,
     );
     rest = _initRestClient();
     functions = _initFunctionsClient();
@@ -161,6 +164,7 @@ class SupabaseClient {
     bool? autoRefreshToken,
     required Map<String, String> headers,
     required GotrueAsyncStorage? gotrueAsyncStorage,
+    required AuthFlowType authFlowType,
   }) {
     final authHeaders = {...headers};
     authHeaders['apikey'] = supabaseKey;
@@ -172,6 +176,7 @@ class SupabaseClient {
       autoRefreshToken: autoRefreshToken,
       httpClient: _httpClient,
       asyncStorage: gotrueAsyncStorage,
+      flowType: authFlowType,
     );
   }
 
