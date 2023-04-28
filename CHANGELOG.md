@@ -1,3 +1,7 @@
+## [1.6.4]
+- fix: race condition for passing auth headers for rest client [#192](https://github.com/supabase/supabase-dart/pull/192)
+
+
 ## [1.6.3]
 - fix: copy headers value on from() call [#189](https://github.com/supabase/supabase-dart/pull/189)
 
