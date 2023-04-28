@@ -104,7 +104,10 @@ class SupabaseClient {
     return SupabaseQueryBuilder(
       url,
       realtime,
-      headers: _getAuthHeaders(),
+      headers: {
+        ...rest.headers,
+        ..._getAuthHeaders(),
+      },
       schema: schema,
       table: table,
       httpClient: _httpClient,
@@ -121,7 +124,10 @@ class SupabaseClient {
   }) {
     return PostgrestClient(
       '$supabaseUrl/rest/v1',
-      headers: _getAuthHeaders(),
+      headers: {
+        ...rest.headers,
+        ..._getAuthHeaders(),
+      },
       schema: schema,
       httpClient: _httpClient,
     ).rpc(fn, params: params);
