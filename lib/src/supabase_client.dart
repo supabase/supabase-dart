@@ -104,7 +104,7 @@ class SupabaseClient {
     return SupabaseQueryBuilder(
       url,
       realtime,
-      headers: {...rest.headers},
+      headers: _getAuthHeaders(),
       schema: schema,
       table: table,
       httpClient: _httpClient,
