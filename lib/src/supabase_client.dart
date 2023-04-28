@@ -119,7 +119,12 @@ class SupabaseClient {
     Map<String, dynamic>? params,
     FetchOptions options = const FetchOptions(),
   }) {
-    return rest.rpc(fn, params: params, options: options);
+    return PostgrestClient(
+      '$supabaseUrl/rest/v1',
+      headers: _getAuthHeaders(),
+      schema: schema,
+      httpClient: _httpClient,
+    ).rpc(fn, params: params);
   }
 
   /// Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
