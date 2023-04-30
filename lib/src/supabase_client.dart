@@ -104,7 +104,10 @@ class SupabaseClient {
     return SupabaseQueryBuilder(
       url,
       realtime,
-      headers: {...rest.headers},
+      headers: {
+        ...rest.headers,
+        ..._getAuthHeaders(),
+      },
       schema: schema,
       table: table,
       httpClient: _httpClient,
@@ -119,6 +122,7 @@ class SupabaseClient {
     Map<String, dynamic>? params,
     FetchOptions options = const FetchOptions(),
   }) {
+    rest.headers.addAll({...rest.headers, ..._getAuthHeaders()});
     return rest.rpc(fn, params: params, options: options);
   }
 
