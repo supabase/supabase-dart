@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:supabase/supabase.dart';
 
-enum _FilterType { eq, neq, lt, lte, gt, gte }
+enum _FilterType { eq, neq, lt, lte, gt, gte, inFilter }
 
 class _StreamPostgrestFilter {
   _StreamPostgrestFilter({
@@ -198,6 +198,26 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     return this;
   }
 
+  /// Filters the results where [column] is included in [value].
+  ///
+  /// Only one filter can be applied to `.stream()`.
+  ///
+  /// ```dart
+  /// supabase.from('users').stream(primaryKey: ['id']).inFilter('name', ['Andy', 'Amy', 'Terry']);
+  /// ```
+  SupabaseStreamBuilder inFilter(String column, List<dynamic> values) {
+    assert(
+      _streamFilter == null,
+      'Only one filter can be applied to `.stream()`',
+    );
+    _streamFilter = _StreamPostgrestFilter(
+      type: _FilterType.inFilter,
+      column: column,
+      value: values,
+    );
+    return this;
+  }
+
   /// Orders the result with the specified [column].
   ///
   /// When `ascending` value is true, the result will be in ascending order.
@@ -261,8 +281,19 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
     _streamData = [];
     String? realtimeFilter;
     if (currentStreamFilter != null) {
-      realtimeFilter =
-          '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
+      if (currentStreamFilter.type == _FilterType.inFilter) {
+        final value = currentStreamFilter.value;
+        if (value is List<String>) {
+          realtimeFilter =
+              '${currentStreamFilter.column}=in.(${value.map((s) => '"$s"').join(',')})';
+        } else {
+          realtimeFilter =
+              '${currentStreamFilter.column}=in.(${value.join(',')})';
+        }
+      } else {
+        realtimeFilter =
+            '${currentStreamFilter.column}=${currentStreamFilter.type.name}.${currentStreamFilter.value}';
+      }
     }
 
     _channel = _realtimeClient.channel(_realtimeTopic);
@@ -334,6 +365,9 @@ class SupabaseStreamBuilder extends Stream<SupabaseStreamEvent> {
           break;
         case _FilterType.gte:
           query = query.gte(_streamFilter!.column, _streamFilter!.value);
+          break;
+        case _FilterType.inFilter:
+          query = query.in_(_streamFilter!.column, _streamFilter!.value);
           break;
       }
     }

@@ -114,7 +114,10 @@ class SupabaseClient {
     return SupabaseQueryBuilder(
       url,
       realtime,
-      headers: {...rest.headers},
+      headers: {
+        ...rest.headers,
+        ..._getAuthHeaders(),
+      },
       schema: schema,
       table: table,
       httpClient: _httpClient,
@@ -129,6 +132,7 @@ class SupabaseClient {
     Map<String, dynamic>? params,
     FetchOptions options = const FetchOptions(),
   }) {
+    rest.headers.addAll({...rest.headers, ..._getAuthHeaders()});
     return rest.rpc(fn, params: params, options: options);
   }
 
@@ -234,7 +238,8 @@ class SupabaseClient {
   }
 
   void _listenForAuthEvents() {
-    _authStateSubscription = auth.onAuthStateChange.listen(
+    // ignore: invalid_use_of_internal_member
+    _authStateSubscription = auth.onAuthStateChangeSync.listen(
       (data) {
         _handleTokenChanged(data.event, data.session?.accessToken);
       },
