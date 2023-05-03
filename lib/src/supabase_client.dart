@@ -224,7 +224,8 @@ class SupabaseClient {
   }
 
   void _listenForAuthEvents() {
-    _authStateSubscription = auth.onAuthStateChange.listen(
+    // ignore: invalid_use_of_internal_member
+    _authStateSubscription = auth.onAuthStateChangeSync.listen(
       (data) {
         _handleTokenChanged(data.event, data.session?.accessToken);
       },
