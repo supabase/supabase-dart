@@ -1,3 +1,6 @@
+## [1.7.0]
+- feat: add async storage as parameter to support pkce flow [#190](https://github.com/supabase/supabase-dart/pull/190)
+
 ## [1.6.3]
 - fix: copy headers value on from() call [#189](https://github.com/supabase/supabase-dart/pull/189)
 
