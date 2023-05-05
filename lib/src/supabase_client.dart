@@ -69,6 +69,30 @@ class SupabaseClient {
     return _headers;
   }
 
+  set headers(Map<String, String> headers) {
+    _headers.clear();
+    _headers.addAll({
+      ...Constants.defaultHeaders,
+      ..._getAuthHeaders(),
+      ...headers,
+    });
+
+    rest.headers.clear();
+    rest.headers.addAll(_headers);
+
+    realtime.headers.clear();
+    realtime.headers.addAll(_headers);
+
+    functions.headers.clear();
+    functions.headers.addAll(_headers);
+
+    storage.headers.clear();
+    storage.headers.addAll(_headers);
+
+    auth.headers.clear();
+    auth.headers.addAll(_headers);
+  }
+
   /// Creates a Supabase client to interact with your Supabase instance.
   ///
   /// [supabaseUrl] and [supabaseKey] can be found on your Supabase dashboard.
