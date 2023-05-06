@@ -69,6 +69,7 @@ class SupabaseClient {
     return _headers;
   }
 
+  /// To apply the new headers in existing realtime channels, manually unsubscribe and resubscribe these channels.
   set headers(Map<String, String> headers) {
     _headers.clear();
     _headers.addAll({
@@ -77,17 +78,27 @@ class SupabaseClient {
       ...headers,
     });
 
-    rest.headers..clear()..addAll(_headers);
+    rest.headers
+      ..clear()
+      ..addAll(_headers);
 
-    functions.headers..clear()..addAll(_headers);
+    functions.headers
+      ..clear()
+      ..addAll(_headers);
 
-    storage.headers..clear()..addAll(_headers);
+    storage.headers
+      ..clear()
+      ..addAll(_headers);
 
-    auth.headers..clear()..addAll(_headers);
-    
+    auth.headers
+      ..clear()
+      ..addAll(_headers);
+
     // To apply the new headers in the realtime client,
     // manually unsubscribe and resubscribe to all channels.
-    realtime.headers..clear()..addAll(_headers);
+    realtime.headers
+      ..clear()
+      ..addAll(_headers);
   }
 
   /// Creates a Supabase client to interact with your Supabase instance.
