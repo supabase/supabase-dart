@@ -64,13 +64,67 @@ class SupabaseClient {
   /// Number of retries storage client should do on file failed file uploads.
   final int _storageRetryAttempts;
 
+  /// Getter for the HTTP headers
+  Map<String, String> get headers {
+    return _headers;
+  }
+
+  /// To apply the new headers in existing realtime channels, manually unsubscribe and resubscribe these channels.
+  set headers(Map<String, String> headers) {
+    _headers.clear();
+    _headers.addAll({
+      ...Constants.defaultHeaders,
+      ..._getAuthHeaders(),
+      ...headers,
+    });
+
+    rest.headers
+      ..clear()
+      ..addAll(_headers);
+
+    functions.headers
+      ..clear()
+      ..addAll(_headers);
+
+    storage.headers
+      ..clear()
+      ..addAll(_headers);
+
+    auth.headers
+      ..clear()
+      ..addAll(_headers);
+
+    // To apply the new headers in the realtime client,
+    // manually unsubscribe and resubscribe to all channels.
+    realtime.headers
+      ..clear()
+      ..addAll(_headers);
+  }
+
+  /// Creates a Supabase client to interact with your Supabase instance.
+  ///
+  /// [supabaseUrl] and [supabaseKey] can be found on your Supabase dashboard.
+  ///
+  /// You can access none public schema by passing different [schema].
+  ///
+  /// Default headers can be overridden by specifying [headers].
+  ///
+  /// Custom http client can be used by passing [httpClient] parameter.
+  ///
+  /// [storageRetryAttempts] specifies how many retry attempts there should be to
+  ///  upload a file to Supabase storage when failed due to network interruption.
+  ///
+  /// [realtimeClientOptions] specifies different options you can pass to `RealtimeClient`.
+  ///
+  /// Pass an instance of `YAJsonIsolate` to [isolate] to use your own persisted
+  /// isolate instance. A new instance will be created if [isolate] is omitted.
   /// {@macro supabase_client}
   SupabaseClient(
     this.supabaseUrl,
     this.supabaseKey, {
     String? schema,
     bool autoRefreshToken = true,
-    Map<String, String> headers = Constants.defaultHeaders,
+    Map<String, String>? headers,
     Client? httpClient,
     int storageRetryAttempts = 0,
     RealtimeClientOptions realtimeClientOptions = const RealtimeClientOptions(),
@@ -86,13 +140,16 @@ class SupabaseClient {
             ? '${supabaseUrl.split('.')[0]}.functions.${supabaseUrl.split('.')[1]}.${supabaseUrl.split('.')[2]}'
             : '$supabaseUrl/functions/v1',
         schema = schema ?? 'public',
-        _headers = headers,
+        _headers = {
+          ...Constants.defaultHeaders,
+          if (headers != null) ...headers
+        },
         _httpClient = httpClient,
         _storageRetryAttempts = storageRetryAttempts,
         _isolate = isolate ?? (YAJsonIsolate()..initialize()) {
     auth = _initSupabaseAuthClient(
       autoRefreshToken: autoRefreshToken,
-      headers: headers,
+      headers: _headers,
       gotrueAsyncStorage: gotrueAsyncStorage,
       authFlowType: authFlowType,
     );
@@ -100,7 +157,7 @@ class SupabaseClient {
     functions = _initFunctionsClient();
     storage = _initStorageClient();
     realtime = _initRealtimeClient(
-      headers: headers,
+      headers: _headers,
       options: realtimeClientOptions,
     );
 

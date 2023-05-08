@@ -1,3 +1,10 @@
+## [1.8.0]
+- feat: make the headers property editable [#185](https://github.com/supabase/supabase-dart/pull/185)
+  ```dart
+  // Add custom headers using the `headers` setter
+  supabase.headers = {'my-headers': 'my-value'};
+  ```
+
 ## [1.7.0]
 - feat: add async storage as parameter to support pkce flow [#190](https://github.com/supabase/supabase-dart/pull/190)
 - fix: use onAuthStateChangeSync to set auth headers [#193](https://github.com/supabase/supabase-dart/pull/193)
