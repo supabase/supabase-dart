@@ -1,7 +1,7 @@
 # `supabase-dart`
 
 > **Warning**
-> This repository has been moved [supabase-flutter repo](https://github.com/supabase/supabase-flutter/tree/main/packages/supabase).
+> This repository has been moved to the [supabase-flutter repo](https://github.com/supabase/supabase-flutter/tree/main/packages/supabase).
 
 A Dart client for [Supabase](https://supabase.io/).
 
